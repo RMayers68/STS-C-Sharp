@@ -1,0 +1,68 @@
+﻿namespace STV
+{
+    public class Potion
+    {
+        //attributes
+        public int PotionID { get; set; }
+        public string Name { get; set; }
+        public string Description { get; set; }
+
+        //constructors
+        public Potion(int potionID, string name, string description)
+        {
+            this.PotionID = potionID;
+            this.Name = name;
+            this.Description = description;
+        }
+
+        public Potion(Potion potion)
+        {
+            this.PotionID = potion.PotionID;
+            this.Name = potion.Name;
+            this.Description = potion.Description;
+        }
+        //string method
+        public override string ToString()
+        {
+            return $"{Name} - {Description}";
+        }
+        public void UsePotion(Actor hero,List<Actor> encounter,List<Card> drawPile, List<Card> discardPile, List<Card> hand, List<Card> exhaustPile, Random rng)                              // potion methods (correlating to PotionID
+        {
+            int target = 0;
+            switch (Name)
+            {
+                case "Fire Potion":
+                    target = hero.DetermineTarget(encounter);
+                    hero.NonAttackDamage(encounter[target], 20);
+                    break;
+                case "Energy Potion":
+                    hero.GainEnergy(2);
+                    break;
+                case "Strength Potion":
+                    hero.IntensityBuff(4,2);
+                    break;
+                case "Block Potion":
+                    hero.GainBlock(12);
+                    break;
+                case "Fear Potion":
+                    target = hero.DetermineTarget(encounter);
+                    hero.DurationDebuff(encounter[target],1, 3);
+                    break;
+                case "Swift Potion":
+                    STS.DrawCards(drawPile, hand, discardPile, rng, 3);
+                    break;
+                case "Weak Potion":
+                    target = hero.DetermineTarget(encounter);
+                    hero.DurationDebuff(encounter[target],2, 3);
+                    break;
+                case "Focus Potion":
+                    hero.IntensityBuff(7, 2);
+                    break;
+                case "Cultist Potion":
+                    hero.IntensityBuff(3, 1);
+                    break;
+
+            }
+        }
+    }
+}
