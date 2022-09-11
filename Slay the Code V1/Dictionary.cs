@@ -1,4 +1,4 @@
-﻿namespace STV
+namespace STV
 {
     public class Dict
     {
@@ -17,9 +17,9 @@
             { 2, new Card(2, "Barricade", "Power", "Rare", "3", "Block no longer expires at the start of your turn.") },
             { 3, new Card(3, "Bash", "Attack", "Common", "2", "Deal 8 damage. Apply 2 Vulnerable.") },
             { 4, new Card(4, "Battle Trance", "Skill", "Uncommon", "0", "Draw 3 cards. You cannot draw additional cards this turn.") },
-            { 5, new Card(5, "Berserk", "Power", "Rare", "0", "Gain 2 vulnerable. At the start of your turn, gain 1 .") },
+            { 5, new Card(5, "Berserk", "Power", "Rare", "0", "Gain 2 Vulnerable. At the start of your turn, gain 1 .") },
             { 6, new Card(6, "Blood for Blood", "Attack", "Uncommon", "4", "Costs 1 less  for each time you lose HP in combat. Deal 18 damage.") },
-            { 7, new Card(7, "Bloodletting", "Skill", "Uncommon", "0", "Gain . Lose 3 HP.") },
+            { 7, new Card(7, "Bloodletting", "Skill", "Uncommon", "0", "Lose 3 HP. Gain 2 Energy.") },
             { 8, new Card(8, "Bludgeon", "Attack", "Rare", "3", "Deal 32 damage.") },
             { 9, new Card(9, "Body Slam", "Attack", "Common", "1", "Deal damage equal to your current Block.") },
             { 10, new Card(10, "Brutality", "Power", "Rare", "0", "At the start of your turn, lose 1 HP and draw 1 card.") },
@@ -71,10 +71,10 @@
             { 56, new Card(56, "Rupture", "Power", "Uncommon", "1", "Whenever you lose HP from a card, gain 1 Strength.") },
             { 57, new Card(57, "Searing Blow", "Attack", "Uncommon", "2", "Deal 12 damage. Can be upgraded any number of times.") },
             { 58, new Card(58, "Second Wind", "Skill", "Uncommon", "1", "Exhaust all non-Attack cards in your hand and gain 5 Block for each.") },
-            { 59, new Card(59, "Seeing Red", "Skill", "Uncommon", "1", "Gain  . Exhaust.") },
-            { 60, new Card(60, "Sentinel", "Skill", "Uncommon", "1", "Gain 5 Block. If this card is Exhausted, gain  .") },
+            { 59, new Card(59, "Seeing Red", "Skill", "Uncommon", "1", "Gain 2 Energy. Exhaust.") },
+            { 60, new Card(60, "Sentinel", "Skill", "Uncommon", "1", "Gain 5 Block. If this card is Exhausted, gain 3 Energy.") },
             { 61, new Card(61, "Sever Soul", "Attack", "Uncommon", "2", "Exhaust all non-Attack cards in your hand. Deal 16 damage.") },
-            { 62, new Card(62, "Shockwave", "Skill", "Uncommon", "2", "Apply 3 Weak and Vulnerable to ALL enemies.") },
+            { 62, new Card(62, "Shockwave", "Skill", "Uncommon", "2", "Apply 3 Weak and Vulnerable to ALL enemies. Exhaust.") },
             { 63, new Card(63, "Shrug It Off", "Skill", "Common", "1", "Gain 8 Block. Draw 1 card.") },
             { 64, new Card(64, "Spot Weakness", "Skill", "Uncommon", "1", "If an enemy intends to attack, gain 3 Strength.") },
             { 65, new Card(65, "Sword Boomerang", "Attack", "Common", "1", "Deal 3 damage to a random enemy 3 times.") },
@@ -335,7 +335,7 @@
             { 320, new Card(320, "Transmutation", "Skill", "Rare", "X", "Add X random colorless cards into your hand. Exhaust.") },
             { 321, new Card(321, "Trip", "Skill", "Uncommon", "0", "Apply 2 Vulnerable.") },
             { 322, new Card(322, "Apparition", "Skill", "Common", "1", "Gain 1 Intangible. Exhaust. Ethereal.") },
-            { 323, new Card(323, "Ritual Dagger", "Attack", "Common", "1", "Deal 6 Damage. If this kills an enemy, permanently increase this card's damage by 3. Exhaust.") },
+            { 323, new Card(323, "Ritual Dagger", "Attack", "Common", "1", "Deal 15 Damage. If this kills an enemy, permanently increase this card's damage by 3. Exhaust.") },
             { 324, new Card(324, "Discovery", "Skill", "Uncommon", "1", "Choose 1 of 3 random cards to add to your hand. It costs 0 this turn. Exhaust.") },
             { 325, new Card(325, "Forethought", "Skill", "Uncommon", "1", "Place a card from your hand on the bottom of your draw pile. It cost 0 until it is played.") },
             { 326, new Card(326, "Impatience", "Skill", "Uncommon", "0", "If you have no Attack cards in your hand, draw 2 cards.") },
@@ -372,6 +372,10 @@
             { 357, new Card(357, "Wound", "Status", "Common", "None", "Unplayable.") },
             { 358, new Card(358, "Slimed", "Status", "Common", "1", "Exhaust.") },
             { 359, new Card(359, "Void", "Status", "Common", "None", "Unplayable. Whenever this card is drawn, lose 1 Energy.") },
+            { 360, new Card(360, "Expunger", "Attack", "Common", "1", "Deal 9 damage X times.") },
+            { 361, new Card(361, "Become Almighty","Power","Common","None","Gain 3 Strength.")},
+            { 362, new Card(362, "Fame and Fortune", "Skill", "Common", "None", "Gain 25 Gold.") },
+            { 363, new Card(363, "Live Forever", "Power", "Common", "None", "Gain 6 Plated Armor.") },
         };
 
         public static Dictionary<int, Orb> orbL = new()                                            // Orb Reference Dictionary
@@ -384,22 +388,34 @@
 
         public static Dictionary<int, Buff> buffL = new()                                            // Buffs and Debuffs Reference Dictionary
         {
-            { 0, new Buff(0, "","", 0) },
-            { 1, new Buff(1, "Vulnerable","Debuff", 1) },
-            { 2, new Buff(2, "Weak", "Debuff", 1) },
-            { 3, new Buff(3, "Ritual", "Buff", 2) },
-            { 4, new Buff(4, "Strength", "Buff", 3) },
-            { 5, new Buff(5,"Curl Up","Buff",4) },
-            { 6, new Buff(6,"Frail","Debuff",1)},
-            { 7, new Buff(7,"Focus","Buff",3)},
+            { 0, new Buff(0, "",false, 0) },
+            { 1, new Buff(1, "Vulnerable", false, 1) },
+            { 2, new Buff(2, "Weak", false, 1) },
+            { 3, new Buff(3, "Ritual", true, 2) },
+            { 4, new Buff(4, "Strength", true, 3) },
+            { 5, new Buff(5,"Curl Up", true, 3) },
+            { 6, new Buff(6,"Frail", false, 1)},
+            { 7, new Buff(7,"Focus", true, 3)},
+            { 8, new Buff(8,"Artifact", true, 5)},
+            { 9, new Buff(9,"Dexterity", true, 3)},
+            { 10, new Buff(10,"Mantra", true, 5)},
+            { 11, new Buff(11,"Mental Fortress", true, 3)},
+            { 12, new Buff(12,"Mark", false, 3)},
+            { 13, new Buff(13,"No Block", false, 1)},
+            { 14, new Buff(14, "Entangled", false, 1) },
+            { 15, new Buff(15, "Asleep", false, 1)},
+            { 16, new Buff(16, "Mode Shift",true,3)},
+            { 17, new Buff(17,"Sharp Hide",true,3)},
+            { 18, new Buff(18,"Thievery",true,3)},
+            { 19, new Buff(19,"Enrage",true,3)},
 
             /*
              * Buff types:
              * 1: Duration effect
-             * 2: Proc end of turn Intensity effect
+             * 2: Proc Intensity effect
              * 3: Constant Intensity effect
              * 4: One time Intensity effect
-             
+             * 5: Counter
             */
         };
 
@@ -407,11 +423,29 @@
         {
             { 0, new Actor(0, "Jaw Worm",40,44, "Chomp") },
             { 1, new Actor(1, "Cultist",48,54, "Incantation") },
-            { 2, new Actor(2, "Louse", 10,15, "Grow") },
+            { 2, new Actor(2, "Red Louse", 10,15, "Grow") },
             { 3, new Actor(3, "Med Acid Slime", 28, 32, "Tackle") },
             { 4, new Actor(4, "Med Spike Slime", 28, 32, "Lick") },
             { 5, new Actor(5, "Small Acid Slime", 10, 14, "Lick") },
             { 6, new Actor(6, "Small Spike Slime", 10, 14, "Tackle") },
+            { 7, new Actor(7,"Green Louse",11,17,"Spit Web")},
+            { 8, new Actor(8,"Blue Slaver",46,50,"Rake")},
+            { 9, new Actor(9,"Red Slaver",46,50,"Stab")},
+            { 10, new Actor(10,"Fungi Beast",22,28,"Bite")},
+            { 11, new Actor(11,"Looter",44,48,"Mug")},
+            { 12, new Actor(12, "Sneaky Gremlin", 10, 14, "Puncture") },
+            { 13, new Actor(13, "Mad Gremlin", 20, 24, "Scratch") },
+            { 14, new Actor(14, "Gremlin Wizard", 23, 25, "Charging") },
+            { 15, new Actor(15, "Fat Gremlin", 13, 17, "Smash") },
+            { 16, new Actor(16, "Shield Gremlin", 20, 24, "Protect") },
+            { 17, new Actor(17, "Gremlin Nob", 82, 86, "Bellow") },
+            { 18, new Actor(18, "Lagavulin", 109, 111, "Sleeping") },
+            { 19, new Actor(19, "Sentry", 38, 42, "Bolt") },
+            { 20, new Actor(20, "Slime Boss", 140, 140, "Goop Spray") },
+            { 21, new Actor(21, "Large Acid Slime", 65, 69, "Corrosive Spit") },
+            { 22, new Actor(22, "Large Spike Slime", 64, 70, "Flame Tackle") },
+            { 23, new Actor(23, "The Guardian", 240, 240, "Charging Up") },
+            { 24, new Actor(24, "Hexaghost", 250, 250, "Charging") },
         };
 
         public static Dictionary<int, Relic> relicL = new()                                            // Relics Reference Dictionary
@@ -424,14 +458,14 @@
 
         public static Dictionary<int, Potion> potionL = new()                                           // Potions Reference Dictionary
         {
-            { 0, new Potion(0, "Fire Potion", "Deal 20 damage.") },
-            { 1, new Potion(1, "Energy Potion", "Gain 2 Energy.") },
-            { 2, new Potion(2, "Strength Potion", "Gain 2 Strength.") },
-            { 3, new Potion(3, "Block Potion", "Gain 12 Block.") },
-            { 4, new Potion(4, "Fear Potion", "Apply 3 Vulnerable.") },
-            { 5, new Potion(5, "Swift Potion", "Draw 3 cards.") },
-            { 6, new Potion(6, "Weak Potion", "Apply 3 Weak.") },
-            { 7, new Potion(6, "Cultist Potion", "Gain 1 Ritual.") },
+            { 0, new Potion(0, "Fire Potion","Common", "Deal 20 damage.") },
+            { 1, new Potion(1, "Energy Potion", "Common", "Gain 2 Energy.") },
+            { 2, new Potion(2, "Strength Potion", "Common", "Gain 2 Strength.") },
+            { 3, new Potion(3, "Block Potion", "Common", "Gain 12 Block.") },
+            { 4, new Potion(4, "Fear Potion", "Common", "Apply 3 Vulnerable.") },
+            { 5, new Potion(5, "Swift Potion", "Common", "Draw 3 cards.") },
+            { 6, new Potion(6, "Weak Potion", "Common", "Apply 3 Weak.") },
+            { 7, new Potion(6, "Cultist Potion", "Rare", "Gain 1 Ritual.") },
         };
     }
 }
