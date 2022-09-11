@@ -2,7 +2,7 @@ Program: Slay the Spire in C# (Console Application)
 
 Author: Richard Mayers
 
-Date last modified: Sept 2nd, 2022
+Date last modified: Sept 11th, 2022
 
 If you are reading this, I have likely shared access as a step of applying to your company! 
 I created this huge product (for me) to further my learning of core programming principles.
