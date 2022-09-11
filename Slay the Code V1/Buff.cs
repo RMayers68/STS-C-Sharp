@@ -1,11 +1,11 @@
-﻿namespace STV
+namespace STV
 {
     public class Buff
     {
         // attributes
         public int BuffID { get; set; }
         public string Name { get; set; }
-        public string BuffDebuff { get; set; }
+        public bool BuffDebuff { get; set; }
         public byte Type { get; set; }
         public int? Intensity { get; set; }
         public int? Duration { get; set; }
@@ -14,7 +14,7 @@
 
         //constructor
 
-        public Buff(int buffID, string name, string buffDebuff, byte type)
+        public Buff(int buffID, string name, bool buffDebuff, byte type)
         {
             this.BuffID = buffID;
             this.Name = name;
@@ -37,31 +37,26 @@
         {
             switch (BuffID)
             {
-                default:
-                    return "";
-                case 1:
-                    return $"Takes 50% more damage from attacks for {Duration} turns.";
-                case 2:
-                    return $"Deal 25% less damage with attacks for {Duration} turns.";
-                case 3:
-                    return $"At the end of its turn, gains {Intensity} Strength.";
-                case 4:
-                    return $"Increases attack damage by {Intensity}.";
-                case 5:
-                    return $"Gains {Intensity} Block upon first receiving attack damage.";
-                case 6:
-                    return $"Gain 25% less Block from cards for {Duration} turns.";
-                case 7:
-                    return $"Increases the effectiveness of Orbs by {Intensity}.";
+                default:    return "";
+                case 1:     return $"Takes 50% more damage from attacks for {Duration} turns.";
+                case 2:     return $"Deal 25% less damage with attacks for {Duration} turns.";
+                case 3:     return $"At the end of its turn, gains {Intensity} Strength.";
+                case 4:     return $"Increases attack damage by {Intensity}.";
+                case 5:     return $"Gains {Intensity} Block upon first receiving attack damage.";
+                case 6:     return $"Gain 25% less Block from cards for {Duration} turns.";
+                case 7:     return $"Increases the effectiveness of Orbs by {Intensity}.";
+                case 8:     return $"Prevents the next {Counter} debuffs from being applied.";
+                case 9:     return $"Increases Block gained from Cards by {Intensity}.";
+                case 10:    return $"When you obtain 10 Mantra, enter Divinity. (current Mantra:{Counter})";
+                case 11:    return $"Whenever you switch stances, gain {Intensity}";
             }
         }
 
 
         // Duration-related methods
-        public void setDuration(int turnDuration)
+        public void DurationSet(int turnDuration)
         {
-            if (this.Duration == null)
-                this.Duration = turnDuration;
+            if (this.Duration == null) this.Duration = turnDuration;
             else this.Duration += turnDuration;
         }
 
@@ -80,6 +75,13 @@
             else return false;
         }
 
+        //Counter methods
+        public void CounterSet(int counter)
+        {
+            if (this.Counter == null) this.Counter = counter;
+            else this.Counter += counter;
+        }
+        
         // Intensity related methods
         public void IntensitySet(int intensity)
         {
