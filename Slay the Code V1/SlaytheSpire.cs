@@ -1,4 +1,4 @@
-﻿// Richard Mayers, August 30th, 2022
+// Richard Mayers, Sept 11th, 2022
 
 namespace STV
 {
@@ -11,7 +11,7 @@ namespace STV
             {
                 Console.Clear();
                 Console.WriteLine($"{Tab(6)}Slay The Spire!\n\n{Tab(6)}****************\n\n{Tab(6)}1: Play\n\n{Tab(6)}2: Card Library\n\n{Tab(6)}3: Exit");
-                while (!Int32.TryParse(Console.ReadLine(), out menuChoice) || menuChoice < 1 || menuChoice > 3)
+                while (!Int32.TryParse(Console.ReadLine(), out menuChoice) || menuChoice < 1 || menuChoice > 4)
                     Console.WriteLine("Invalid input, enter again:");
                 switch (menuChoice)
                 {
@@ -91,6 +91,11 @@ namespace STV
                         }
                         Console.Clear();
                         break;
+                    /*case 4:                                                       // Programming Test Case Area
+                        for (int i = 0; i < 10; i++)
+                            Console.WriteLine($"{(i-7) % 7}");
+                        Pause();
+                        break;*/
                 }
             }
         }
@@ -117,7 +122,7 @@ namespace STV
             List<Card> discardPile = new();
             List<Card> exhaustPile = new();
             int turnNumber = 0;
-            while ((!Encounter.All(x => x.Hp == 0)) && (hero.Hp != 0))
+            while ((!Encounter.All(x => x.Hp == 0)) && (hero.Hp != 0) && Encounter.Count > 0)
             {
                 for (int i = 0; i < hero.Buffs.Count; i++)                                          //Start Turn Setup
                 {
@@ -137,18 +142,22 @@ namespace STV
                         Encounter[i].Buffs[j].DurationDecrease();
                         if (Encounter[i].Buffs[j].DurationEnded())
                         {
-                            Console.WriteLine($"\nThe {Encounter[i].Name}'s {Encounter[i].Buffs[j].Name} {Encounter[i].Buffs[j].BuffDebuff} has ran out.");
+                            string buffDebuff = "";
+                            if (Encounter[i].Buffs[j].BuffDebuff)
+                                buffDebuff = "Buff";
+                            else buffDebuff = "Debuff";
+                            Console.WriteLine($"\nThe {Encounter[i].Name}'s {Encounter[i].Buffs[j].Name} {buffDebuff} has ran out.");
                             removeBuff = true;
                         }
                         if (Encounter[i].Buffs[j].Name == "Ritual" && turnNumber != 1)
-                            Encounter[i].IntensityBuff(4,Encounter[i].Buffs.Find(x => x.BuffID.Equals(3)).Intensity.GetValueOrDefault(3)); // Adds Ritual Intensity to Strength
+                            Encounter[i].AddBuff(4,Encounter[i].Buffs.Find(x => x.Name.Equals("Ritual")).Intensity.GetValueOrDefault(3)); // Adds Ritual Intensity to Strength
                         if (removeBuff)
                             Encounter[i].Buffs.RemoveAt(j);
                     }
                 }
                 turnNumber++;                                                                       // End Turn Setup
                 for (int i = 0; i < Encounter.Count; i++)
-                    Encounter[i].EnemyIntent(Encounter[i], turnNumber);
+                    Encounter[i].EnemyIntent(turnNumber,Encounter);
                 Pause();
                 PlayerTurn(hero, Encounter, drawPile, hand, discardPile,cardRNG,exhaustPile,turnNumber);
                 if (hero.Orbs.Count != null || hero.Orbs.Count != 0)                                //Start Orb Time
@@ -184,10 +193,7 @@ namespace STV
             {
                 Console.WriteLine("\nVictorious, the creature is slain!\n");
                 if (hero.Relics[0].Name == "Burning Blood")
-                {
-                    hero.Hp += 6;
-                    Console.WriteLine($"You have healed 6 HP and are now at {hero.Hp}/{hero.MaxHP}!");
-                }
+                    hero.HealHP(6);                
             }                
             Pause();
         }
@@ -234,15 +240,25 @@ namespace STV
                             if (playCard == 0)
                                 break;
                             Card card = hand[playCard - 1];
+                            if (card.EnergyCost == "X")
+                                card.EnergyCost = $"{hero.Energy}";
                             if (Int32.Parse(card.EnergyCost) > hero.Energy)
                                 Console.WriteLine($"You failed to play the card. You need {card.EnergyCost} to play {card.Name}.");
                             else
                             {
-                                discardPile.Add(card);
                                 hand.Remove(card);
-                                Console.WriteLine($"You played {card.Name}.");
-                                card.CardAction(card, hero, Encounter, drawPile, discardPile, hand, exhaustPile);
+                                Console.WriteLine($"You played {card.Name}.");                               
                                 hero.Energy -= (Int32.Parse(card.EnergyCost));
+                                card.CardAction(card, hero, Encounter, drawPile, discardPile, hand, exhaustPile,rng);
+                                if (card.Description.Contains("Exhaust"))
+                                    card.Exhaust(exhaustPile);
+                                else if (card.Name == "Tantrum")
+                                {
+                                    drawPile.Add(card);
+                                    Shuffle(drawPile, rng);
+                                }                                  
+                                else if (card.Type != "Power")
+                                    discardPile.Add(card);
                                 HealthUnderZero(hero, Encounter);
                             }
                             Pause();
@@ -294,7 +310,9 @@ namespace STV
                     break;
                 else
                 {
-                    discardPile.Add(hand[i-1]);
+                    if (hand[i-1].Description.Contains("Ethereal"))
+                        hand[i-1].Exhaust(exhaustPile);
+                    else discardPile.Add(hand[i-1]);
                     hand.RemoveAt(i-1);
                 }
             }
@@ -307,8 +325,9 @@ namespace STV
                     Console.WriteLine($"The {Encounter[i].Name} is dead and therefore... does nothing.");
                 else
                 {
-                    Encounter[i].EnemyAction(hero, Encounter[i], drawPile, discardPile);
-                    HealthUnderZero(hero, Encounter);
+                    Encounter[i].Actions.Add(Encounter[i].Intent);
+                    Encounter[i].EnemyAction(hero,drawPile, discardPile,Encounter);
+                    HealthUnderZero(hero, Encounter);                  
                 }
             }
 
@@ -367,18 +386,24 @@ namespace STV
             }
         }
 
-        public static void Discard(List<Card> hand, List<Card> discardPile)
+        public static void Discard(List<Card> hand, List<Card> discardPile, Card card)
         {
-            int discardChoice = 0;
-            for (int i = 0; i < hand.Count; i++)
-                Console.WriteLine($"{i + 1}:{hand[i].Name}");
-            Console.WriteLine("Which card would you like to discard?");
-            while (!Int32.TryParse(Console.ReadLine(), out discardChoice) || discardChoice < 1 || discardChoice > hand.Count)
-                Console.WriteLine("Invalid input, enter again:");
-            discardPile.Add(hand[discardChoice - 1]);
-            hand.RemoveAt(discardChoice - 1);
+            if (!hand.Any())
+                return;
+            discardPile.Add(card);
+            hand.Remove(card);
         }
 
+        public static Card ChooseCard(List<Card> list)
+        {
+            int cardChoice = 0;
+            for (int i = 0; i < list.Count; i++)
+                Console.WriteLine($"{i + 1}:{list[i].Name}");
+            Console.WriteLine("Which card would you like to choose?");
+            while (!Int32.TryParse(Console.ReadLine(), out cardChoice) || cardChoice < 1 || cardChoice > list.Count)
+                Console.WriteLine("Invalid input, enter again:");
+            return list[cardChoice-1];
+        }
         //MENU AND UI METHODS
         public static void CombatMenu(Actor hero, List<Actor> Encounter, List<Card> drawPile, List<Card> hand, List<Card> discardPile, List<Card> exhaustPile, int turnNumber)
         {
@@ -514,6 +539,7 @@ namespace STV
                 case "Watcher":
                     Deck.Add(new Card(Dict.cardL[241]));
                     Deck.Add(new Card(Dict.cardL[285]));
+                    Deck.Add(new Card(Dict.cardL[262]));
                     break;
             }
             Deck.Sort(delegate (Card x, Card y)
@@ -530,7 +556,7 @@ namespace STV
         {
             Random enemyRNG = new Random();
             List<Actor> list = new();
-            int encounterChoice = enemyRNG.Next(0, 3);
+            int encounterChoice = 4;// enemyRNG.Next(0, 4);
             switch (encounterChoice)
             {
                 case 0:
@@ -540,8 +566,12 @@ namespace STV
                     list.Add(new Actor(Dict.enemyL[1]));
                     break;
                 case 2:
-                    list.Add(new Actor(Dict.enemyL[2]));
-                    list.Add(new Actor(Dict.enemyL[2]));
+                    for (int i = 0; i < 2; i++)
+                    { 
+                        if (enemyRNG.Next(0,2) == 0)
+                            list.Add(new Actor(Dict.enemyL[2]));
+                        else list.Add(new Actor(Dict.enemyL[7]));
+                    }                   
                     break;
                 case 3:
                     int slimeSwitch = enemyRNG.Next(0, 2);
@@ -559,6 +589,9 @@ namespace STV
                             break;
                     }
                     break;
+                case 4:
+                    list.Add(new Actor(Dict.enemyL[11]));
+                    break;
                 default: break;
             }
             for (int i = 0; i < list.Count; i++)
@@ -571,10 +604,13 @@ namespace STV
                     default:
                         break;
                     case 2:
-                        list[i].Buffs.Add(new Buff(Dict.buffL[5]));
                         Random random = new Random();
-                        list[i].Buffs[0].IntensitySet(random.Next(3, 8));
+                        list[i].AddBuff(5,random.Next(3, 8));
                         break;
+                    case 11:
+                        list[i].AddBuff(18, 15);
+                        break;
+
                 }
             }
             return list;
