@@ -134,6 +134,14 @@ namespace STV
                         Pause();
                     }
                 }
+                if (Orbs.Exists(x => x.Name == "Plasma"))
+                {
+                    foreach (Orb orb in Orbs)
+                    {
+                        if (orb.Name == "Plasma");
+                            hero.Energy += 1;
+                    }
+                }
                 for (int i = 0; i < Encounter.Count; i++)
                 {
                     for (int j = Encounter[i].Buffs.Count - 1; j >= 0; j--)
@@ -163,22 +171,29 @@ namespace STV
                 if (hero.Orbs.Count != null || hero.Orbs.Count != 0)                                //Start Orb Time
                 {
                     Random random = new Random();
+                    int focus = 0;
+                    if (Buffs.Exists(x => x.Name == "Focus"))
+                        focus = Buffs.Find(x => x.Name == "Focus").Intensity.GetValueOrDefault();
                     foreach (var orb in hero.Orbs)
                     {
+                        if (Buffs.Exists(x => x.Name == "Focus"))
+                            int focus = Buffs.Find(x => x.Name == "Focus").Intensity.GetValueOrDefault();
                         switch (orb.OrbID)
                         {
                             case 0:
                                 int target = random.Next(0, Encounter.Count);
-                                hero.NonAttackDamage(Encounter[target], 3);
-                                Console.WriteLine($"The {Encounter[target].Name} took 3 damage from the Lightning Orb!");
+                                focus += 3;
+                                hero.NonAttackDamage(Encounter[target], focus);
+                                Console.WriteLine($"The {Encounter[target].Name} took {focus} damage from the Lightning Orb!");
                                 break;
                             case 1:
-                                hero.GainBlock(2);
-                                Console.WriteLine($"The {hero.Name} gained 2 Block from the Frost Orb!");
+                                focus += 2;
+                                hero.GainBlock(focus);
+                                Console.WriteLine($"The {hero.Name} gained {focus} Block from the Frost Orb!");
                                 break;
                             case 2:
-                                orb.Effect += 6;
-                                Console.WriteLine($"The {orb.Name} Orb stored 6 more Energy!");
+                                orb.Effect += focus+6;
+                                Console.WriteLine($"The {orb.Name} Orb stored {focus+6} more Power!");
                                 break;
                         }
                     }
@@ -246,19 +261,9 @@ namespace STV
                                 Console.WriteLine($"You failed to play the card. You need {card.EnergyCost} to play {card.Name}.");
                             else
                             {
-                                hand.Remove(card);
-                                Console.WriteLine($"You played {card.Name}.");                               
+                                hand.Remove(card);                            
                                 hero.Energy -= (Int32.Parse(card.EnergyCost));
-                                card.CardAction(card, hero, Encounter, drawPile, discardPile, hand, exhaustPile,rng);
-                                if (card.Description.Contains("Exhaust"))
-                                    card.Exhaust(exhaustPile);
-                                else if (card.Name == "Tantrum")
-                                {
-                                    drawPile.Add(card);
-                                    Shuffle(drawPile, rng);
-                                }                                  
-                                else if (card.Type != "Power")
-                                    discardPile.Add(card);
+                                card.CardAction(hero, Encounter, drawPile, discardPile, hand, exhaustPile,rng);                               
                                 HealthUnderZero(hero, Encounter);
                             }
                             Pause();

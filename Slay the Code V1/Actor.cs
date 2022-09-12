@@ -111,9 +111,9 @@ namespace STV
 		}
 		public void AddBuff(int ID,int effect)
         {
-			if ((!Dict.buffL[ID].BuffDebuff || effect < 0) && Buffs.Contains(Buffs.Find(x => x.BuffID.Equals(8))))
+			if ((!Dict.buffL[ID].BuffDebuff || effect < 0) && Buffs.Contains(Buffs.Find(x => x.Name == "Artifact")))
             {
-				Buffs.Find(x => x.BuffID.Equals(8)).Counter--;
+				Buffs.Find(x => x.Name == "Artifact").Counter--;
 				return;
 			}				
 			if (!Buffs.Contains(Buffs.Find(x => x.BuffID.Equals(ID))))
@@ -121,8 +121,8 @@ namespace STV
 			byte b = Dict.buffL[ID].Type switch
 			{
 				byte i when i >= 0 && i <= 1 => 1,
-				byte i when i >= 2 && i <= 4 => 2,
-				byte i when i >= 5 && i <= 5 => 3,
+				byte i when i >= 2 && i <= 2 => 2,
+				byte i when i >= 3 && i <= 3 => 3,
 			};
 			switch (b)
             {
@@ -147,13 +147,15 @@ namespace STV
 		public void SingleAttack(Actor target,int damage)
 		{
 			if(Hp <= 0) return;
-			if (Buffs.Contains(Buffs.Find(x => x.Name.Equals("Strength"))))
-				damage += Buffs.Find(x => x.Name.Equals("Strength")).Intensity.GetValueOrDefault(0);
+			if (target.Buffs.Contains(target.Buffs.Find(x => x.Name == "Thorns")))
+					Hp -= target.Buffs.Find(x => x.Name == "Thorns").Intensity.GetValueOrDefault();
+			if (Buffs.Contains(Buffs.Find(x => x.Name == "Strength")))
+				damage += Buffs.Find(x => x.Name == "Strength").Intensity.GetValueOrDefault();
 			if(Stance == "Wrath" || target.Stance == "Wrath")
 				damage = damage * 2;
-			if (Buffs.Contains(Buffs.Find(x => x.Name.Equals("Weak"))))
+			if (Buffs.Contains(Buffs.Find(x => x.Name == "Weak")))
 				damage = Convert.ToInt32(damage * 0.75);
-			if (target.Buffs.Contains(target.Buffs.Find(x => x.Name.Equals("Vulnerable"))))
+			if (target.Buffs.Contains(target.Buffs.Find(x => x.Name == "Vulnerable")))
 				damage = Convert.ToInt32(damage * 1.5);
 			if (target.Block > 0)
 			{
@@ -166,8 +168,8 @@ namespace STV
 			}
 			else
 				target.Hp -= damage;		    
-			Console.WriteLine($"{Name} attacked for {damage} damage!");
-			if (target.EnemyID == 2 && target.Buffs.Contains(target.Buffs.Find(x => x.Name.Equals("Curl Up"))))      // Louse Curl Up Effect
+			Console.WriteLine($"{Name} attacked the {target.Name} for {damage} damage!");
+			if (target.Buffs.Contains(target.Buffs.Find(x => x.Name == "Curl Up")))      // Louse Curl Up Effect
 			{
 				Console.WriteLine($"The Louse has curled up and gained {target.Buffs[0].Intensity} Block!");
 				target.Block += target.Buffs[0].Intensity.GetValueOrDefault();
@@ -180,33 +182,7 @@ namespace STV
 				if (Hp <= 0) return;
 				foreach (var target in encounter)
                 {
-					if (Buffs.Contains(Buffs.Find(x => x.Name.Equals("Strength"))))
-						damage += Buffs.Find(x => x.Name.Equals("Strength")).Intensity.GetValueOrDefault(0);
-					if (Stance == "Wrath" || target.Stance == "Wrath")
-						damage = damage * 2;
-					if (Buffs.Contains(Buffs.Find(x => x.Name.Equals("Weak"))))
-						damage = Convert.ToInt32(damage * 0.75);
-					if (target.Buffs.Contains(target.Buffs.Find(x => x.Name.Equals("Vulnerable"))))
-						damage = Convert.ToInt32(damage * 1.5);
-					if (target.Block > 0)
-					{
-						target.Block -= damage;
-						if (target.Block < 0)
-						{
-							target.Hp -= Math.Abs(target.Block);
-							target.Block = 0;
-						}
-					}
-					else
-						target.Hp -= damage;
-
-					Console.WriteLine($"{Name} attacked all enemies for {damage} damage!");
-					if (target.EnemyID == 2 && target.Buffs.Contains(target.Buffs.Find(x => x.Name.Equals("Curl Up"))))      // Louse Curl Up Effect
-					{
-						Console.WriteLine($"The Louse has curled up and gained {target.Buffs[0].Intensity} Block!");
-						target.Block += target.Buffs[0].Intensity.GetValueOrDefault();
-						target.Buffs.RemoveAt(0);
-					}
+					SingleAttack(target, damage);
 				}
 				
 			}
@@ -235,6 +211,8 @@ namespace STV
 		public void HealHP(int heal)
         {
 			Hp += heal;
+			if (Hp > MaxHP)
+				Hp = MaxHP;
 			Console.WriteLine($"You have healed {heal} HP and are now at {Hp}/{MaxHP}!");
 		}
 
@@ -778,17 +756,20 @@ namespace STV
         {
 			if (Hp <= 0) return;
 			Random random = new();
+			int focus = 0;
+			if (Buffs.Exists(x => x.Name == "Focus")) ;
+				focus = Buffs.Find(x => x.Name == "Focus").Intensity.GetValueOrDefault();
 			if (Orbs[0] == null) return;
 			else if (Orbs[0].Name == "Lightning")
 			{
 				int target = random.Next(0, encounter.Count);
-				NonAttackDamage(encounter[target], 8);
-				Console.WriteLine($"The {encounter[target].Name} took 8 damage from the Evoked Lightning Orb!");
+				NonAttackDamage(encounter[target], focus+8);
+				Console.WriteLine($"The {encounter[target].Name} took {focus+8} damage from the Evoked Lightning Orb!");
 			}
 			else if (Orbs[0].Name == "Frost")
 			{
-				GainBlock(5);
-				Console.WriteLine($"The {Name} gained 2 Block from the Evoked Frost Orb!");
+				GainBlock(focus+5);
+				Console.WriteLine($"The {Name} gained {focus} Block from the Evoked Frost Orb!");
 			}
 			else if (Orbs[0].Name == "Dark")
 			{
