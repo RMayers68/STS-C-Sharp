@@ -49,6 +49,23 @@ namespace STV
                 case 9:     return $"Increases Block gained from Cards by {Intensity}.";
                 case 10:    return $"When you obtain 10 Mantra, enter Divinity. (current Mantra:{Counter})";
                 case 11:    return $"Whenever you switch stances, gain {Intensity}";
+                case 12:    return $"Whenever you play Pressure Points, all enemy with Mark loses {Intensity} HP.";
+                case 13:    return $"You may not gain Block from cards for the next {Duration} turns.";
+                case 14:    return $"You may not play any Attacks for {Duration} turns.";
+                case 15:    return $"Will not awaken for {Duration} turns";
+                case 16:    return $"After receiving {Intensity} damage, changes to a Defensive Mode.";
+                case 17:    return $"When attacked, deals {Intensity} damage back.";
+                case 18:    return $"Steals {Intensity} Gold whenever it attacks.";
+                case 19:    return $"Whenever you play a Skill, gains {Intensity} Strength";
+                case 20:    return $"At the end of your turn, gain {Intensity} Block. Receiving unblocked attack damage reduces Plated Armor by 1.";
+                case 21:    return $"At the end of your turn, lose {Intensity} Strength.";
+                case 22:    return $"Reduce ALL damage taken and HP loss to 1 this turn. (lasts {Duration} turns)";
+                case 23:    return $"At the end of its turn, gains {Intensity} Block.";
+                case 24:    return $"At the beginning of its turn, the target loses {Duration} HP and 1 stack of Poison.";
+                case 25:    return $"At the end of its turn, heals {Duration} HP and loses 1 stack of Regen.";
+                case 26:    return $"At the end of your turn, lose {Intensity} Dexterity.";
+                case 27:    return $"When its HP is at or below 50%, will split into 2 smaller Slimes with its current HP.";
+                case 28:    return $"On death, applies {Intensity} Vulnerable.";                   
             }
         }
 

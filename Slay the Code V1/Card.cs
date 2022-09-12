@@ -6,10 +6,10 @@ namespace STV
 	{
 
 		// attributes
-		public int FuncID { get; set; } // ID correlates to method ran (Name without spaces)
+		public int FuncID { get; set; }
 		public string Name { get; set; }
-		public string Type { get; set; } // Attack, Skill, Power, Status or Curse (A,S,P,T,C)
-		public string Rarity { get; set; } //Common,Uncommon,Rare (C,U,R)
+		public string Type { get; set; } // Attack, Skill, Power, Status or Curse 
+		public string Rarity { get; set; } 
 		public string EnergyCost { get; set; }
 		public string Description { get; set; }
 
@@ -138,13 +138,13 @@ namespace STV
 				case "Dropkick":
 					target = hero.DetermineTarget(encounter);
 					hero.SingleAttack(encounter[target], 5);
-					if (encounter[target].Buffs.Contains(encounter[target].Buffs.Find(x => x.BuffID.Equals(1))))
+					if (encounter[target].Buffs.Exists(x => x.Name == "Vulnerable"))
 						hero.GainEnergy(1);
 					break;
 				case "Entrench":
 					hero.Block *= 2;
 					break;
-				case "Feed":												//minion buff add
+				case "Feed":						
 					target = hero.DetermineTarget(encounter);
 					hero.SingleAttack(encounter[target], 10);
 					if (encounter[target].Hp <= 0)
@@ -168,16 +168,17 @@ namespace STV
 						hero.MaxHP += 3;
 					}
 					break;
-				case "Flex":												// Debuff to lose strength at end of turn
+				case "Flex":						
 					hero.AddBuff(4, 2);
+					hero.AddBuff(21, 2);
 					break;
 				case "Ghostly Armor":
 					hero.Block += 10;
 					break;
 				case "Heavy Blade":
 					target = hero.DetermineTarget(encounter);
-					if (hero.Buffs.Contains(hero.Buffs.Find(x => x.BuffID.Equals(4))))
-						damage += (hero.Buffs.Find(x => x.BuffID.Equals(4)).Intensity.GetValueOrDefault() * 2);
+					if (hero.Buffs.Exists(x => x.BuffID.Equals(4)))
+						damage += (hero.Buffs.Find(x => x.BuffID.Equals(4)).Intensity.Value * 2);
 					hero.SingleAttack(encounter[target], damage);
 					break;
 				case "Hemokinesis":
@@ -205,8 +206,8 @@ namespace STV
 					hero.SingleAttack(encounter[target], 5);
 					break;
 				case "Limit Break":
-					if (hero.Buffs.Contains(hero.Buffs.Find(x => x.BuffID.Equals(4))))
-						hero.Buffs.Find(x => x.BuffID.Equals(4)).IntensitySet(hero.Buffs.Find(x => x.BuffID.Equals(4)).Intensity.GetValueOrDefault()*2);
+					if (hero.Buffs.Exists(x => x.BuffID.Equals(4)))
+						hero.Buffs.Find(x => x.BuffID.Equals(4)).IntensitySet(hero.Buffs.Find(x => x.BuffID.Equals(4)).Intensity.Value*2);
 					break;
 				case "Offering":
 					hero.SelfDamage(6);
@@ -383,7 +384,7 @@ namespace STV
 				case "Heel Hook":
 					target = hero.DetermineTarget(encounter);
 					hero.SingleAttack(encounter[target], 5);
-					if (encounter[target].Buffs.Contains(encounter[target].Buffs.Find(x => x.BuffID.Equals(2))))
+					if (encounter[target].Buffs.Exists(x => x.Name == "Weak"))
 						hero.GainEnergy(1);
 					break;
 				case "Leg Sweep":
@@ -686,7 +687,7 @@ namespace STV
 					STS.DrawCards(drawPile,hand,discardPile,rng, 1);
 					break;
 				case "Tempest":
-					for (int i = 0; i < Int32.Parse(card.EnergyCost); i++)
+					for (int i = 0; i < Int32.Parse(EnergyCost); i++)
 						hero.ChannelOrb(encounter,0);
 					break;
 				case "TURBO":
@@ -841,6 +842,7 @@ namespace STV
 					break;
 				case "Pray":
 					hero.AddBuff(10, 3);
+					STS.DivinityCheck(hero, discardPile, hand);
 					drawPile.Add(new Card(Dict.cardL[335]));
 					STS.Shuffle(drawPile, rng);
 					break;
@@ -848,11 +850,12 @@ namespace STV
 					target = hero.DetermineTarget(encounter);
 					encounter[target].AddBuff(12, 8);
 					for (int i = 0; i < encounter.Count; i++)
-						if (encounter[i].Buffs.Contains(encounter[i].Buffs.Find(x => x.BuffID.Equals(12))))
-							hero.NonAttackDamage(encounter[i], encounter[i].Buffs.Find(x => x.BuffID == 12).Intensity.GetValueOrDefault());
+						if (encounter[i].Buffs.Exists(x => x.Name == "Mark"))
+							hero.NonAttackDamage(encounter[i], encounter[i].Buffs.Find(x => x.Name == "Mark").Intensity.Value);
 					break;
 				case "Prostrate":
 					hero.AddBuff(10, 2);
+					STS.DivinityCheck(hero, discardPile, hand);
 					hero.CardBlock(4);
 					break;
 				case "Protect":
@@ -922,12 +925,12 @@ namespace STV
 					for (int i = 0; i < 3; i++)
 						lastWish.Add(new Card(Dict.cardL[i + 361]));
 					Card wish = STS.ChooseCard(lastWish);
-					CardAction(wish, hero, encounter, drawPile, discardPile, hand, exhaustPile, rng);
+					wish.CardAction(hero, encounter, drawPile, discardPile, hand, exhaustPile, rng);
 					break;
 				case "Worship":
 					hero.AddBuff(10, 5);
-					break;
-																										// Colorless Cards
+					STS.DivinityCheck(hero, discardPile, hand);
+					break;																										// Colorless Cards
 				case "Bandage Up":
 					hero.HealHP(4);
 					break;
@@ -1123,7 +1126,7 @@ namespace STV
 			else if (Name == "Tantrum")
 			{
 				drawPile.Add(this);
-				Shuffle(drawPile, rng);
+				STS.Shuffle(drawPile, rng);
 			}
 			else if (Type != "Power")
 				discardPile.Add(this);

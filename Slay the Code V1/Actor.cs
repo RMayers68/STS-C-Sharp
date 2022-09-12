@@ -35,7 +35,8 @@ namespace STV
 			this.BottomHP = bottomHP;
 			this.Block = 0;
 			this.Intent = intent;
-			this.Buffs = new();		
+			this.Buffs = new();
+			this.Gold = 0;
 			this.Actions = new();
 		}
 		public Actor(string name, int maxHP)
@@ -70,6 +71,7 @@ namespace STV
 				this.Block = 0;
 				this.Intent = actor.Intent;
 				this.Buffs = new();
+				this.Gold = 0;
 				this.Actions = new();
 			}
 			else
@@ -95,7 +97,7 @@ namespace STV
 		// Inclusive methods
 		public void CardBlock(int block)
 		{
-			if (Buffs.Contains(Buffs.Find(x => x.BuffID == 13)))
+			if (Buffs.Contains(Buffs.Find(x => x.Name == "No Block")))
 				return;
 			GainBlock(block);
 		}
@@ -103,7 +105,7 @@ namespace STV
         {
 			if (Hp <= 0) return;
 			if (Buffs.Contains(Buffs.Find(x =>x.Name == "Dexterity")))
-				block += Buffs.Find(x =>x.Name == "Dexterity").Intensity.GetValueOrDefault();
+				block += Buffs.Find(x =>x.Name == "Dexterity").Intensity.Value;
 			if (Buffs.Contains(Buffs.Find(x => x.Name == "Frail")))
 				block = Convert.ToInt32(block * 0.75);
 			Block += block;
@@ -118,13 +120,7 @@ namespace STV
 			}				
 			if (!Buffs.Contains(Buffs.Find(x => x.BuffID.Equals(ID))))
 				Buffs.Add(new Buff(Dict.buffL[ID]));
-			byte b = Dict.buffL[ID].Type switch
-			{
-				byte i when i >= 0 && i <= 1 => 1,
-				byte i when i >= 2 && i <= 2 => 2,
-				byte i when i >= 3 && i <= 3 => 3,
-			};
-			switch (b)
+			switch (Dict.buffL[ID].Type)
             {
 				case 1:
 					Buffs.Find(y => y.BuffID.Equals(ID)).DurationSet(effect);
@@ -142,39 +138,61 @@ namespace STV
 					return;
 			}
 		}
-
+		public void DamageEffectChecks(Actor target, int damage)
+        {
+			if (target.Buffs.Exists(x => x.Name == "Mode Shift"))
+            {
+				target.Buffs.Find(x => x.Name == "Mode Shift").IntensitySet(-damage);
+				if (target.Buffs.Find(x => x.Name == "Mode Shift").Intensity == 0)
+                {
+					target.Buffs.RemoveAll(x => x.Name == "Mode Shift");
+					Console.WriteLine("The Guardian has shifted into Defensive Mode!");
+					target.GainBlock(20);
+					target.Intent = "Defensive Mode";
+				}					
+			}							
+		}
 		//HP Altering Methods
 		public void SingleAttack(Actor target,int damage)
 		{
-			if(Hp <= 0) return;
-			if (target.Buffs.Contains(target.Buffs.Find(x => x.Name == "Thorns")))
-					Hp -= target.Buffs.Find(x => x.Name == "Thorns").Intensity.GetValueOrDefault();
-			if (Buffs.Contains(Buffs.Find(x => x.Name == "Strength")))
-				damage += Buffs.Find(x => x.Name == "Strength").Intensity.GetValueOrDefault();
+			if(Hp <= 0) return;			
+			if (Buffs.Exists(x => x.Name == "Strength"))
+				damage += Buffs.Find(x => x.Name == "Strength").Intensity.Value;
 			if(Stance == "Wrath" || target.Stance == "Wrath")
 				damage = damage * 2;
-			if (Buffs.Contains(Buffs.Find(x => x.Name == "Weak")))
+			if (Stance == "Divinity")
+				damage = damage * 3;
+			if (Buffs.Exists(x => x.Name == "Weak"))
 				damage = Convert.ToInt32(damage * 0.75);
-			if (target.Buffs.Contains(target.Buffs.Find(x => x.Name == "Vulnerable")))
+			if (target.Buffs.Exists(x => x.Name == "Vulnerable"))
 				damage = Convert.ToInt32(damage * 1.5);
-			if (target.Block > 0)
+			if (target.Buffs.Exists(x => x.Name == "Intangible"))
+				damage = 1;
+			if (target.Block > damage)
 			{
-				target.Block -= damage;
-				if (target.Block < 0)
-				{
-					target.Hp -= Math.Abs(target.Block);
-					target.Block = 0;				
-				}
+				Console.WriteLine($"{target.Name} has blocked {damage}, leaving itself with {target.Block} Block!");
+				if (target.Buffs.Exists(x => x.Name == "Thorns"))
+					NonAttackDamage(this, target.Buffs.Find(x => x.Name == "Thorns").Intensity.Value);
+				return;
 			}
 			else
-				target.Hp -= damage;		    
+			{
+				damage = Math.Abs(target.Block);
+				target.Block = 0;
+			}
+			target.Hp -= damage;		    
 			Console.WriteLine($"{Name} attacked the {target.Name} for {damage} damage!");
-			if (target.Buffs.Contains(target.Buffs.Find(x => x.Name == "Curl Up")))      // Louse Curl Up Effect
+			if (target.Buffs.Exists(x => x.Name == "Curl Up"))							      // Louse Curl Up Effect
 			{
 				Console.WriteLine($"The Louse has curled up and gained {target.Buffs[0].Intensity} Block!");
-				target.Block += target.Buffs[0].Intensity.GetValueOrDefault();
+				target.Block += target.Buffs[0].Intensity.Value;
 				target.Buffs.RemoveAt(0);
 			}
+			if (target.Buffs.Exists(x => x.Name == "Plated Armor"))
+				target.Buffs.Find(x => x.Name == "Plated Armor").IntensitySet(-1);
+			if (target.Buffs.Exists(x => x.Name == "Thorns"))
+				NonAttackDamage(this, target.Buffs.Find(x => x.Name == "Thorns").Intensity.Value);
+			DamageEffectChecks(target, damage);
 		}
 		public void AttackAll( List<Actor> encounter, int damage)
         {
@@ -183,28 +201,47 @@ namespace STV
 				foreach (var target in encounter)
                 {
 					SingleAttack(target, damage);
-				}
-				
+				}				
 			}
 		}
 		public void NonAttackDamage(Actor target, int damage)
         {
 			if (Hp <= 0) return;
+			if (target.Buffs.Exists(x => x.Name == "Intangible"))
+				damage = 1;
 			if (target.Block > 0)
 			{
 				target.Block -= damage;
-				if (target.Block < 0)
+				if (target.Block > damage)
+                {
+					Console.WriteLine($"{target.Name} has blocked {damage}, leaving itself with {target.Block} Block!");
+					return;
+				}					
+				else
 				{
-					target.Hp -= Math.Abs(target.Block);
+					damage = Math.Abs(target.Block);
 					target.Block = 0;
 				}
 			}
-			else
-				target.Hp -= damage;
+			target.Hp -= damage;
+			Console.WriteLine($"{Name} inflicted the {target.Name} with {damage} damage!");
+			DamageEffectChecks(target,damage);
+		}
+		public void PoisonDamage()
+		{
+			int damage = Buffs.Find(x => x.Name == "Poison").Duration.Value;
+			if (Hp <= 0) return;
+			if (Buffs.Exists(x => x.Name == "Intangible"))
+				damage = 1;
+			Hp -= damage;
+			Console.WriteLine($"{Name} suffered {damage} poison damage!");
+			DamageEffectChecks(this, damage);
 		}
 		public void SelfDamage(int damage)
         {
 			if (Hp <= 0) return;
+			if (Buffs.Exists(x => x.Name == "Intangible"))
+				damage = 1;
 			this.Hp -= damage;
 			Console.WriteLine($"{Name} hurt themselves for {damage} damage!");
         }
@@ -359,9 +396,21 @@ namespace STV
 					};
 					Repeat3Prevent("Skull Bash", "Rush");
 					break;
-				case 18:															// Lagavulin
-					if (Buffs.Contains(Buffs.Find(x => x.Name == "Asleep")))
-						break;
+				case 18:                                                            // Lagavulin
+					if (Buffs.Exists(x => x.Name == "Asleep"))
+						if (Hp < MaxHP)
+						{
+							Console.WriteLine("Lagavulin has been startled by your attack and awakens!");
+							Buffs.Remove(Buffs.Find((x => x.Name == "Asleep")));
+							Buffs.Remove(Buffs.Find((x => x.Name == "Metallicize")));
+							break;
+						}
+					else if (Buffs.Exists(x => x.Name == "Asleep") && Buffs.Find((x => x.Name == "Asleep")).Duration == 1)
+                        {
+							Console.WriteLine("Lagavulin is stirring and will wake up soon...");
+							Buffs.Remove(Buffs.Find((x => x.Name == "Metallicize")));
+							break;
+                        }
 					else if (Actions.Count >= 3 && Actions[Actions.Count - 1] == "Attack" && Actions[Actions.Count - 2] == "Attack")
 						Intent = "Siphon Soul";
 					else Intent = "Attack";
@@ -376,15 +425,8 @@ namespace STV
 						Intent = "Beam";
 					else Intent = "Bolt";
 					break;
-				case 20:															// Slime Boss
-					Intent = (Actions.Count % 3) switch
-					{
-						int i when i == 0 => "Goop Spray",
-						int i when i == 1 => "Charging",
-						int i when i == 3 => "Slam",
-					};
-					break;
-				case 21:															// Large Acid Slime
+
+				case 20:															// Large Acid Slime
 					Intent = enemyrng.Next(0, 20) switch
 					{
 						int i when i >= 0 && i <= 7 => "Corrosive Spit",
@@ -393,13 +435,21 @@ namespace STV
 					};
 					Repeat3Prevent("Corrosive Spit", "Tackle", "Lick");
 					break;
-				case 22:															// Large Spike Slime
+				case 21:															// Large Spike Slime
 					Intent = enemyrng.Next(0, 20) switch
 					{
 						int i when i >= 0 && i <= 5 => "Flame Tackle",
 						int i when i >= 6 && i <= 19 => "Lick",
 					};
 					Repeat3Prevent("Flame Tackle", "Lick");
+					break;
+				case 22:                                                            // Slime Boss
+					Intent = (Actions.Count % 3) switch
+					{
+						int i when i == 0 => "Goop Spray",
+						int i when i == 1 => "Charging",
+						int i when i == 3 => "Slam",
+					};
 					break;
 				case 23:															// The Guardian
 					if (Buffs.Contains(Buffs.Find(x => x.Name == "Mode Shift")))
@@ -412,7 +462,7 @@ namespace STV
 							int i when i == 3 => "Whirlwind",
 						};
 					}					
-					else if (Actions != null)
+					else if (Actions.Count != 0)
 					{
 						if (Actions[Actions.Count - 1] == "Roll Attack")
 							Intent = "Twin Slam";
@@ -507,14 +557,14 @@ namespace STV
 				case "Corrosive Spit":
 					SingleAttack(hero, 7);
 					discardPile.Add(Dict.cardL[358]);
-					if (EnemyID == 21)
+					if (EnemyID == 20)
 						discardPile.Add(Dict.cardL[358]);
 					break;
 				case "Dark Strike":
 					SingleAttack(hero, 6);
 					break;
 				case "Defensive Mode":
-					AddBuff(16, 3);
+					AddBuff(17, 3);
 					break;
 				case "Divider":
 					damage = hero.Hp / 12 + 1;
@@ -533,12 +583,12 @@ namespace STV
 					SingleAttack(hero, 32);
 					break;
 				case "Flame Tackle":
-					if (EnemyID == 22)
+					if (EnemyID == 21)
 						damage = 16;
 					else damage = 8;
 					SingleAttack(hero, damage);
 					discardPile.Add(Dict.cardL[358]);
-					if (EnemyID == 22)
+					if (EnemyID == 21)
 						discardPile.Add(Dict.cardL[358]);
 					break;
 				case "Goop Spray":
@@ -568,28 +618,30 @@ namespace STV
 				case "Lick":
 					int li = 0;
 					int ck = 2;
-					if (EnemyID == 3 || EnemyID == 5 || EnemyID == 21)
+					if (EnemyID == 3 || EnemyID == 5 || EnemyID == 20)
 						li = 2;
 					else li = 6;
-					if (EnemyID == 21 || EnemyID == 22)
+					if (EnemyID == 20 || EnemyID == 21)
 						ck++;
 					hero.AddBuff(li,ck);
 					break;
 				case "Lunge":
 					SingleAttack(hero, 12);
-					hero.Gold -= Buffs.Find(x => x.Name == "Thievery").Intensity.GetValueOrDefault(15);
-					Gold += Buffs.Find(x => x.Name == "Thievery").Intensity.GetValueOrDefault(15);
+					hero.Gold -= Buffs.Find(x => x.Name == "Thievery").Intensity.Value;
+					Gold += Buffs.Find(x => x.Name == "Thievery").Intensity.Value;
 					Console.WriteLine($"The {Name} stole 15 Gold!");
 					break;
 				case "Mug":
 					SingleAttack(hero, 10);
-					hero.Gold -= Buffs.Find(x => x.Name == "Thievery").Intensity.GetValueOrDefault(15);
-					Gold += Buffs.Find(x => x.Name == "Thievery").Intensity.GetValueOrDefault(15);
+					hero.Gold -= Buffs.Find(x => x.Name == "Thievery").Intensity.Value;
+					Gold += Buffs.Find(x => x.Name == "Thievery").Intensity.Value;
 					Console.WriteLine($"The {Name} stole 15 Gold!");
 					break;
 				case "Protect":
 					while (target != encounter.FindIndex(x => x == this))
 						target = rng.Next(0, encounter.Count);
+					if (encounter[target].Hp == 0)
+						target = encounter.FindIndex(x => x == this);
 					encounter[target].GainBlock(7);
 					break;
 				case "Puncture":
@@ -682,7 +734,7 @@ namespace STV
 				case "Twin Slam":
 					for (int i = 0;i < 2; i++)
 						SingleAttack(hero, 8);
-					Buffs.Remove(Buffs.Find(x => x.Name == "Sharp Hide"));
+					Buffs.RemoveAll(x => x.Name == "Thorns");
 					AddBuff(16, 30);
 					Actions.Clear();
 					break;
@@ -727,7 +779,7 @@ namespace STV
 						break;
 				}
 			if (Buffs.Contains(Buffs.Find(x => x.BuffID.Equals(11))))							// Mental Fortress Check
-				GainBlock(Buffs.Find(x => x.BuffID.Equals(11)).Intensity.GetValueOrDefault());
+				GainBlock(Buffs.Find(x => x.BuffID.Equals(11)).Intensity.Value);
 			if (oldStance != Stance && oldStance == "Calm")
 				Energy += 2;
 			else if (oldStance != Stance && Stance == "Divinity")
@@ -758,7 +810,7 @@ namespace STV
 			Random random = new();
 			int focus = 0;
 			if (Buffs.Exists(x => x.Name == "Focus")) ;
-				focus = Buffs.Find(x => x.Name == "Focus").Intensity.GetValueOrDefault();
+				focus = Buffs.Find(x => x.Name == "Focus").Intensity.Value;
 			if (Orbs[0] == null) return;
 			else if (Orbs[0].Name == "Lightning")
 			{
@@ -811,14 +863,35 @@ namespace STV
 		public static List<string> AttackIntents()
         {
 			List<string> list = new List<string>();
+			list.Add("Attack");
+			list.Add("Beam");
 			list.Add("Bite");
 			list.Add("Chomp");
 			list.Add("Corrosive Spit");
-			list.Add("Bite");
 			list.Add("Dark Strike");
+			list.Add("Divider");
+			list.Add("Fierce Bash");
 			list.Add("Flame Tackle");
+			list.Add("Inferno");
+			list.Add("Lunge");
+			list.Add("Mug");
+			list.Add("Puncture");
+			list.Add("Rake");
+			list.Add("Roll Attack");
+			list.Add("Rush");
+			list.Add("Scrape");
+			list.Add("Scratch");
+			list.Add("Shield Bash");
+			list.Add("Sear");
+			list.Add("Skull Bash");
+			list.Add("Slam");
+			list.Add("Smash");
+			list.Add("Stab");
 			list.Add("Tackle");
 			list.Add("Thrash");
+			list.Add("Twin Slam");
+			list.Add("Ultimate Blast");
+			list.Add("Whirlwind");
 			return list;
 		}
 

@@ -7,7 +7,7 @@
         public string Type { get; set; }
         public string Description { get; set; }
 
-        // constructor
+        // constructors
         public Relic(int relicID, string name, string type,string description)
         {
             this.RelicID = relicID;
@@ -15,7 +15,6 @@
             this.Type = type;
             this.Description = description;
         }
-        //Cloning from dictionary constructor
         public Relic(Relic relic)
         {
             this.RelicID = relic.RelicID;
