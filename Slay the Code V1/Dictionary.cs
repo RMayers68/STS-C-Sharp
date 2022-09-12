@@ -376,12 +376,14 @@ namespace STV
             { 361, new Card(361, "Become Almighty","Power","Common","None","Gain 3 Strength.")},
             { 362, new Card(362, "Fame and Fortune", "Skill", "Common", "None", "Gain 25 Gold.") },
             { 363, new Card(363, "Live Forever", "Power", "Common", "None", "Gain 6 Plated Armor.") },
+            { 364, new Card(364, "Calm", "Skill", "Common", "None", "") },
+            { 365, new Card(365, "Wrath", "Skill", "Common", "None", "") },
         };
 
         public static Dictionary<int, Orb> orbL = new()                                            // Orb Reference Dictionary
         {
             { 0, new Orb(0, "Lightning", "Strikes foes with thunder and lightning.", 3) },
-            { 1, new Orb(1, "Frost","Shield yourself behind a frozen barricade.", 4) },
+            { 1, new Orb(1, "Frost","Shield yourself behind a frozen barricade.", 2) },
             { 2, new Orb(2, "Dark","Devour your enemies in the Void.", 6) },
             { 3, new Orb(3, "Plasma", "Restore yourself in the blinding lights.", 1) },
         };
@@ -392,30 +394,36 @@ namespace STV
             { 1, new Buff(1, "Vulnerable", false, 1) },
             { 2, new Buff(2, "Weak", false, 1) },
             { 3, new Buff(3, "Ritual", true, 2) },
-            { 4, new Buff(4, "Strength", true, 3) },
-            { 5, new Buff(5,"Curl Up", true, 3) },
+            { 4, new Buff(4, "Strength", true, 2) },
+            { 5, new Buff(5,"Curl Up", true, 2) },
             { 6, new Buff(6,"Frail", false, 1)},
-            { 7, new Buff(7,"Focus", true, 3)},
-            { 8, new Buff(8,"Artifact", true, 5)},
-            { 9, new Buff(9,"Dexterity", true, 3)},
-            { 10, new Buff(10,"Mantra", true, 5)},
-            { 11, new Buff(11,"Mental Fortress", true, 3)},
-            { 12, new Buff(12,"Mark", false, 3)},
+            { 7, new Buff(7,"Focus", true, 2)},
+            { 8, new Buff(8,"Artifact", true, 3)},
+            { 9, new Buff(9,"Dexterity", true, 2)},
+            { 10, new Buff(10,"Mantra", true, 3)},
+            { 11, new Buff(11,"Mental Fortress", true, 2)},
+            { 12, new Buff(12,"Mark", false,2)},
             { 13, new Buff(13,"No Block", false, 1)},
             { 14, new Buff(14, "Entangled", false, 1) },
             { 15, new Buff(15, "Asleep", false, 1)},
-            { 16, new Buff(16, "Mode Shift",true,3)},
-            { 17, new Buff(17,"Sharp Hide",true,3)},
-            { 18, new Buff(18,"Thievery",true,3)},
-            { 19, new Buff(19,"Enrage",true,3)},
+            { 16, new Buff(16, "Mode Shift",true,2)},
+            { 17, new Buff(17,"Sharp Hide",true,2)},
+            { 18, new Buff(18,"Thievery",true,2)},
+            { 19, new Buff(19,"Enrage",true,2)},
+            { 20, new Buff(20, "Plated Armor", true, 2) },
+            { 21, new Buff(21, "Strength Down",false,2)},
+            { 22, new Buff(22, "Intangible", true, 1) },
+            { 23, new Buff(23, "Metallicize", true, 2) },
+            { 24, new Buff(24, "Thorns", true, 2) },
+            { 25, new Buff(25, "Poison", false, 2) },
+            { 26, new Buff(26, "Regeneration", true, 2) },
+            { 27, new Buff(27, "Dexterity Down", false, 2) },
 
             /*
              * Buff types:
-             * 1: Duration effect
-             * 2: Proc Intensity effect
-             * 3: Constant Intensity effect
-             * 4: One time Intensity effect
-             * 5: Counter
+             * 1: Duration 
+             * 2: Intensity
+             * 3: Counter
             */
         };
 
@@ -465,7 +473,28 @@ namespace STV
             { 4, new Potion(4, "Fear Potion", "Common", "Apply 3 Vulnerable.") },
             { 5, new Potion(5, "Swift Potion", "Common", "Draw 3 cards.") },
             { 6, new Potion(6, "Weak Potion", "Common", "Apply 3 Weak.") },
-            { 7, new Potion(6, "Cultist Potion", "Rare", "Gain 1 Ritual.") },
+            { 7, new Potion(7, "Cultist Potion", "Rare", "Gain 1 Ritual.") },
+            { 8, new Potion(8,"Ambrosia","Rare","Enter Divinity Stance.")},
+            { 9, new Potion(9, "Ancient Potion", "Uncommon", "Gain 1 Artifact.") },
+            { 10, new Potion(10, "Blood Potion", "Common", "Heal for 20% of your Max HP.") },
+            { 11, new Potion(11, "Bottled Miracle", "Common", "Add 2 Miracles to your hand.") },
+            { 12, new Potion(12, "Cunning Potion", "Uncommon", "Add 3 Shivs to your hand.") },
+            { 13, new Potion(13, "Dexterity Potion", "Common", "Gain 2 Dexterity") },
+            { 14, new Potion(14, "Distilled Chaos", "Uncommon", "Play the top 3 cards of your draw pile.") },
+            { 15, new Potion(15, "Essence of Darkness", "Rare", "Channel 1 Dark Orb for each Orb Slot.") },
+            { 16, new Potion(16, "Essence of Steel", "Uncommon", "Gain 4 Plated Armor.") },
+            { 17, new Potion(17, "Explosive Potion", "Common", "Deal 10 damage to all enemies.") },
+            { 18, new Potion(18, "Fairy in a Bottle", "Rare", "When you would die, heal to 30% of Max HP and discard this potion.") },
+            { 19, new Potion(19, "Flex Potion", "Common", "Gain 5 Strength. At the end of your turn, lose 5 Strength.") },
+            { 20, new Potion(20, "Fruit Juice", "Rare", "Gain 5 Max HP.") },
+            { 21, new Potion(21, "Ghost in a Jar", "Rare", "Gain 1 Intangible.") },
+            { 22, new Potion(22, "Heart of Iron", "Rare", "Gain 6 Metallicize.") },
+            { 23, new Potion(23, "Liquid Bronze", "Uncommon", "Gain 3 Thorns.") },
+            { 24, new Potion(24, "Poison Potion", "Common", "Apply 6 Poison to target enemy.") },
+            { 25, new Potion(25, "Potion of Capacity", "Uncommon", "Gain 2 Orb Slots.") },
+            { 26, new Potion(26, "Regen Potion", "Uncommon", "Gain 5 Regeneration.") },
+            { 27, new Potion(27, "Speed Potion", "Common", "Gain 5 Dexterity. At the end of this turn, lose 5 Dexterity") },
+            { 28, new Potion(28, "Stance Potion", "Uncommon", "Enter Calm or Wrath") },
         };
     }
 }

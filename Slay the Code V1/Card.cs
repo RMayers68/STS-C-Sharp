@@ -89,17 +89,18 @@ namespace STV
 			return $"Name: {Name}\nEnergy Cost: {EnergyCost}\tType: {Type}\nEffect: {Description}";																	// need if conditions for X cost, type, and rarity
 		}
 		
-        public void CardAction(Card card, Actor hero, List<Actor> encounter, List<Card> drawPile, List<Card> discardPile, List<Card> hand, List<Card> exhaustPile, Random rng)
+        public void CardAction(Actor hero, List<Actor> encounter, List<Card> drawPile, List<Card> discardPile, List<Card> hand, List<Card> exhaustPile, Random rng)
 		{
+			Console.WriteLine($"You played {Name}.");
 			int target = 0;
 			int damage = 0;
-			switch (card.Name)
+			switch (Name)
 			{
 																									// Start of Ironclad cards
 				case "Anger":
 					target = hero.DetermineTarget(encounter);
 					hero.SingleAttack(encounter[target], 6);
-					discardPile.Add(new Card(card));
+					discardPile.Add(new Card(this));
 					break;
 				case "Bash":
 					target = hero.DetermineTarget(encounter);
@@ -277,7 +278,7 @@ namespace STV
 					encounter[target].AddBuff(2, 1);
 					break;
 				case "Whirlwind":
-					for(int i = 0;i < Int32.Parse(card.EnergyCost);i++)
+					for(int i = 0;i < Int32.Parse(EnergyCost);i++)
 						hero.AttackAll(encounter, 5);
 					break;
 				case "Wild Strike":
@@ -392,8 +393,8 @@ namespace STV
 					break;
 				case "Malaise":
 					target = hero.DetermineTarget(encounter);
-					encounter[target].AddBuff(4, (Int32.Parse(card.EnergyCost) * -1));
-					encounter[target].AddBuff(2, Int32.Parse(card.EnergyCost));
+					encounter[target].AddBuff(4, (Int32.Parse(EnergyCost) * -1));
+					encounter[target].AddBuff(2, Int32.Parse(EnergyCost));
 					break;
 				case "Neutralize":
 					target = hero.DetermineTarget(encounter);
@@ -423,7 +424,7 @@ namespace STV
 					break;
 				case "Skewer":
 					target = hero.DetermineTarget(encounter);
-					for (int i = 0; i < Int32.Parse(card.EnergyCost); i++)
+					for (int i = 0; i < Int32.Parse(EnergyCost); i++)
 						hero.SingleAttack(encounter[target], 7);
 					break;
 				case "Slice":
@@ -578,11 +579,9 @@ namespace STV
 					break;
 				case "Hologram":
 					hero.CardBlock(3);
-					if (hand.Count < 10)
-					{
-						hand.Add(card);                                                         //Add choose card function
-						discardPile.Remove(card);
-					}
+					Card hologram = STS.ChooseCard(discardPile);
+					hand.Add(hologram);                                                         //Add choose card function
+					discardPile.Remove(hologram);
 					break;
 				case "Hyperbeam":
 					hero.AttackAll(encounter, 26);
@@ -603,7 +602,7 @@ namespace STV
 						hero.ChannelOrb(encounter,3);
 					break;
 				case "Multi-Cast":
-					for (int i = 0; i < Int32.Parse(card.EnergyCost); i++)
+					for (int i = 0; i < Int32.Parse(EnergyCost); i++)
 						hero.Evoke(encounter);
 					hero.Orbs.RemoveAt(0);
 					break;
@@ -636,7 +635,7 @@ namespace STV
 					hero.ChannelOrb(encounter,tmp);
 					break;
 				case "Reinforced Body":
-					for(int i = 0;i<Int32.Parse(card.EnergyCost); i++)
+					for(int i = 0;i<Int32.Parse(EnergyCost); i++)
 						hero.CardBlock(7);
 					break;
 				case "Reprogram":
@@ -673,8 +672,8 @@ namespace STV
 				case "Streamline":
 					target = hero.DetermineTarget(encounter);
 					hero.SingleAttack(encounter[target], 15);
-					if (card.EnergyCost != "0")
-						card.EnergyCost = $"{Int32.Parse(card.EnergyCost)-1}";
+					if (EnergyCost != "0")
+						EnergyCost = $"{Int32.Parse(EnergyCost)-1}";
 					break;
 				case "Sunder":
 					target = hero.DetermineTarget(encounter);
@@ -717,7 +716,7 @@ namespace STV
 					break;
 				case "Conjure Blade":
 					drawPile.Add(new Card(Dict.cardL[360]));
-					drawPile[drawPile.Count - 1].Description = Regex.Replace(drawPile[drawPile.Count - 1].Description, "X", $"{card.EnergyCost}");
+					drawPile[drawPile.Count - 1].Description = Regex.Replace(drawPile[drawPile.Count - 1].Description, "X", $"{EnergyCost}");
 					break;
 				case "Consecrate":
 					hero.AttackAll(encounter, 5);
@@ -834,8 +833,8 @@ namespace STV
 					do
 						omni = STS.ChooseCard(drawPile);
 					while (omni.Description.Contains("Unplayable"));
-					CardAction(omni, hero, encounter, drawPile, discardPile, hand, exhaustPile, rng);
-					CardAction(omni, hero, encounter, drawPile, discardPile, hand, exhaustPile, rng);
+					omni.CardAction(hero, encounter, drawPile, discardPile, hand, exhaustPile, rng);
+					omni.CardAction(hero, encounter, drawPile, discardPile, hand, exhaustPile, rng);
 					if (!omni.Type.Contains("Power"))
 						omni.Exhaust(exhaustPile);
 					drawPile.Remove(omni);
@@ -1009,11 +1008,11 @@ namespace STV
 					break;
 				case "Ritual Dagger":
 					target = hero.DetermineTarget(encounter);
-					string ritualDagger = card.Description;
-					card.Description = Regex.Replace(card.Description, @"[a-zA-Z '.]", "");
-					card.Description.Remove(card.Description.Length - 1);
-					hero.SingleAttack(encounter[target], Int32.Parse(card.Description));
-					card.Description = ritualDagger;
+					string ritualDagger = Description;
+					Description = Regex.Replace(Description, @"[a-zA-Z '.]", "");
+					Description.Remove(Description.Length - 1);
+					hero.SingleAttack(encounter[target], Int32.Parse(Description));
+					Description = ritualDagger;
 					if (encounter[target].Hp <= 0) ;
 						//Add way to add to total damage.
 					break;
@@ -1097,16 +1096,16 @@ namespace STV
 					break;
 				case "Expunger":
 					target = hero.DetermineTarget(encounter);
-					string expunger = card.Description;
-					card.Description = Regex.Replace(card.Description, @"[a-zA-Z .]", "");
-					for (int i = 0; i < Int32.Parse(card.Description.Substring(1)); i++)
-					hero.SingleAttack(encounter[target],9);
-					card.Description = expunger;
+					string expunger = Description;
+					Description = Regex.Replace(Description, @"[a-zA-Z .]", "");
+					for (int i = 0; i < Int32.Parse(Description.Substring(1)); i++)
+						hero.SingleAttack(encounter[target],9);
+					Description = expunger;
 					break;
 				default:
 					break;
 			}
-			switch (card.Type)
+			switch (Type)
             {
 				default:
 					break;
@@ -1119,6 +1118,15 @@ namespace STV
 					Exhaust(exhaustPile);
 					break;
 			}
+			if (Description.Contains("Exhaust"))
+				Exhaust(exhaustPile);
+			else if (Name == "Tantrum")
+			{
+				drawPile.Add(this);
+				Shuffle(drawPile, rng);
+			}
+			else if (Type != "Power")
+				discardPile.Add(this);
 		}
 		//misc card methods
 		public void Exhaust(List<Card> exhaustPile)
