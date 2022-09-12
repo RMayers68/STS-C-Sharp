@@ -18,7 +18,8 @@ namespace STV
                     case 1:                                                             // PLAY
                         Console.Clear();
                         int heroChoice = 0;
-                        Console.WriteLine("What hero would you like to choose? Each comes with their own set of cards and playstyles:\n1: Ironclad\n2: Silent\n3: Defect\n4: Watcher");
+                        Console.WriteLine("What hero would you like to choose? Each comes with their own set of cards and playstyles:");
+                        Console.WriteLine("1: Ironclad\n2: Silent\n3: Defect\n4: Watcher");
                         while (!Int32.TryParse(Console.ReadLine(), out heroChoice) || heroChoice < 1 || heroChoice > 4)
                             Console.WriteLine("Invalid input, enter again:");
                         Actor hero = new Actor(Dict.heroL[heroChoice]);
@@ -101,20 +102,20 @@ namespace STV
         }
 
         //COMBAT METHODS
-        public static void Combat(Actor hero, List<Actor> Encounter, List<Card> Deck)
+        public static void Combat(Actor hero, List<Actor> encounter, List<Card> Deck)
         {
             Random cardRNG = new();
             Console.Clear();
-            switch (Encounter.Count)
+            switch (encounter.Count)
             {
                 default: break;
                 case 1:
-                    Console.WriteLine($"You have encountered a {Encounter[0].Name}!");
+                    Console.WriteLine($"You have encountered a {encounter[0].Name}!");
                     break;
                 case 2:
-                    if (Encounter[0].Name == Encounter[1].Name)
-                        Console.WriteLine($"You have encountered 2 {Encounter[0].Name}s!");
-                    else Console.WriteLine($"You have encountered a {Encounter[0].Name} and a {Encounter[1].Name}!");
+                    if (encounter[0].Name == encounter[1].Name)
+                        Console.WriteLine($"You have encountered 2 {encounter[0].Name}s!");
+                    else Console.WriteLine($"You have encountered a {encounter[0].Name} and a {encounter[1].Name}!");
                     break;
             }
             List<Card> drawPile = Shuffle(Deck, cardRNG);
@@ -122,7 +123,7 @@ namespace STV
             List<Card> discardPile = new();
             List<Card> exhaustPile = new();
             int turnNumber = 0;
-            while ((!Encounter.All(x => x.Hp == 0)) && (hero.Hp != 0) && Encounter.Count > 0)
+            while ((!encounter.All(x => x.Hp == 0)) && (hero.Hp != 0) && encounter.Count > 0)
             {
                 for (int i = 0; i < hero.Buffs.Count; i++)                                          //Start Turn Setup
                 {
@@ -134,57 +135,54 @@ namespace STV
                         Pause();
                     }
                 }
-                if (Orbs.Exists(x => x.Name == "Plasma"))
+                foreach(Orb orb in hero.Orbs)
                 {
-                    foreach (Orb orb in Orbs)
-                    {
-                        if (orb.Name == "Plasma");
-                            hero.Energy += 1;
-                    }
+                    if (orb.Name == "Plasma")
+                        hero.GainEnergy(1);
                 }
-                for (int i = 0; i < Encounter.Count; i++)
+                for (int i = 0; i < encounter.Count; i++)
                 {
-                    for (int j = Encounter[i].Buffs.Count - 1; j >= 0; j--)
+                    for (int j = encounter[i].Buffs.Count - 1; j >= 0; j--)
                     {
                         bool removeBuff = false;
-                        Encounter[i].Buffs[j].DurationDecrease();
-                        if (Encounter[i].Buffs[j].DurationEnded())
+                        encounter[i].Buffs[j].DurationDecrease();
+                        if (encounter[i].Buffs[j].DurationEnded())
                         {
                             string buffDebuff = "";
-                            if (Encounter[i].Buffs[j].BuffDebuff)
+                            if (encounter[i].Buffs[j].BuffDebuff)
                                 buffDebuff = "Buff";
                             else buffDebuff = "Debuff";
-                            Console.WriteLine($"\nThe {Encounter[i].Name}'s {Encounter[i].Buffs[j].Name} {buffDebuff} has ran out.");
+                            Console.WriteLine($"\nThe {encounter[i].Name}'s {encounter[i].Buffs[j].Name} {buffDebuff} has ran out.");
                             removeBuff = true;
                         }
-                        if (Encounter[i].Buffs[j].Name == "Ritual" && turnNumber != 1)
-                            Encounter[i].AddBuff(4,Encounter[i].Buffs.Find(x => x.Name.Equals("Ritual")).Intensity.GetValueOrDefault(3)); // Adds Ritual Intensity to Strength
+                        if (encounter[i].Buffs[j].Name == "Ritual" && turnNumber != 1)
+                            encounter[i].AddBuff(4,encounter[i].Buffs.Find(x => x.Name.Equals("Ritual")).Intensity.GetValueOrDefault(3)); // Adds Ritual Intensity to Strength
                         if (removeBuff)
-                            Encounter[i].Buffs.RemoveAt(j);
+                            encounter[i].Buffs.RemoveAt(j);
                     }
                 }
                 turnNumber++;                                                                       // End Turn Setup
-                for (int i = 0; i < Encounter.Count; i++)
-                    Encounter[i].EnemyIntent(turnNumber,Encounter);
+                for (int i = 0; i < encounter.Count; i++)
+                    encounter[i].EnemyIntent(turnNumber,encounter);
                 Pause();
-                PlayerTurn(hero, Encounter, drawPile, hand, discardPile,cardRNG,exhaustPile,turnNumber);
+                PlayerTurn(hero, encounter, drawPile, hand, discardPile,cardRNG,exhaustPile,turnNumber);
                 if (hero.Orbs.Count != null || hero.Orbs.Count != 0)                                //Start Orb Time
                 {
                     Random random = new Random();
                     int focus = 0;
-                    if (Buffs.Exists(x => x.Name == "Focus"))
-                        focus = Buffs.Find(x => x.Name == "Focus").Intensity.GetValueOrDefault();
+                    if (hero.Buffs.Exists(x => x.Name == "Focus"))
+                        focus = hero.Buffs.Find(x => x.Name == "Focus").Intensity.GetValueOrDefault();
                     foreach (var orb in hero.Orbs)
                     {
-                        if (Buffs.Exists(x => x.Name == "Focus"))
-                            int focus = Buffs.Find(x => x.Name == "Focus").Intensity.GetValueOrDefault();
+                        if (hero.Buffs.Exists(x => x.Name == "Focus"))
+                            focus = hero.Buffs.Find(x => x.Name == "Focus").Intensity.GetValueOrDefault();
                         switch (orb.OrbID)
                         {
                             case 0:
-                                int target = random.Next(0, Encounter.Count);
+                                int target = random.Next(0, encounter.Count);
                                 focus += 3;
-                                hero.NonAttackDamage(Encounter[target], focus);
-                                Console.WriteLine($"The {Encounter[target].Name} took {focus} damage from the Lightning Orb!");
+                                hero.NonAttackDamage(encounter[target], focus);
+                                Console.WriteLine($"The {encounter[target].Name} took {focus} damage from the Lightning Orb!");
                                 break;
                             case 1:
                                 focus += 2;
@@ -199,7 +197,7 @@ namespace STV
                     }
                 }                                                                                     // End Orb Time
                 Console.WriteLine("Enemy's Turn!\n");
-                EnemyTurn(hero, Encounter, drawPile, discardPile, hand);
+                EnemyTurn(hero, encounter, drawPile, discardPile, hand);
             }
             Console.Clear();
             if (hero.Hp == 0)
@@ -208,11 +206,16 @@ namespace STV
             {
                 Console.WriteLine("\nVictorious, the creature is slain!\n");
                 if (hero.Relics[0].Name == "Burning Blood")
-                    hero.HealHP(6);                
+                    hero.HealHP(6);
+                if (encounter.Exists(x => x.Name == "Looter"))                                        // Taking Gold back from Looters
+                {
+                    foreach(var looter in encounter.FindAll(x => x.Name == "Looter"))
+                        hero.Gold += looter.Gold;
+                }
             }                
             Pause();
         }
-        public static void PlayerTurn(Actor hero, List<Actor> Encounter, List<Card> drawPile, List<Card> hand, List<Card> discardPile, Random rng, List<Card> exhaustPile, int turnNumber)
+        public static void PlayerTurn(Actor hero, List<Actor> encounter, List<Card> drawPile, List<Card> hand, List<Card> discardPile, Random rng, List<Card> exhaustPile, int turnNumber)
         {
             if (turnNumber == 1 && hero.Relics[0].Name == "Pure Water")
                 hand.Add(new Card(Dict.cardL[336]));
@@ -223,11 +226,11 @@ namespace STV
             else DrawCards(drawPile, hand, discardPile, rng, 5);
             hero.Energy = hero.MaxEnergy;
             int playerChoice = 0;
-            while (playerChoice != 5 && (!Encounter.All(x => x.Hp == 0)) && hero.Hp != 0)
+            while (playerChoice != 5 && (!encounter.All(x => x.Hp == 0)) && hero.Hp != 0)
             {
                 Console.Clear();
 
-                CombatMenu(hero, Encounter, drawPile, hand, discardPile,exhaustPile,turnNumber);
+                CombatMenu(hero, encounter, drawPile, hand, discardPile,exhaustPile,turnNumber);
                 while (!Int32.TryParse(Console.ReadLine(), out playerChoice) || playerChoice < 1 || playerChoice > 5)
                     Console.WriteLine("Invalid input, enter again:");
                 switch (playerChoice)
@@ -259,12 +262,16 @@ namespace STV
                                 card.EnergyCost = $"{hero.Energy}";
                             if (Int32.Parse(card.EnergyCost) > hero.Energy)
                                 Console.WriteLine($"You failed to play the card. You need {card.EnergyCost} to play {card.Name}.");
+                            else if (card.Type == "Attack" && hero.Buffs.Exists(x => x.Name == "Entangled"))
+                                Console.WriteLine($"You are Entangled and can't play an Attack!");
                             else
                             {
-                                hand.Remove(card);                            
+                                hand.Remove(card);
                                 hero.Energy -= (Int32.Parse(card.EnergyCost));
-                                card.CardAction(hero, Encounter, drawPile, discardPile, hand, exhaustPile,rng);                               
-                                HealthUnderZero(hero, Encounter);
+                                card.CardAction(hero, encounter, drawPile, discardPile, hand, exhaustPile, rng);
+                                if (card.Type == "Skill" && encounter[0].Buffs.Exists(x => x.Name == "Enrage"))             //Gremlin Nob Enrage Check
+                                    encounter[0].AddBuff(4, 2);
+                                HealthUnderZero(hero, encounter);
                             }
                             Pause();
                             break;
@@ -279,31 +286,50 @@ namespace STV
                             Console.WriteLine("Invalid input, enter again:");
                         if (usePotion == 0)
                             break;
-                        hero.Potions[usePotion-1].UsePotion(hero, Encounter, drawPile, discardPile, hand, exhaustPile, rng);
-                        HealthUnderZero(hero,Encounter);
+                        hero.Potions[usePotion-1].UsePotion(hero, encounter, drawPile, discardPile, hand, exhaustPile, rng);
+                        HealthUnderZero(hero,encounter);
                         break;
                     case 4:                                                                             // Enemy Info Menu
                         Console.Clear();
-                        for (int i = 0; i < Encounter.Count; i++)
+                        for (int i = 0; i < encounter.Count; i++)
                         {
                             Console.WriteLine("********************\n");
-                            Console.WriteLine($"Enemy {i + 1}: {Encounter[i].Name}{Tab(3)}HP:{Encounter[i].Hp}/{Encounter[i].MaxHP}{Tab(3)}Block:{Encounter[i].Block}\n");
-                            Console.WriteLine($"Intent:{Encounter[i].Intent}\n");
+                            Console.WriteLine($"Enemy {i + 1}: {encounter[i].Name}{Tab(3)}HP:{encounter[i].Hp}/{encounter[i].MaxHP}{Tab(3)}Block:{encounter[i].Block}\n");
+                            Console.WriteLine($"Intent:{encounter[i].Intent}\n");
                             Console.Write($"Buffs/Debuffs: ");
-                            if (Encounter[i].Buffs.Count == 0)
+                            if (encounter[i].Buffs.Count == 0)
                                 Console.Write("None\n");
-                            else for (int j = 0; j < Encounter[i].Buffs.Count; j++)
-                                    Console.WriteLine($"{Encounter[i].Buffs[j].Name} - {Encounter[i].Buffs[j].Description()}\n");
+                            else for (int j = 0; j < encounter[i].Buffs.Count; j++)
+                                    Console.WriteLine($"{encounter[i].Buffs[j].Name} - {encounter[i].Buffs[j].Description()}\n");
                             Console.WriteLine("\n********************");
                         }
                         Pause();
                         break;
                     case 5:
-                        HealthUnderZero(hero, Encounter);
-                        for (int i = 0; i < Encounter.Count; i++)
+                        
+                        if (hero.Buffs.Exists(x => x.Name == "Regeneration"))
+                            hero.HealHP(hero.Buffs.Find(x => x.Name == "Regeneration").Duration.GetValueOrDefault());
+                        if (hero.Buffs.Exists(x => x.Name == "Metallicize"))
+                            hero.GainBlock(hero.Buffs.Find(x => x.Name == "Metallicize").Intensity.GetValueOrDefault());
+                        if (hero.Buffs.Exists(x => x.Name == "Plated Armor"))
+                            hero.GainBlock(hero.Buffs.Find(x => x.Name == "Plated Armor").Intensity.GetValueOrDefault());
+                        if (hero.Buffs.Exists(x => x.Name == "Strength Down"))
                         {
-                            Encounter[i].Block = 0;
+                            hero.AddBuff(4, -hero.Buffs.Find(x => x.Name == "Strength Down").Intensity.Value);
+                            hero.Buffs.RemoveAll(x => x.Name == "Strength Down");
                         }
+                        if (hero.Buffs.Exists(x => x.Name == "Dexterity Down"))
+                        {
+                            hero.AddBuff(9, -hero.Buffs.Find(x => x.Name == "Dexterity Down").Intensity.Value);
+                            hero.Buffs.RemoveAll(x => x.Name == "Dexterity Down");
+                        }
+                        for (int i = 0; i < encounter.Count; i++)
+                        {
+                            encounter[i].Block = 0;
+                        }
+                        foreach (var enemy in encounter.FindAll(x => x.Buffs.Exists(y => y.Name == "Poison")))
+                            enemy.PoisonDamage();
+                        HealthUnderZero(hero, encounter);
                         Console.Clear();
                         break;
                 }
@@ -322,17 +348,19 @@ namespace STV
                 }
             }
         }
-        public static void EnemyTurn(Actor hero, List<Actor> Encounter, List<Card> drawPile, List<Card> discardPile, List<Card> hand)
+        public static void EnemyTurn(Actor hero, List<Actor> encounter, List<Card> drawPile, List<Card> discardPile, List<Card> hand)
         {
-            for (int i = 0; i < Encounter.Count; i++)
+            for (int i = 0; i < encounter.Count; i++)
             {
-                if (Encounter[i].Hp == 0)
-                    Console.WriteLine($"The {Encounter[i].Name} is dead and therefore... does nothing.");
+                if (encounter[i].Hp == 0)
+                    Console.WriteLine($"The {encounter[i].Name} is dead and therefore... does nothing.");
                 else
                 {
-                    Encounter[i].Actions.Add(Encounter[i].Intent);
-                    Encounter[i].EnemyAction(hero,drawPile, discardPile,Encounter);
-                    HealthUnderZero(hero, Encounter);                  
+                    encounter[i].Actions.Add(encounter[i].Intent);
+                    encounter[i].EnemyAction(hero,drawPile, discardPile,encounter);
+                    HealthUnderZero(hero, encounter);
+                    if (encounter[i].Buffs.Exists(x => x.Name == "Metallicize"))
+                        encounter[i].GainBlock(hero.Buffs.Find(x => x.Name == "Metallicize").Intensity.GetValueOrDefault());
                 }
             }
 
@@ -340,10 +368,18 @@ namespace STV
         }
 
         // HEALTH CHECK
-        public static void HealthUnderZero(Actor hero, List<Actor> Encounter)                                      
+        public static void HealthUnderZero(Actor hero, List<Actor> encounter)                                      
         {
-            for (int i = 0; i < Encounter.Count; i++)
-                if (Encounter[i].Hp <= 0) Encounter[i].Hp = 0;
+            for (int i = 0; i < encounter.Count; i++)
+            {
+                if (encounter[i].Hp <= 0) 
+                    encounter[i].Hp = 0;
+                if (encounter[i].Buffs.Exists(x => x.Name == "Spore Cloud") && encounter[i].Hp == 0)
+                {
+                    hero.AddBuff(1, 2);
+                    encounter[i].Buffs.RemoveAll(x => x.Name == "Spore Cloud");
+                }                  
+            }
             if (hero.Hp <= 0) hero.Hp = 0;
         }
 
@@ -409,6 +445,19 @@ namespace STV
                 Console.WriteLine("Invalid input, enter again:");
             return list[cardChoice-1];
         }
+        //BUFF METHODS
+        public static void DivinityCheck(Actor hero, List<Card>discardPile,List<Card> hand)
+        {
+            if (!hero.Buffs.Exists(x => x.Name == "Mantra"))
+                return;
+            if (hero.Buffs.Find(x => x.Name == "Mantra").Counter > 10)
+            {
+                hero.Buffs.Find(x => x.Name == "Mantra").CounterSet(-10);
+                hero.Buffs.Find(x => x.Name == "Mantra").IntensitySet(10);
+                hero.SwitchStance("Divinity", discardPile, hand);
+            }
+        }
+
         //MENU AND UI METHODS
         public static void CombatMenu(Actor hero, List<Actor> Encounter, List<Card> drawPile, List<Card> hand, List<Card> discardPile, List<Card> exhaustPile, int turnNumber)
         {
@@ -544,7 +593,6 @@ namespace STV
                 case "Watcher":
                     Deck.Add(new Card(Dict.cardL[241]));
                     Deck.Add(new Card(Dict.cardL[285]));
-                    Deck.Add(new Card(Dict.cardL[262]));
                     break;
             }
             Deck.Sort(delegate (Card x, Card y)
@@ -561,16 +609,16 @@ namespace STV
         {
             Random enemyRNG = new Random();
             List<Actor> list = new();
-            int encounterChoice = 4;// enemyRNG.Next(0, 4);
+            int encounterChoice = enemyRNG.Next(0, 4);
             switch (encounterChoice)
             {
-                case 0:
+                case 0:                                                     // Jaw Worm
                     list.Add(new Actor(Dict.enemyL[0]));
                     break;
-                case 1:
+                case 1:                                                     // Cultist
                     list.Add(new Actor(Dict.enemyL[1]));
                     break;
-                case 2:
+                case 2:                                                     // Two Louses
                     for (int i = 0; i < 2; i++)
                     { 
                         if (enemyRNG.Next(0,2) == 0)
@@ -578,7 +626,7 @@ namespace STV
                         else list.Add(new Actor(Dict.enemyL[7]));
                     }                   
                     break;
-                case 3:
+                case 3:                                                     // 1 Small Slime and 1 Med Slime
                     int slimeSwitch = enemyRNG.Next(0, 2);
                     switch (slimeSwitch)
                     {
@@ -594,12 +642,111 @@ namespace STV
                             break;
                     }
                     break;
-                case 4:
+                case 4:                                                     // Looter
                     list.Add(new Actor(Dict.enemyL[11]));
+                    break;
+                case 5:                                                     //Lots of Slimes
+                    for (int i = 0;i < 5;i++)
+                    {
+                        if (i < 3)
+                            list.Add(new Actor(Dict.enemyL[6]));
+                        else list.Add(new Actor(Dict.enemyL[5]));
+                    }
+                    break;
+                case 6:                                                     // Large Slime
+                    if (enemyRNG.Next(0, 2) == 0)
+                        list.Add(new Actor(Dict.enemyL[20]));
+                    else list.Add(new Actor(Dict.enemyL[21]));
+                    break;
+                case 7:                                                     // 2 Fungi Beasts
+                    list.Add(new Actor(Dict.enemyL[10]));
+                    list.Add(new Actor(Dict.enemyL[10]));
+                    break;
+                case 8:                                                     // 3 Louses
+                    for (int i = 0; i < 3; i++)
+                    {
+                        if (enemyRNG.Next(0, 2) == 0)
+                            list.Add(new Actor(Dict.enemyL[2]));
+                        else list.Add(new Actor(Dict.enemyL[7]));
+                    }
+                    break;
+                case 9:                                                     // Blue Slaver
+                    list.Add(new Actor(Dict.enemyL[8]));
+                    break;
+                case 10:                                                    // Red Slaver
+                    list.Add(new Actor(Dict.enemyL[9]));
+                    break;
+                case 11:                                                    // Gremlin Gang
+                    List<int> gangBlock = new();
+                    gangBlock.Add(8);
+                    for (int i = 0; i < 4; i++)
+                    {
+                        int gremlin = 8;
+                        while(gangBlock.Contains(gremlin))
+                        {
+                            gremlin = enemyRNG.Next(0, 8) switch
+                            {
+                                int j when j >= 0 && j <= 1 => 12,
+                                int j when j >= 2 && j <= 3 => 13,
+                                int j when j >= 4 && j <= 4 => 14,
+                                int j when j >= 5 && j <= 6 => 15,
+                                int j when j >= 7 && j <= 7 => 16,
+                            };
+                        }                                               
+                        list.Add(new Actor(Dict.enemyL[gremlin]));
+                        gangBlock.Add(gremlin);
+                    }
+                    break;
+                case 12:                                                    // Exordium Thugs
+                    int thugs = enemyRNG.Next(0, 4) switch
+                    {
+                        int j when j == 0 => 2,
+                        int j when j == 1 => 7,
+                        int j when j == 2 => 3,
+                        int j when j == 3 => 4,
+                    };
+                    list.Add(new Actor(Dict.enemyL[thugs]));
+                    thugs = enemyRNG.Next(0, 4) switch
+                    {
+                        int j when j == 0 => 1,
+                        int j when j == 1 => 8,
+                        int j when j == 2 => 9,
+                        int j when j == 3 => 11,
+                    };
+                    list.Add(new Actor(Dict.enemyL[thugs]));
+                    break;
+                case 13:                                                    // Exordium Wildlife
+                    int wildlife = enemyRNG.Next(0, 4) switch
+                    {
+                        int j when j == 0 => 2,
+                        int j when j == 1 => 7,
+                        int j when j == 2 => 3,
+                        int j when j == 3 => 4,
+                    };
+                    list.Add(new Actor(Dict.enemyL[wildlife]));
+                    wildlife = enemyRNG.Next(0, 4) switch
+                    {
+                        int j when j == 0 => 1,
+                        int j when j == 1 => 8,
+                        int j when j == 2 => 9,
+                        int j when j == 3 => 11,
+                    };
+                    list.Add(new Actor(Dict.enemyL[wildlife]));
+                    break;
+                case 14:                                                    // Elite
+                    int elite = enemyRNG.Next(17, 20);
+                    if (elite == 19)
+                        for (int i = 0; i < 3; i++)
+                            list.Add(new Actor(Dict.enemyL[elite]));
+                    else list.Add(new Actor(Dict.enemyL[elite]));
+                    break;
+                case 15:                                                    // Boss
+                    int boss = enemyRNG.Next(22, 25);
+                    list.Add(new Actor(Dict.enemyL[boss]));
                     break;
                 default: break;
             }
-            for (int i = 0; i < list.Count; i++)
+            for (int i = 0; i < list.Count; i++)                            //Enemy Init
             {
                 list[i].MaxHP = list[i].EnemyHealthSet(list[i].BottomHP, list[i].TopHP);
                 list[i].Hp = list[i].MaxHP;
@@ -612,10 +759,31 @@ namespace STV
                         Random random = new Random();
                         list[i].AddBuff(5,random.Next(3, 8));
                         break;
+                    case 10:
+                        list[i].AddBuff(28, 2);
+                        break;
                     case 11:
                         list[i].AddBuff(18, 15);
                         break;
-
+                    case 18:
+                        list[i].AddBuff(15, 3);
+                        list[i].AddBuff(23, 8);
+                        break;
+                    case 19:
+                        list[i].AddBuff(8, 1);
+                        break;
+                    case 20:
+                        list[i].AddBuff(28, 0);
+                        break;
+                    case 21:
+                        list[i].AddBuff(28, 0);
+                        break;
+                    case 22:
+                        list[i].AddBuff(28, 0);
+                        break;
+                    case 23:
+                        list[i].AddBuff(16, 30);
+                        break;
                 }
             }
             return list;

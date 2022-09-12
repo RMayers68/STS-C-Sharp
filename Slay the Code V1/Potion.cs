@@ -29,7 +29,7 @@ namespace STV
         {
             return $"{Name} - {Description}";
         }
-        public void UsePotion(Actor hero,List<Actor> encounter,List<Card> drawPile, List<Card> discardPile, List<Card> hand, List<Card> exhaustPile, Random rng)                              // potion methods (correlating to PotionID
+        public void UsePotion(Actor hero,List<Actor> encounter,List<Card> drawPile, List<Card> discardPile, List<Card> hand, List<Card> exhaustPile, Random rng)
         {
             int target = 0;
             switch (Name)
@@ -44,7 +44,7 @@ namespace STV
                     hero.GainBlock(12);
                     break;
                 case "Blood Potion":
-                    hero.HealHP(hero.MaxHP * 0.2);
+                    hero.HealHP(Convert.ToInt32(hero.MaxHP * 0.2));
                     break;
                 case "Bottled Miracle":
                     for (int i = 0; i < 2; i++ )
@@ -100,7 +100,7 @@ namespace STV
                         hero.NonAttackDamage(encounter[i], 10);
                     break;
                 case "Fairy in a Bottle":
-                    hero.HealHP(hero.MaxHP * 0.3);
+                    hero.HealHP(Convert.ToInt32(hero.MaxHP * 0.3));
                     break;
                 case "Flex Potion":
                     hero.AddBuff(4, 5);
@@ -117,7 +117,7 @@ namespace STV
                     hero.AddBuff(23, 6);
                     break;
                 case "Liquid Bronze":
-                    hero.AddBuff(24, 3);
+                    hero.AddBuff(17, 3);
                     break;
                 case "Posion Potion":
                     target = hero.DetermineTarget(encounter);
@@ -134,7 +134,9 @@ namespace STV
                     hero.AddBuff(27, 5);
                     break;
                 case "Stance Potion":
-                    List<Card> stances = (Dict.cardL[364], Dict.cardL[365]);
+                    List<Card> stances = new();
+                    stances.Add(Dict.cardL[364]);
+                    stances.Add(Dict.cardL[365]);
                     string stancePick = STS.ChooseCard(stances).Name;
                     hero.SwitchStance(stancePick, discardPile, hand);
                     break;
