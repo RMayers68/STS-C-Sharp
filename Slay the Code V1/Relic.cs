@@ -2,7 +2,7 @@
 {
     public class Relic
     {
-        public int RelicID { get; set; }
+        private int RelicID { get; set; }
         public string Name { get; set; }
         public string Type { get; set; }
         public string Description { get; set; }

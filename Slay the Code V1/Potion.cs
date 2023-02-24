@@ -3,16 +3,18 @@
     public class Potion
     {
         //attributes
-        public int PotionID { get; set; }
+        private int PotionID { get; set; }
         public string Name { get; set; }
         public string Description { get; set; }
+        public string Rarity { get; set; }
 
         //constructors
-        public Potion(int potionID, string name, string description)
+        public Potion(int potionID, string name, string description, string rarity)
         {
             this.PotionID = potionID;
             this.Name = name;
             this.Description = description;
+            this.Rarity = rarity;
         }
 
         public Potion(Potion potion)
@@ -20,6 +22,7 @@
             this.PotionID = potion.PotionID;
             this.Name = potion.Name;
             this.Description = potion.Description;
+            this.Rarity = potion.Rarity;
         }
         //string method
         public override string ToString()
@@ -39,27 +42,27 @@
                     hero.GainEnergy(2);
                     break;
                 case "Strength Potion":
-                    hero.IntensityBuff(4,2);
+                    hero.AddBuff(4,2);
                     break;
                 case "Block Potion":
                     hero.GainBlock(12);
                     break;
                 case "Fear Potion":
                     target = hero.DetermineTarget(encounter);
-                    hero.DurationDebuff(encounter[target],1, 3);
+                    encounter[target].AddBuff(1, 3);
                     break;
                 case "Swift Potion":
                     STS.DrawCards(drawPile, hand, discardPile, rng, 3);
                     break;
                 case "Weak Potion":
                     target = hero.DetermineTarget(encounter);
-                    hero.DurationDebuff(encounter[target],2, 3);
+                    encounter[target].AddBuff(2, 3);
                     break;
                 case "Focus Potion":
-                    hero.IntensityBuff(7, 2);
+                    hero.AddBuff(7, 2);
                     break;
                 case "Cultist Potion":
-                    hero.IntensityBuff(3, 1);
+                    hero.AddBuff(3, 1);
                     break;
 
             }

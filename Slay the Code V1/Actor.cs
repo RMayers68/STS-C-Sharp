@@ -16,6 +16,7 @@
 		public string? Stance { get; set; }
 		public int EnemyID { get; set; } // ID correlates to method ran (Name without spaces)
 		public string? Intent { get; set; }
+		public List<string> Actions { get; set; }
 		public List<Buff> Buffs { get; set; }
 		public List<Relic> Relics { get; set; }
 		public List<Orb> Orbs { get; set; } 
@@ -34,7 +35,8 @@
 			this.BottomHP = bottomHP;
 			this.Block = 0;
 			this.Intent = intent;
-			this.Buffs = new();				
+			this.Buffs = new();		
+			this.Actions = new();
 		}
 		public Actor(string name, int maxHP)
 		{
@@ -49,6 +51,7 @@
 			this.Relics = new();
 			this.Potions = new();
 			this.Orbs = new();
+			this.Actions = new();
 			this.OrbSlots = 1;
 			this.Gold = 99;
 		}
@@ -67,6 +70,7 @@
 				this.Block = 0;
 				this.Intent = actor.Intent;
 				this.Buffs = new();
+				this.Actions = new();
 			}
 			else
             {
@@ -83,37 +87,66 @@
 				this.Orbs = new();
 				this.OrbSlots = 1;
 				this.Gold = 99;
+				this.Actions = new();
 			}
 
 		}
 
 		// Inclusive methods
-		public void GainBlock(int block)
+		public void CardBlock(int block)
 		{
-			if (Buffs.Contains(Buffs.Find(x => x.Name.Equals("Frail"))))
+			if (Buffs.Contains(Buffs.Find(x => x.getBuffID() == 13)))
+				return;
+			GainBlock(block);
+		}
+		public void GainBlock(int block)
+        {
+			if (Hp <= 0) return;
+			if (Buffs.Contains(Buffs.Find(x =>x.Name == "Dexterity")))
+				block += Buffs.Find(x =>x.Name == "Dexterity").Intensity.GetValueOrDefault();
+			if (Buffs.Contains(Buffs.Find(x => x.Name == "Frail")))
 				block = Convert.ToInt32(block * 0.75);
 			Block += block;
-			Console.WriteLine($"The {Name} gained {block} Block.");	
+			Console.WriteLine($"The {Name} gained {block} Block.");
 		}
-		public void AddBuff(int ID)
+		public void AddBuff(int ID,int effect)
         {
-			if (!Buffs.Contains(Buffs.Find(x => x.BuffID.Equals(ID))))
+			if ((!Dict.buffL[ID].BuffDebuff || effect < 0) && Buffs.Contains(Buffs.Find(x => x.getBuffID().Equals(8))))
+            {
+				Buffs.Find(x => x.getBuffID().Equals(8)).Counter--;
+				return;
+			}				
+			if (!Buffs.Contains(Buffs.Find(x => x.getBuffID().Equals(ID))))
 				Buffs.Add(new Buff(Dict.buffL[ID]));
+			byte b = Dict.buffL[ID].Type switch
+			{
+				byte i when i >= 0 && i <= 1 => 1,
+				byte i when i >= 2 && i <= 4 => 2,
+				byte i when i >= 5 && i <= 5 => 3,
+			};
+			switch (b)
+            {
+				case 1:
+					Buffs.Find(y => y.getBuffID().Equals(ID)).DurationSet(effect);
+					Console.WriteLine($"{Name} is now {Dict.buffL[ID].Name} for {effect} turns!");
+					break;
+				case 2:
+					Buffs.Find(y => y.getBuffID().Equals(ID)).IntensitySet(effect);
+					Console.WriteLine($"{Name} gained {effect} {Dict.buffL[ID].Name}!");
+					break;
+				case 3:
+					Buffs.Find(y => y.getBuffID().Equals(ID)).CounterSet(effect);
+					Console.WriteLine($"{Name}'s {Dict.buffL[ID].Name} is now at {effect}!");
+					break;
+				default:
+					return;
+			}
 		}
-		public void IntensityBuff(int ID, int intensity)
-		{
-			AddBuff(ID);
-			Buffs.Find(y => y.BuffID.Equals(ID)).IntensitySet(intensity);
-			Console.WriteLine($"{Name} gained {intensity} {Dict.buffL[ID].Name}!");
-		}
-		public void DurationDebuff(Actor target,int ID, int duration)
-        {
-			target.AddBuff(ID);
-			target.Buffs.Find(y => y.BuffID.Equals(ID)).setDuration(duration);
-			Console.WriteLine($"{Name} applied {duration} {Dict.buffL[ID].Name} to the {target.Name}!");
-		}
+
+		//HP Altering Methods
 		public void SingleAttack(Actor target,int damage)
 		{
+			if(Hp <= 0) return;
 			if (Buffs.Contains(Buffs.Find(x => x.Name.Equals("Strength"))))
 				damage += Buffs.Find(x => x.Name.Equals("Strength")).Intensity.GetValueOrDefault(0);
 			if(Stance == "Wrath" || target.Stance == "Wrath")
@@ -132,8 +165,7 @@
 				}
 			}
 			else
-				target.Hp -= damage;
-		    
+				target.Hp -= damage;		    
 			Console.WriteLine($"{Name} attacked for {damage} damage!");
 			if (target.EnemyID == 2 && target.Buffs.Contains(target.Buffs.Find(x => x.Name.Equals("Curl Up"))))      // Louse Curl Up Effect
 			{
@@ -142,8 +174,46 @@
 				target.Buffs.RemoveAt(0);
 			}
 		}
+		public void AttackAll( List<Actor> encounter, int damage)
+        {
+			{
+				if (Hp <= 0) return;
+				foreach (var target in encounter)
+                {
+					if (Buffs.Contains(Buffs.Find(x => x.Name.Equals("Strength"))))
+						damage += Buffs.Find(x => x.Name.Equals("Strength")).Intensity.GetValueOrDefault(0);
+					if (Stance == "Wrath" || target.Stance == "Wrath")
+						damage = damage * 2;
+					if (Buffs.Contains(Buffs.Find(x => x.Name.Equals("Weak"))))
+						damage = Convert.ToInt32(damage * 0.75);
+					if (target.Buffs.Contains(target.Buffs.Find(x => x.Name.Equals("Vulnerable"))))
+						damage = Convert.ToInt32(damage * 1.5);
+					if (target.Block > 0)
+					{
+						target.Block -= damage;
+						if (target.Block < 0)
+						{
+							target.Hp -= Math.Abs(target.Block);
+							target.Block = 0;
+						}
+					}
+					else
+						target.Hp -= damage;
+
+					Console.WriteLine($"{Name} attacked all enemies for {damage} damage!");
+					if (target.EnemyID == 2 && target.Buffs.Contains(target.Buffs.Find(x => x.Name.Equals("Curl Up"))))      // Louse Curl Up Effect
+					{
+						Console.WriteLine($"The Louse has curled up and gained {target.Buffs[0].Intensity} Block!");
+						target.Block += target.Buffs[0].Intensity.GetValueOrDefault();
+						target.Buffs.RemoveAt(0);
+					}
+				}
+				
+			}
+		}
 		public void NonAttackDamage(Actor target, int damage)
         {
+			if (Hp <= 0) return;
 			if (target.Block > 0)
 			{
 				target.Block -= damage;
@@ -156,118 +226,457 @@
 			else
 				target.Hp -= damage;
 		}
-		public void StatusCardAdd(List<Card> drawPile, List<Card> discardPile, int cardNumber, bool inDraw)
-		{
-			switch (inDraw)
-			{
-				case true:
-					drawPile.Add(new Card(Dict.cardL[cardNumber]));
-					Console.WriteLine($"A {Dict.cardL[cardNumber].Name} has been added to your draw pile!");
-					break;
-				case false:
-					discardPile.Add(new Card(Dict.cardL[cardNumber]));
-					Console.WriteLine($"A {Dict.cardL[cardNumber].Name} has been added to your discard pile!");
-					break;
-			}
+		public void SelfDamage(int damage)
+        {
+			if (Hp <= 0) return;
+			this.Hp -= damage;
+			Console.WriteLine($"{Name} hurt themselves for {damage} damage!");
+        }
+		public void HealHP(int heal)
+        {
+			Hp += heal;
+			Console.WriteLine($"You have healed {heal} HP and are now at {Hp}/{MaxHP}!");
 		}
+
 		// Enemy Exclusive methods
-		public void EnemyIntent(Actor enemy, int turnNumber)
+		public void EnemyIntent(int turnNumber, List<Actor> encounter)
 		{
 			Random enemyrng = new();
 			switch (EnemyID)
 			{
-				case 0:	// Jaw Worm
+				default:															// Any enemy who only uses one Intent
+					break;
+				case 0:																// Jaw Worm
 					if (turnNumber == 1)
 						break;
-					enemy.Intent = enemyrng.Next(0, 20) switch
+					Intent = enemyrng.Next(0, 20) switch
 					{
 						int i when i >= 0 && i <= 4 => "Chomp",
 						int i when i >= 5 && i <= 10 => "Thrash",
 						int i when i >= 11 && i <= 19 => "Bellow",
 					};
+					Repeat3Prevent("Chomp", "Bellow", "Thrash");
 					break;
-				case 1:	// Cultist
+				case 1:																// Cultist
 					if (turnNumber == 1)
 						break;
-					else enemy.Intent = "Dark Strike";
+					else Intent = "Dark Strike";
 					break;
-				case 2:	// Louse
-					enemy.Intent = enemyrng.Next(0, 20) switch
+				case 2:																// Red Louse
+					Intent = enemyrng.Next(0, 20) switch
 					{
 						int i when i >= 0 && i <= 4 => "Grow",
 						int i when i >= 5 && i <= 19 => "Bite",
 					};
+					Repeat3Prevent("Bite", "Grow");
 					break;
-				case 3: // Med Acid Slime
-					enemy.Intent = enemyrng.Next(0, 20) switch
+				case 3:																// Med Acid Slime
+					Intent = enemyrng.Next(0, 20) switch
 					{
 						int i when i >= 0 && i <= 7 => "Corrosive Spit",
 						int i when i >= 8 && i <= 15 => "Tackle",
 						int i when i >= 16 && i <= 19 => "Lick",
 					};
+					Repeat3Prevent("Corrosive Spit", "Tackle", "Lick");
 					break;
-				case 4: // Med Spike Slime
-					enemy.Intent = enemyrng.Next(0, 20) switch
+				case 4:																// Med Spike Slime
+					Intent = enemyrng.Next(0, 20) switch
 					{
 						int i when i >= 0 && i <= 5 => "Flame Tackle",
 						int i when i >= 6 && i <= 19 => "Lick",
 					};
+					Repeat3Prevent("Flame Tackle", "Lick");
 					break;
-				case 5: // Small Acid Slime
+				case 5:																// Small Acid Slime
 
-					enemy.Intent = enemyrng.Next(0, 20) switch
+					Intent = enemyrng.Next(0, 20) switch
 					{
 						int i when i >= 0 && i <= 9 => "Tackle",
 						int i when i >= 10 && i <= 19 => "Lick",
 					};
+					Repeat3Prevent("Tackle", "Lick");
 					break;
-				case 6: // Small Spike Slime
+				case 7:																// Green Louse
+					Intent = enemyrng.Next(0, 20) switch
+					{
+						int i when i >= 0 && i <= 4 => "Web Spit",
+						int i when i >= 5 && i <= 19 => "Bite",
+					};
+					Repeat3Prevent("Bite", "Web Spit");
 					break;
-
+				case 8:																//Blue Slaver
+					Intent = enemyrng.Next(0, 20) switch
+					{
+						int i when i >= 0 && i <= 7 => "Rake",
+						int i when i >= 8 && i <= 19 => "Stab",
+					};
+					Repeat3Prevent("Stab", "Rake");
+					break;
+				case 9:																//Red Slaver
+					if (turnNumber == 1)
+						break;
+					if (!Actions.Contains("Entangle"))
+						Intent = enemyrng.Next(0, 20) switch
+						{
+							int i when i >= 0 && i <= 4 => "Entangle",
+							int i when i >= 5 && i <= 19 => "Determine",
+						};
+					else Intent = enemyrng.Next(0, 20) switch
+					{
+						int i when i >= 0 && i <= 10 => "Scrape",
+						int i when i >= 11 && i <= 19 => "Stab",
+					};
+					if (Intent == "Determine")
+                    {
+						if (Actions != null && Actions.Count % 3 == 0)
+							Intent = "Stab";
+						else Intent = "Scrape";
+                    }
+					if (Actions != null && Actions.Count >= 2)
+						Repeat3Prevent("Stab", "Scrape");
+					break;
+				case 10:															//Fungi Beast
+					Intent = enemyrng.Next(0, 20) switch
+					{
+						int i when i >= 0 && i <= 7 => "Grow",
+						int i when i >= 8 && i <= 19 => "Bite",
+					};
+					Repeat3Prevent("Bite", "Grow");
+					break;
+				case 11:															//Looters
+					if (turnNumber == 1 || turnNumber == 2)
+						break;
+					else if (turnNumber == 3)
+						Intent = enemyrng.Next(0, 20) switch
+						{
+							int i when i >= 0 && i <= 7 => "Lunge",
+							int i when i >= 8 && i <= 19 => "Smoke Bomb",
+						};
+					if (Actions != null && Actions.Count >= 3)
+						if (Actions[Actions.Count - 1] == "Lunge")
+							Intent = "Smoke Bomb";
+						else Intent = "Escape";
+					break;
+				case 14:															//Gremlin Wizard
+					if (Actions != null && Actions.Count % 3 == 0)
+						Intent = "Ultimate Blast";
+					else Intent = "Charging";
+					break;
+				case 16:															//Shield Gremlin
+					bool targetExists = false;
+					for (int i = 0; i < encounter.Count; i++)
+						if (encounter[i].Hp != 0 && encounter[i] != this)
+							targetExists = true;
+					if (targetExists)
+						Intent = "Protect";
+					else Intent = "Shield Bash";
+					break;
+				case 17:															//Gremlin Nob
+					if (turnNumber == 1)
+						break;
+					Intent = enemyrng.Next(0, 21) switch
+					{
+						int i when i >= 0 && i <= 6 => "Skull Bash",
+						int i when i >= 7 && i <= 20 => "Rush",
+					};
+					Repeat3Prevent("Skull Bash", "Rush");
+					break;
+				case 18:															// Lagavulin
+					if (Buffs.Contains(Buffs.Find(x => x.Name == "Asleep")))
+						break;
+					else if (Actions.Count >= 3 && Actions[Actions.Count - 1] == "Attack" && Actions[Actions.Count - 2] == "Attack")
+						Intent = "Siphon Soul";
+					else Intent = "Attack";
+					break;
+				case 19:															// Sentry
+					if (turnNumber == 1 && encounter.Count == 3)
+                    {
+						encounter[1].Intent = "Beam";
+						break;
+					}
+					if (Intent == "Bolt")
+						Intent = "Beam";
+					else Intent = "Bolt";
+					break;
+				case 20:															// Slime Boss
+					Intent = (Actions.Count % 3) switch
+					{
+						int i when i == 0 => "Goop Spray",
+						int i when i == 1 => "Charging",
+						int i when i == 3 => "Slam",
+					};
+					break;
+				case 21:															// Large Acid Slime
+					Intent = enemyrng.Next(0, 20) switch
+					{
+						int i when i >= 0 && i <= 7 => "Corrosive Spit",
+						int i when i >= 8 && i <= 15 => "Tackle",
+						int i when i >= 16 && i <= 19 => "Lick",
+					};
+					Repeat3Prevent("Corrosive Spit", "Tackle", "Lick");
+					break;
+				case 22:															// Large Spike Slime
+					Intent = enemyrng.Next(0, 20) switch
+					{
+						int i when i >= 0 && i <= 5 => "Flame Tackle",
+						int i when i >= 6 && i <= 19 => "Lick",
+					};
+					Repeat3Prevent("Flame Tackle", "Lick");
+					break;
+				case 23:															// The Guardian
+					if (Buffs.Contains(Buffs.Find(x => x.Name == "Mode Shift")))
+                    {
+						Intent = (Actions.Count % 4) switch
+						{
+							int i when i == 0  => "Charging Up",
+							int i when i == 1 => "Fierce Bash",
+							int i when i == 2 => "Vent Steam",
+							int i when i == 3 => "Whirlwind",
+						};
+					}					
+					else if (Actions != null)
+					{
+						if (Actions[Actions.Count - 1] == "Roll Attack")
+							Intent = "Twin Slam";
+						else if (Actions[Actions.Count - 1] == "Defensive Mode")
+							Intent = "Roll Attack";
+					}
+					else Intent = "Defensive Mode";
+					break;
+				case 24:															// Hexaghost
+					if (turnNumber == 1)
+						break;
+					if (turnNumber == 2)
+                    {
+						Intent = "Divider";
+						break;
+					}
+					Intent = ((Actions.Count - 2) % 7) switch
+					{
+						int i when i == 0 || i == 2 || i == 5 => "Sear",
+						int i when i == 1 || i == 4 => "Slice",
+						int i when i == 3 => "Inflame",
+						int i when i ==6 => "Inferno",
+					};
+					break;
 			}
 		}
 
-		public void EnemyAction(Actor hero, Actor enemy, List<Card> drawPile, List<Card> discardPile)
+
+		public void Repeat3Prevent(string one, string two)
+        {
+			if (Actions != null && Actions.Count >= 2)
+				while (Actions[Actions.Count - 1] == Actions[Actions.Count - 2] && Intent == Actions[Actions.Count - 1])
+				{
+					if (Intent == one)
+						Intent = two;
+					else Intent = one;
+				}
+		}
+		public void Repeat3Prevent(string one, string two,string three)
 		{
-			switch (enemy.Intent)
+			if (Actions != null && Actions.Count >= 2)
+				while (Actions[Actions.Count - 1] == Actions[Actions.Count - 2] && Intent == Actions[Actions.Count - 1])
+				{
+					if (Intent == one)
+						Intent = two;
+					else if (Intent == two)
+						Intent = three;
+					else Intent = one;
+				}
+		}
+		public void EnemyAction(Actor hero,List<Card> drawPile, List<Card> discardPile, List<Actor> encounter)
+		{
+			int damage = 0;
+			int target = 0;
+			Random rng = new Random();
+			switch (Intent)
 			{
+				case "Attack":
+					SingleAttack(hero, 18);
+					break;
+				case "Beam":
+					SingleAttack(hero, 9);
+					break;
 				case "Bellow":
-					IntensityBuff(4,3);
-					GainBlock(6);
+					if (EnemyID == 17)
+						AddBuff(19, 2);
+					else
+                    {
+						AddBuff(4, 3);
+						GainBlock(6);
+					}				
 					break;
 				case "Bite":
-					SingleAttack(hero,enemy.MaxHP / 2);
+					if (EnemyID == 10)
+						SingleAttack(hero, MaxHP / 2); 
+					else SingleAttack(hero, 6);
+					break;
+				case "Bolt":
+					for (int i = 0; i < 2; i++)
+						discardPile.Add(new Card(Dict.cardL[356]));
+					Console.WriteLine($"{Name} has added 2 Dazed cards to your deck!");
+					break;
+				case "Charging":
+					Console.WriteLine($"{Name} is charging up!");
+					break;
+				case "Charging Up":
+					GainBlock(9);
 					break;
 				case "Chomp":
 					SingleAttack(hero, 11);
 					break;
 				case "Corrosive Spit":
 					SingleAttack(hero, 7);
-					StatusCardAdd(drawPile, discardPile, 358, false);
+					discardPile.Add(Dict.cardL[358]);
+					if (EnemyID == 21)
+						discardPile.Add(Dict.cardL[358]);
 					break;
 				case "Dark Strike":
 					SingleAttack(hero, 6);
 					break;
+				case "Defensive Mode":
+					AddBuff(16, 3);
+					break;
+				case "Divider":
+					damage = hero.Hp / 12 + 1;
+					for (int i = 0; i < 6; i++)
+					SingleAttack(hero, damage);
+					break;
+				case "Entangle":
+					hero.AddBuff(14, 2);
+					break;
+				case "Escape":
+					encounter.Remove(this);
+					Console.WriteLine($"The {Name} has escaped!");
+					STS.Pause();
+					break;
+				case "Fierce Bash":
+					SingleAttack(hero, 32);
+					break;
 				case "Flame Tackle":
-					SingleAttack(hero, 8);
-					StatusCardAdd(drawPile, discardPile, 358, false);
+					if (EnemyID == 22)
+						damage = 16;
+					else damage = 8;
+					SingleAttack(hero, damage);
+					discardPile.Add(Dict.cardL[358]);
+					if (EnemyID == 22)
+						discardPile.Add(Dict.cardL[358]);
+					break;
+				case "Goop Spray":
+					for (int i = 0; i < 3; i++)
+						discardPile.Add(new Card(Dict.cardL[358]));
+					Console.WriteLine($"{Name} has added 3 Slimed cards into your Deck! Ewww!");
 					break;
 				case "Grow":
-					IntensityBuff(4, 3);
+					AddBuff(4, 3);
 					break;
 				case "Incantation":
-					IntensityBuff(3, 3);
+					AddBuff(3, 3);
+					break;
+				case "Inferno":
+					for (int i = 0; i < 6; i++)
+                    {
+						SingleAttack(hero, 2);
+						if (i % 2 == 0)
+							discardPile.Add(new Card(Dict.cardL[355]));
+					}
+					Console.WriteLine($"{Name} has added 3 Burns to your Deck!");
+					break;
+				case "Inflame":
+					AddBuff(4, 2);
+					GainBlock(12);
 					break;
 				case "Lick":
-					int lick = 0;
-					if (enemy.EnemyID == 3 || enemy.EnemyID == 5)
-						lick = 2;
-					else lick = 6;
-					DurationDebuff(hero,lick, 1);
+					int li = 0;
+					int ck = 2;
+					if (EnemyID == 3 || EnemyID == 5 || EnemyID == 21)
+						li = 2;
+					else li = 6;
+					if (EnemyID == 21 || EnemyID == 22)
+						ck++;
+					hero.AddBuff(li,ck);
+					break;
+				case "Lunge":
+					SingleAttack(hero, 12);
+					hero.Gold -= Buffs.Find(x => x.Name == "Thievery").Intensity.GetValueOrDefault(15);
+					Gold += Buffs.Find(x => x.Name == "Thievery").Intensity.GetValueOrDefault(15);
+					Console.WriteLine($"The {Name} stole 15 Gold!");
+					break;
+				case "Mug":
+					SingleAttack(hero, 10);
+					hero.Gold -= Buffs.Find(x => x.Name == "Thievery").Intensity.GetValueOrDefault(15);
+					Gold += Buffs.Find(x => x.Name == "Thievery").Intensity.GetValueOrDefault(15);
+					Console.WriteLine($"The {Name} stole 15 Gold!");
+					break;
+				case "Protect":
+					while (target != encounter.FindIndex(x => x == this))
+						target = rng.Next(0, encounter.Count);
+					encounter[target].GainBlock(7);
+					break;
+				case "Puncture":
+					SingleAttack(hero, 9);
+					break;
+				case "Rake":
+					SingleAttack(hero, 7);
+					hero.AddBuff(2, 2);
+					break;
+				case "Roll Attack":
+					SingleAttack(hero, 9);
+					break;
+				case "Rush":
+					SingleAttack(hero, 14);
+					break;
+				case "Scrape":
+					SingleAttack(hero, 8);
+					hero.AddBuff(1, 2);
+					break;
+				case "Scratch":
+					SingleAttack(hero, 4);
+					break;
+				case "Shield Bash":
+					SingleAttack(hero, 6);
+					break;
+				case "Sear":
+					SingleAttack(hero, 6);
+					discardPile.Add(new Card(Dict.cardL[355]));
+					Console.WriteLine($"{Name} has added a Burn to your Deck!");
+					break;
+				case "Siphon Soul":
+					hero.AddBuff(9, -1);
+					hero.AddBuff(4, -1);
+					break;
+				case "Skull Bash":
+					SingleAttack(hero, 6);
+					hero.AddBuff(1, 3);
+					break;
+				case "Slam":
+					SingleAttack(hero, 35);
+					break;
+				case "Sleeping":
+					Console.WriteLine($"{Name} is sleeping, be cautious on waking it...");
+					break;
+				case "Smash":
+					SingleAttack(hero, 4);
+					hero.AddBuff(2, 2);
+					break;
+				case "Smoke Bomb":
+					GainBlock(6);
+					break;
+				case "Stab":
+					switch(EnemyID)
+                    {
+						case 8:
+							damage = 10;
+							break;
+						case 9:
+							damage = 13;
+							break;
+                    }
+					SingleAttack(hero, damage);
 					break;
 				case "Tackle":
-					int damage = 0;
-					switch (enemy.EnemyID)
+					switch (EnemyID)
                     {
 						case 3:
 							damage = 10;
@@ -278,13 +687,42 @@
 						case 6:
 							damage = 5;
 							break;
+						case 21:
+							damage = 16;
+							break;
+						case 24:
+							damage = 5;
+							SingleAttack(hero,damage);
+							break;
                     }
-					SingleAttack(hero,damage);
+					SingleAttack(hero, damage);
 					break;
 				case "Thrash":
 					SingleAttack(hero,7);
 					GainBlock(5);
 					break;
+				case "Twin Slam":
+					for (int i = 0;i < 2; i++)
+						SingleAttack(hero, 8);
+					Buffs.Remove(Buffs.Find(x => x.Name == "Sharp Hide"));
+					AddBuff(16, 30);
+					Actions.Clear();
+					break;
+				case "Ultimate Blast":
+					SingleAttack(hero, 25);
+					break;
+				case "Vent Steam":
+					hero.AddBuff(1, 3);
+					hero.AddBuff(2, 3);
+					break;
+				case "Web Spit":
+					hero.AddBuff(2, 3);
+					break;
+				case "Whirlwind":
+					for (int i = 0; i < 4; i++)
+						SingleAttack(hero, 5);
+					break;
+
 			}
 		}
 
@@ -296,47 +734,79 @@
 		}
 
 		// Hero exclusive methods
-		public void SwitchStance(string newStance)
+		public void SwitchStance(string newStance, List<Card> discardPile, List<Card> hand)
 		{
-			string oldStance = this.Stance;
-			this.Stance = newStance;
-			if (oldStance != this.Stance && oldStance == "Calm")
-				this.Energy += 2;
-			else if (oldStance != this.Stance && this.Stance == "Divinity")
-				this.Energy += 3;
+			string oldStance = Stance;
+			Stance = newStance;
+			if(oldStance != Stance)
+                switch (Stance)
+                {
+					default:
+						Console.WriteLine($"{Name} has switched to {Stance} Stance.");
+						break;
+					case "None":
+						Console.WriteLine($"{Name} has left {oldStance} Stance.");
+						break;
+				}
+			if (Buffs.Contains(Buffs.Find(x => x.getBuffID().Equals(11))))							// Mental Fortress Check
+				GainBlock(Buffs.Find(x => x.getBuffID().Equals(11)).Intensity.GetValueOrDefault());
+			if (oldStance != Stance && oldStance == "Calm")
+				Energy += 2;
+			else if (oldStance != Stance && Stance == "Divinity")
+				Energy += 3;
+			for (int i = discardPile.Count; i > 0; i--)											// Flurry of Blows Check
+            {
+				if (discardPile[i - 1].Name == "Flurry Of Blows" && hand.Count < 10)
+                {
+					hand.Add(discardPile[i - 1]);
+					discardPile.Remove(discardPile[i - 1]);
+				}					
+            }
+		}
+
+		public void ChannelOrb(List<Actor> encounter, int orbID)
+		{
+			if (Hp <= 0) return;
+			if (Orbs.Count == OrbSlots)
+			{
+				Evoke(encounter);
+				Orbs.RemoveAt(0);
+			}
+			Orbs.Add(new Orb(Dict.orbL[orbID]));
 		}
 		public void Evoke(List<Actor> encounter)
         {
+			if (Hp <= 0) return;
 			Random random = new();
-			if (this.Orbs[0] == null) return;
-			else if (this.Orbs[0].Name == "Lightning")
+			if (Orbs[0] == null) return;
+			else if (Orbs[0].Name == "Lightning")
 			{
 				int target = random.Next(0, encounter.Count);
 				NonAttackDamage(encounter[target], 8);
 				Console.WriteLine($"The {encounter[target].Name} took 8 damage from the Evoked Lightning Orb!");
 			}
-			else if (this.Orbs[0].Name == "Frost")
+			else if (Orbs[0].Name == "Frost")
 			{
 				GainBlock(5);
-				Console.WriteLine($"The {this.Name} gained 2 Block from the Evoked Frost Orb!");
+				Console.WriteLine($"The {Name} gained 2 Block from the Evoked Frost Orb!");
 			}
-			else if (this.Orbs[0].Name == "Dark")
+			else if (Orbs[0].Name == "Dark")
 			{
 				Actor lowestHP = encounter[0];
 				foreach (var enemy in encounter)
 					if (enemy.Hp < lowestHP.Hp) lowestHP = enemy;
-				NonAttackDamage(lowestHP, this.Orbs[0].Effect);
-				Console.WriteLine($"The Evoked Dark Orb exploded on the {lowestHP.Name} for {this.Orbs[0].Effect} damage!");
+				NonAttackDamage(lowestHP, Orbs[0].Effect);
+				Console.WriteLine($"The Evoked Dark Orb exploded on the {lowestHP.Name} for {Orbs[0].Effect} damage!");
 			}
 			else
 			{
-				this.GainEnergy(2);
+				GainEnergy(2);
 			}
         }
 		public int DetermineTarget(List<Actor> encounter)
 		{
 			int x = 0;
-			if (encounter.Count == 1)
+			if (encounter.Count == 1 || Hp == 0)
 				return x;
 			Console.WriteLine("What enemy would you like to target?\n");
 			for (int i = 0; i < encounter.Count; i++)
@@ -345,10 +815,31 @@
 				Console.WriteLine("Invalid input, enter again:");
 			return x - 1;
 		}
+
 		public void GainEnergy(int energy)
         {
 			this.Energy += energy;
-			Console.WriteLine($"The {this.Name} gained {energy} Energy!");
+			Console.WriteLine($"The {Name} gained {energy} Energy!");
+		}
+
+		public void GoldChange(int amount) //For when rewards are set
+        {
+
         }
+		//enemy attack intents list
+		public static List<string> AttackIntents()
+        {
+			List<string> list = new List<string>();
+			list.Add("Bite");
+			list.Add("Chomp");
+			list.Add("Corrosive Spit");
+			list.Add("Bite");
+			list.Add("Dark Strike");
+			list.Add("Flame Tackle");
+			list.Add("Tackle");
+			list.Add("Thrash");
+			return list;
+		}
+
 	}
 }
