@@ -9,14 +9,11 @@ namespace STV
         public static void Main()
         {
             Console.Title = "Slay The Spire";
-            Console.
             int menuChoice = 1;
+            List<String> mainMenu = new List<string> { "1: Enter The Spire", "2: Card Library", "3: Exit" };
             while (menuChoice != 3)                                                     //MAIN MENU
             {
                 Console.Clear();
-
-                string[] options = { "1: Enter The Spire", "2: Card Library", "3: Exit" };
-                List<string> mainMenu = options.ToList();
                 ConsoleTableExt.ConsoleTableBuilder.From(mainMenu).ExportAndWriteLine(TableAligntment.Center);
                 while (!Int32.TryParse(Console.ReadLine(), out menuChoice) || menuChoice < 1 || menuChoice > 4)
                     Console.WriteLine("Invalid input, enter again:");
@@ -307,16 +304,14 @@ namespace STV
         {
             for (int i = 0; i < Encounter.Count; i++)
             {
-                if (Encounter[i].Hp == 0)
-                    Console.WriteLine($"The {Encounter[i].Name} is dead and therefore... does nothing.");
-                else
+                if (!(Encounter[i].Hp == 0))
                 {
                     Encounter[i].Actions.Add(Encounter[i].Intent);
-                    Encounter[i].EnemyAction(hero,drawPile, discardPile,Encounter);
-                    HealthUnderZero(hero, Encounter);                  
-                }
+                    Encounter[i].EnemyAction(hero, drawPile, discardPile, Encounter);
+                    HealthUnderZero(hero, Encounter);
+                }  
+                else Console.WriteLine($"The {Encounter[i].Name} is dead and therefore... does nothing.");
             }
-
             hero.Block = 0;
         }
 
