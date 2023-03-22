@@ -1,6 +1,7 @@
 ﻿// Richard Mayers, Sept 11th, 2022
 
 using ConsoleTableExt;
+using Slay_the_Code_V1;
 
 namespace STV
 {
@@ -50,6 +51,7 @@ namespace STV
                         Console.WriteLine($"You have chosen the {hero.Name}! Here is the {hero.Name} Deck.\n");                    
                         ConsoleTableExt.ConsoleTableBuilder.From(Deck).ExportAndWriteLine(TableAligntment.Center);
                         Pause();
+                        MapGeneration();
                         List<Actor> encounter = EncounterSet();
                         int debugCheck = Debug();
                         if (debugCheck != 0)
@@ -388,7 +390,7 @@ namespace STV
         //MENU AND UI METHODS
         public static void CombatMenu(Actor hero, List<Actor> Encounter, List<Card> drawPile, List<Card> hand, List<Card> discardPile, List<Card> exhaustPile, int turnNumber)
         {
-            Console.WriteLine($"\tActions:{Tab(5)}TURN {turnNumber}{Tab(4)}Hand:\n********************{Tab(9)}********************\n");
+            Console.WriteLine($"\tActions:{Tab(5)}TURN {turnNumber}{Tab(5)}Hand:\n********************{Tab(9)}********************\n");
             for (int i = 1; i < 11; i++)
             {
                 switch (i)
@@ -604,6 +606,143 @@ namespace STV
             if (debugChoice == 2968)
                 return 1;
             else return 0;
+        }
+
+        public static void MapGeneration()
+        {
+            Console.Clear();
+            // Variable Init
+            Random rng = new Random();
+            Dictionary<int, List<Room>> MapTemplate = new();
+            List<Room> paths = new List<Room>();
+
+            // Fills Map Template with 7*15 grid of Rooms
+            for (int i = 1; i < 16; i++)
+                MapTemplate[i] = new List<Room> { new(0, i), new(1, i), new(2, i), new(3, i), new(4, i), new(5, i), new(6, i) };
+
+            // Runs 6 attempts at creating valid paths through Map       
+            for (int i = 0; i < 6; i++)
+            {
+
+                // Grab starting node at random and move floor by floor to a valid room
+                paths.Add(MapTemplate[1][rng.Next(0, 7)]);
+                for (int j = 1; j < 15; j++)
+                {
+                    while (true)
+                    {
+                        try     // Prevents -1 or 7 index which would be out of range
+                        {
+                            Room tmp = new Room(MapTemplate[j + 1][rng.Next(paths.Last().RoomNumber - 1, paths.Last().RoomNumber + 2)]);
+                            tmp.Connections.Add(paths.Last());
+                            paths.Last().Connections.Add(tmp);
+                            paths.Add(tmp);
+                            break;
+                        }
+                        catch (ArgumentOutOfRangeException) { continue; }  // This runs loop until valid room is found
+                    }
+                }
+            }
+
+            // Remove duplicate Rooms selected during the process and merge connections so no path is lost.
+            List<Room> distinct = new List<Room>();
+            foreach (Room room in paths)
+            {
+                if (!distinct.Contains(room))
+                    distinct.Add(room);
+                else
+                {
+                    distinct.Find(x => x.Equals(room)).Connections.AddRange(room.Connections);
+                }
+            }
+
+            // Sort List by floors for assigning locations and visualization
+            distinct.Sort();
+
+            // Assign locations to each room, starting on bottom floor
+            for (int i = 1; i < 16; i++)
+            {
+
+                //Initial RNG chances
+                int monster = 40, eVent = 65, elite = 83, restSite = 95, merchant = 101, choice = 0;
+
+                // Next 3 conditionals are to set 1 floor of rooms to constant locations
+                if (i == 1)
+                {
+                    foreach (Room r in distinct.Where(x => x.Floor == i))
+                        r.Location = "M";
+                    continue;
+                }
+                else if (i == 9)
+                {
+                    foreach (Room r in distinct.Where(x => x.Floor == i))
+                        r.Location = "T";
+                    continue;
+                }
+                else if (i == 15)
+                {
+                    foreach (Room r in distinct.Where(x => x.Floor == i))
+                        r.Location = "R";
+                    continue;
+                }
+
+                // Next 2 are to change RNG chances for certain floors that can not have some events (-1 odds set on those rooms to prevent them being selected)
+                else if (i > 1 && i < 6)
+                {
+                    monster = 63;
+                    eVent = 93;
+                    elite = -1;
+                    restSite = -1;
+                }
+                else if (i == 14)
+                {
+                    monster = 50;
+                    eVent = 70;
+                    elite = 94;
+                    restSite = -1;
+                }
+
+                // For Floors not 1,9,15 : Roll random number until a valid location is selected
+                foreach (Room r in distinct.Where(x => x.Floor == i))
+                {
+                    while (true)
+                    {
+                        choice = rng.Next(merchant);
+                        if (choice < monster)
+                            r.Location = "M";
+                        else if (choice < eVent)
+                            r.Location = "?";
+                        else if (choice < elite)
+                        {
+                            if (r.Connections.Find(x => x.Location == "E") == null)
+                                r.Location = "E";
+                        }
+                        else if (choice < restSite)
+                        {
+                            if (r.Connections.Find(x => x.Location == "R") == null)
+                                r.Location = "R";
+                        }
+                        else
+                        {
+                            if (r.Connections.Find(x => x.Location == "$") == null)
+                                r.Location = "$";
+                        }
+                        if (r.Location != "Undecided")
+                            break;
+                    }
+                }
+            }
+            // Drawing the Map   
+            for (int i = 15; i >= 1; i--)
+            {
+                for (int j = 0; j < 7; j++)
+                {
+                    if (distinct.Find(x => x.RoomNumber == j && x.Floor == i) == null)
+                        Console.Write(" \t");
+                    else Console.Write(distinct.Find(x => x.RoomNumber == j && x.Floor == i).Location + "\t");
+                }
+                Console.WriteLine("\n\n");
+            }
+            Console.ReadKey();
         }
     }
 }

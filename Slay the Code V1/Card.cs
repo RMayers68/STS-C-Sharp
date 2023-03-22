@@ -14,6 +14,7 @@ namespace STV
 		public string Description { get; set; }
 
 
+
 		//constructors
 		public Card()
         {
