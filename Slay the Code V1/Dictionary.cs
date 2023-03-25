@@ -2,12 +2,12 @@
 {
     public class Dict
     {
-        public static Dictionary<int, Actor> heroL = new()                                             //Dictionary of Hero objects
+        public static Dictionary<int, Hero> heroL = new()                                             //Dictionary of Hero objects
         {
-            { 1, new Actor("Ironclad",80) },
-            { 2, new Actor("Silent",70) },
-            { 3, new Actor("Defect",75) },
-            { 4, new Actor("Watcher",72) },
+            { 1, new Hero("Ironclad",80) },
+            { 2, new Hero("Silent",70) },
+            { 3, new Hero("Defect",75) },
+            { 4, new Hero("Watcher",72) },
         };
 
         public static Dictionary<int, Card> cardL = new()                                             //Dictionary of Card objects
@@ -408,6 +408,7 @@
             { 17, new Buff(17,"Sharp Hide",true,3)},
             { 18, new Buff(18,"Thievery",true,3)},
             { 19, new Buff(19,"Enrage",true,3)},
+            { 20, new Buff(20,"Wrath",true,3)},
 
             /*
              * Buff types:
@@ -419,33 +420,33 @@
             */
         };
 
-        public static Dictionary<int, Actor> enemyL = new()                                            // Enemies Reference Dictionary
+        public static Dictionary<int, Enemy> enemyL = new()                                            // Enemies Reference Dictionary
         {
-            { 0, new Actor(0, "Jaw Worm",40,44, "Chomp") },
-            { 1, new Actor(1, "Cultist",48,54, "Incantation") },
-            { 2, new Actor(2, "Red Louse", 10,15, "Grow") },
-            { 3, new Actor(3, "Med Acid Slime", 28, 32, "Tackle") },
-            { 4, new Actor(4, "Med Spike Slime", 28, 32, "Lick") },
-            { 5, new Actor(5, "Small Acid Slime", 10, 14, "Lick") },
-            { 6, new Actor(6, "Small Spike Slime", 10, 14, "Tackle") },
-            { 7, new Actor(7,"Green Louse",11,17,"Spit Web")},
-            { 8, new Actor(8,"Blue Slaver",46,50,"Rake")},
-            { 9, new Actor(9,"Red Slaver",46,50,"Stab")},
-            { 10, new Actor(10,"Fungi Beast",22,28,"Bite")},
-            { 11, new Actor(11,"Looter",44,48,"Mug")},
-            { 12, new Actor(12, "Sneaky Gremlin", 10, 14, "Puncture") },
-            { 13, new Actor(13, "Mad Gremlin", 20, 24, "Scratch") },
-            { 14, new Actor(14, "Gremlin Wizard", 23, 25, "Charging") },
-            { 15, new Actor(15, "Fat Gremlin", 13, 17, "Smash") },
-            { 16, new Actor(16, "Shield Gremlin", 20, 24, "Protect") },
-            { 17, new Actor(17, "Gremlin Nob", 82, 86, "Bellow") },
-            { 18, new Actor(18, "Lagavulin", 109, 111, "Sleeping") },
-            { 19, new Actor(19, "Sentry", 38, 42, "Bolt") },
-            { 20, new Actor(20, "Slime Boss", 140, 140, "Goop Spray") },
-            { 21, new Actor(21, "Large Acid Slime", 65, 69, "Corrosive Spit") },
-            { 22, new Actor(22, "Large Spike Slime", 64, 70, "Flame Tackle") },
-            { 23, new Actor(23, "The Guardian", 240, 240, "Charging Up") },
-            { 24, new Actor(24, "Hexaghost", 250, 250, "Charging") },
+            { 0, new Enemy(0, "Jaw Worm",40,44, "Chomp") },
+            { 1, new Enemy(1, "Cultist",48,54, "Incantation") },
+            { 2, new Enemy(2, "Red Louse", 10,15, "Grow") },
+            { 3, new Enemy(3, "Med Acid Slime", 28, 32, "Tackle") },
+            { 4, new Enemy(4, "Med Spike Slime", 28, 32, "Lick") },
+            { 5, new Enemy(5, "Small Acid Slime", 10, 14, "Lick") },
+            { 6, new Enemy(6, "Small Spike Slime", 10, 14, "Tackle") },
+            { 7, new Enemy(7,"Green Louse",11,17,"Spit Web")},
+            { 8, new Enemy(8,"Blue Slaver",46,50,"Rake")},
+            { 9, new Enemy(9,"Red Slaver",46,50,"Stab")},
+            { 10, new Enemy(10,"Fungi Beast",22,28,"Bite")},
+            { 11, new Enemy(11,"Looter",44,48,"Mug")},
+            { 12, new Enemy(12, "Sneaky Gremlin", 10, 14, "Puncture") },
+            { 13, new Enemy(13, "Mad Gremlin", 20, 24, "Scratch") },
+            { 14, new Enemy(14, "Gremlin Wizard", 23, 25, "Charging") },
+            { 15, new Enemy(15, "Fat Gremlin", 13, 17, "Smash") },
+            { 16, new Enemy(16, "Shield Gremlin", 20, 24, "Protect") },
+            { 17, new Enemy(17, "Gremlin Nob", 82, 86, "Bellow") },
+            { 18, new Enemy(18, "Lagavulin", 109, 111, "Sleeping") },
+            { 19, new Enemy(19, "Sentry", 38, 42, "Bolt") },
+            { 20, new Enemy(20, "Slime Boss", 140, 140, "Goop Spray") },
+            { 21, new Enemy(21, "Large Acid Slime", 65, 69, "Corrosive Spit") },
+            { 22, new Enemy(22, "Large Spike Slime", 64, 70, "Flame Tackle") },
+            { 23, new Enemy(23, "The Guardian", 240, 240, "Charging Up") },
+            { 24, new Enemy(24, "Hexaghost", 250, 250, "Charging") },
         };
 
         public static Dictionary<int, Relic> relicL = new()                                            // Relics Reference Dictionary

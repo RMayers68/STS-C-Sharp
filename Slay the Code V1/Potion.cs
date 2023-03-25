@@ -29,7 +29,7 @@
         {
             return $"{Name} - {Description}";
         }
-        public void UsePotion(Actor hero,List<Actor> encounter,List<Card> drawPile, List<Card> discardPile, List<Card> hand, List<Card> exhaustPile, Random rng)                              // potion methods (correlating to PotionID
+        public void UsePotion(Hero hero,List<Enemy> encounter,List<Card> drawPile, List<Card> discardPile, List<Card> hand, List<Card> exhaustPile, Random rng)                              // potion methods (correlating to PotionID)
         {
             int target = 0;
             switch (Name)

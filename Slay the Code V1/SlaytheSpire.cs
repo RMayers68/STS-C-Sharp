@@ -1,7 +1,6 @@
 ﻿// Richard Mayers, Sept 11th, 2022
 
 using ConsoleTableExt;
-using Slay_the_Code_V1;
 
 namespace STV
 {
@@ -9,18 +8,23 @@ namespace STV
     {
         public static void Main()
         {
-            Console.Title = "Slay The Spire";
+            Console.Title = "Slay The Spire";  
+
+            // Menu init
             int menuChoice = 1;
             List<String> mainMenu = new List<string> { "1: Enter The Spire", "2: Card Library", "3: Exit" };
-            while (menuChoice != 3)                                                     //MAIN MENU
+
+            //MAIN MENU
+            while (menuChoice != 3)                                                     
             {
                 Console.Clear();
+                Console.BackgroundColor = ConsoleColor.Black;
                 ConsoleTableExt.ConsoleTableBuilder.From(mainMenu).ExportAndWriteLine(TableAligntment.Center);
                 while (!Int32.TryParse(Console.ReadLine(), out menuChoice) || menuChoice < 1 || menuChoice > 4)
                     Console.WriteLine("Invalid input, enter again:");
                 switch (menuChoice)
                 {
-                    case 1:                                                             // PLAY
+                    case 1:      // PLAY                                                       
                         Console.Clear();
                         int heroChoice = 0;
                         Console.WriteLine("What hero would you like to choose? Each comes with their own set of cards and playstyles:");
@@ -29,21 +33,26 @@ namespace STV
                         ConsoleTableExt.ConsoleTableBuilder.From(characterList).ExportAndWriteLine(TableAligntment.Center);
                         while (!Int32.TryParse(Console.ReadLine(), out heroChoice) || heroChoice < 1 || heroChoice > 4)
                             Console.WriteLine("Invalid input, enter again:");
-                        Actor hero = new Actor(Dict.heroL[heroChoice]);
+                        Hero hero = new Hero(Dict.heroL[heroChoice]);
+                        Console.Clear();
                         switch (hero.Name)
                         {
                             case "Ironclad":
                                 hero.Relics.Add(new Relic(Dict.relicL[0]));
+                                //Console.BackgroundColor = ConsoleColor.DarkRed;
                                 break;
                             case "Silent":
                                 hero.Relics.Add(new Relic(Dict.relicL[1]));
+                                //Console.BackgroundColor = ConsoleColor.DarkGreen;
                                 break;
                             case "Defect":
                                 hero.Relics.Add(new Relic(Dict.relicL[2]));
+                                //Console.BackgroundColor = ConsoleColor.DarkCyan;
                                 hero.OrbSlots = 3;
                                 break;
                             case "Watcher":
                                 hero.Relics.Add(new Relic(Dict.relicL[3]));
+                                //Console.BackgroundColor = ConsoleColor.DarkBlue;
                                 hero.Stance = "None";
                                 break;
                         }
@@ -52,7 +61,7 @@ namespace STV
                         ConsoleTableExt.ConsoleTableBuilder.From(Deck).ExportAndWriteLine(TableAligntment.Center);
                         Pause();
                         MapGeneration();
-                        List<Actor> encounter = EncounterSet();
+                        List<Enemy> encounter = CreateEncounter();
                         int debugCheck = Debug();
                         if (debugCheck != 0)
                         {
@@ -65,14 +74,14 @@ namespace STV
                                 encounter[i].Hp = 9999;
                                 encounter[i].MaxHP = 9999;
                             }
-                        }
-                        for (int i = 0;i < Dict.potionL.Count; i++)
-                            hero.Potions.Add(new Potion(Dict.potionL[i]));
+                            for (int i = 0; i < Dict.potionL.Count; i++)
+                                hero.Potions.Add(new Potion(Dict.potionL[i]));
+                        }                        
                         Combat(hero, encounter, Deck);
                         break;
                     case 2:                                                             // LIBRARY
                         Console.Clear();
-                        ConsoleTableBuilder.From(Dict.cardL.Values.ToList()).ExportAndWriteLine();
+                        ConsoleTableBuilder.From(Dict.cardL.Values.ToList()).ExportAndWriteLine(TableAligntment.Center);
                         Pause();
                         break;
                     /*case 4:                                                       // Programming Test Case Area
@@ -85,30 +94,24 @@ namespace STV
         }
 
         //COMBAT METHODS
-        public static void Combat(Actor hero, List<Actor> Encounter, List<Card> Deck)
+        public static void Combat(Hero hero, List<Enemy> Encounter, List<Card> Deck)
         {
             Random cardRNG = new();
             Console.Clear();
-            switch (Encounter.Count)
-            {
-                default: break;
-                case 1:
-                    Console.WriteLine($"You have encountered a {Encounter[0].Name}!");
-                    break;
-                case 2:
-                    if (Encounter[0].Name == Encounter[1].Name)
-                        Console.WriteLine($"You have encountered 2 {Encounter[0].Name}s!");
-                    else Console.WriteLine($"You have encountered a {Encounter[0].Name} and a {Encounter[1].Name}!");
-                    break;
-            }
+            Console.WriteLine("Next encounter:");
+            foreach (Actor actor in Encounter) 
+                Console.WriteLine(actor.Name);
             List<Card> drawPile = Shuffle(Deck, cardRNG);
             List<Card> hand = new();
             List<Card> discardPile = new();
             List<Card> exhaustPile = new();
             int turnNumber = 0;
+
+            //Check HP values to end encounter when one group is reduced to 0
             while ((!Encounter.All(x => x.Hp == 0)) && (hero.Hp != 0) && Encounter.Count > 0)
             {
-                for (int i = 0; i < hero.Buffs.Count; i++)                                          //Start Turn Setup
+                // Modify buffs for hero
+                for (int i = 0; i < hero.Buffs.Count; i++)                                          
                 {
                     hero.Buffs[i].DurationDecrease();
                     if (hero.Buffs[i].DurationEnded())
@@ -118,6 +121,7 @@ namespace STV
                         Pause();
                     }
                 }
+                // Same for enemy
                 for (int i = 0; i < Encounter.Count; i++)
                 {
                     for (int j = Encounter[i].Buffs.Count - 1; j >= 0; j--)
@@ -139,34 +143,36 @@ namespace STV
                             Encounter[i].Buffs.RemoveAt(j);
                     }
                 }
-                turnNumber++;                                                                       // End Turn Setup
+                turnNumber++;                                                        
                 for (int i = 0; i < Encounter.Count; i++)
-                    Encounter[i].EnemyIntent(turnNumber,Encounter);
+                    Encounter[i].SetEnemyIntent(turnNumber,Encounter);
                 Pause();
                 PlayerTurn(hero, Encounter, drawPile, hand, discardPile,cardRNG,exhaustPile,turnNumber);
-                if (hero.Orbs.Count != null || hero.Orbs.Count != 0)                                //Start Orb Time
+
+                // In between Player and Enemy Turn
+                Random random = new Random();
+                foreach (var orb in hero.Orbs)
                 {
-                    Random random = new Random();
-                    foreach (var orb in hero.Orbs)
+                    if(orb is null) continue;
+                    switch (orb.OrbID)
                     {
-                        switch (orb.OrbID)
-                        {
-                            case 0:
-                                int target = random.Next(0, Encounter.Count);
-                                hero.NonAttackDamage(Encounter[target], 3);
-                                Console.WriteLine($"The {Encounter[target].Name} took 3 damage from the Lightning Orb!");
-                                break;
-                            case 1:
-                                hero.GainBlock(2);
-                                Console.WriteLine($"The {hero.Name} gained 2 Block from the Frost Orb!");
-                                break;
-                            case 2:
-                                orb.Effect += 6;
-                                Console.WriteLine($"The {orb.Name} Orb stored 6 more Energy!");
-                                break;
-                        }
+                        case 0:
+                            int target = random.Next(0, Encounter.Count);
+                            hero.NonAttackDamage(Encounter[target], 3);
+                            Console.WriteLine($"The {Encounter[target].Name} took 3 damage from the Lightning Orb!");
+                            break;
+                        case 1:
+                            hero.GainBlock(2);
+                            Console.WriteLine($"The {hero.Name} gained 2 Block from the Frost Orb!");
+                            break;
+                        case 2:
+                            orb.Effect += 6;
+                            Console.WriteLine($"The {orb.Name} Orb stored 6 more Energy!");
+                            break;
                     }
-                }                                                                                     // End Orb Time
+                }
+
+                // Start of Enemy Turn
                 Console.WriteLine("Enemy's Turn!\n");
                 EnemyTurn(hero, Encounter, drawPile, discardPile, hand);
             }
@@ -181,7 +187,9 @@ namespace STV
             }                
             Pause();
         }
-        public static void PlayerTurn(Actor hero, List<Actor> Encounter, List<Card> drawPile, List<Card> hand, List<Card> discardPile, Random rng, List<Card> exhaustPile, int turnNumber)
+
+
+        public static void PlayerTurn(Hero hero, List<Enemy> Encounter, List<Card> drawPile, List<Card> hand, List<Card> discardPile, Random rng, List<Card> exhaustPile, int turnNumber)
         {
             if (turnNumber == 1 && hero.Relics[0].Name == "Pure Water")
                 hand.Add(new Card(Dict.cardL[336]));
@@ -302,7 +310,7 @@ namespace STV
                 }
             }
         }
-        public static void EnemyTurn(Actor hero, List<Actor> Encounter, List<Card> drawPile, List<Card> discardPile, List<Card> hand)
+        public static void EnemyTurn(Hero hero, List<Enemy> Encounter, List<Card> drawPile, List<Card> discardPile, List<Card> hand)
         {
             for (int i = 0; i < Encounter.Count; i++)
             {
@@ -318,7 +326,7 @@ namespace STV
         }
 
         // HEALTH CHECK
-        public static void HealthUnderZero(Actor hero, List<Actor> Encounter)                                      
+        public static void HealthUnderZero(Hero hero, List<Enemy> Encounter)                                      
         {
             for (int i = 0; i < Encounter.Count; i++)
                 if (Encounter[i].Hp <= 0) Encounter[i].Hp = 0;
@@ -387,8 +395,9 @@ namespace STV
                 Console.WriteLine("Invalid input, enter again:");
             return list[cardChoice-1];
         }
+
         //MENU AND UI METHODS
-        public static void CombatMenu(Actor hero, List<Actor> Encounter, List<Card> drawPile, List<Card> hand, List<Card> discardPile, List<Card> exhaustPile, int turnNumber)
+        public static void CombatMenu(Hero hero, List<Enemy> Encounter, List<Card> drawPile, List<Card> hand, List<Card> discardPile, List<Card> exhaustPile, int turnNumber)
         {
             Console.WriteLine($"\tActions:{Tab(5)}TURN {turnNumber}{Tab(5)}Hand:\n********************{Tab(9)}********************\n");
             for (int i = 1; i < 11; i++)
@@ -487,6 +496,7 @@ namespace STV
         }
 
         // INITILIAZE METHODS
+
         public static List<Card> CreateDeck(Actor hero)
         {
             List<Card> Deck = new();
@@ -534,25 +544,26 @@ namespace STV
             return Deck;
 
         }
-        public static List<Actor> EncounterSet()
+
+        public static List<Enemy> CreateEncounter()
         {
             Random enemyRNG = new Random();
-            List<Actor> list = new();
+            List<Enemy> list = new();
             int encounterChoice = enemyRNG.Next(0, 4);
             switch (encounterChoice)
             {
                 case 0:
-                    list.Add(new Actor(Dict.enemyL[0]));
+                    list.Add(new Enemy(Dict.enemyL[0]));
                     break;
                 case 1:
-                    list.Add(new Actor(Dict.enemyL[1]));
+                    list.Add(new Enemy(Dict.enemyL[1]));
                     break;
                 case 2:
                     for (int i = 0; i < 2; i++)
                     { 
                         if (enemyRNG.Next(0,2) == 0)
-                            list.Add(new Actor(Dict.enemyL[2]));
-                        else list.Add(new Actor(Dict.enemyL[7]));
+                            list.Add(new Enemy(Dict.enemyL[2]));
+                        else list.Add(new Enemy(Dict.enemyL[7]));
                     }                   
                     break;
                 case 3:
@@ -560,19 +571,19 @@ namespace STV
                     switch (slimeSwitch)
                     {
                         case 0:
-                            list.Add(new Actor(Dict.enemyL[6]));
-                            list.Add(new Actor(Dict.enemyL[3]));
+                            list.Add(new Enemy(Dict.enemyL[6]));
+                            list.Add(new Enemy(Dict.enemyL[3]));
                             break;
                         case 1:
-                            list.Add(new Actor(Dict.enemyL[5]));
-                            list.Add(new Actor(Dict.enemyL[4]));
+                            list.Add(new Enemy(Dict.enemyL[5]));
+                            list.Add(new Enemy(Dict.enemyL[4]));
                             break;
                         default:
                             break;
                     }
                     break;
                 case 4:
-                    list.Add(new Actor(Dict.enemyL[11]));
+                    list.Add(new Enemy(Dict.enemyL[11]));
                     break;
                 default: break;
             }
@@ -585,7 +596,7 @@ namespace STV
                 {
                     default:
                         break;
-                    case 2:
+                    case 2 or 7:
                         Random random = new Random();
                         list[i].AddBuff(5,random.Next(3, 8));
                         break;
@@ -731,6 +742,8 @@ namespace STV
                     }
                 }
             }
+
+
             // Drawing the Map   
             for (int i = 15; i >= 1; i--)
             {

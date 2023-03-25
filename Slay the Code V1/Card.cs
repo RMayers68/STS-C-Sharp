@@ -90,7 +90,7 @@ namespace STV
 			return $"Name: {Name}\nEnergy Cost: {EnergyCost}\tType: {Type}\nEffect: {Description}";																	// need if conditions for X cost, type, and rarity
 		}
 		
-        public void CardAction(Card card, Actor hero, List<Actor> encounter, List<Card> drawPile, List<Card> discardPile, List<Card> hand, List<Card> exhaustPile, Random rng)
+        public void CardAction(Card card, Hero hero, List<Enemy> encounter, List<Card> drawPile, List<Card> discardPile, List<Card> hand, List<Card> exhaustPile, Random rng)
 		{
 			int target = 0;
 			int damage = 0;
@@ -138,7 +138,7 @@ namespace STV
 				case "Dropkick":
 					target = hero.DetermineTarget(encounter);
 					hero.SingleAttack(encounter[target], 5);
-					if (encounter[target].Buffs.Contains(encounter[target].Buffs.Find(x => x.getBuffID().Equals(1))))
+					if (encounter[target].Buffs.Find(x => x.BuffID.Equals(1)) != null)
 						hero.GainEnergy(1);
 					break;
 				case "Entrench":
@@ -176,8 +176,8 @@ namespace STV
 					break;
 				case "Heavy Blade":
 					target = hero.DetermineTarget(encounter);
-					if (hero.Buffs.Contains(hero.Buffs.Find(x => x.getBuffID().Equals(4))))
-						damage += (hero.Buffs.Find(x => x.getBuffID().Equals(4)).Intensity.GetValueOrDefault() * 2);
+					if (hero.Buffs.Find(x => x.BuffID == 4) != null)
+						damage += (hero.Buffs.Find(x => x.BuffID == 4).Intensity.GetValueOrDefault() * 2);
 					hero.SingleAttack(encounter[target], damage);
 					break;
 				case "Hemokinesis":
@@ -205,8 +205,8 @@ namespace STV
 					hero.SingleAttack(encounter[target], 5);
 					break;
 				case "Limit Break":
-					if (hero.Buffs.Contains(hero.Buffs.Find(x => x.getBuffID().Equals(4))))
-						hero.Buffs.Find(x => x.getBuffID().Equals(4)).IntensitySet(hero.Buffs.Find(x => x.getBuffID().Equals(4)).Intensity.GetValueOrDefault()*2);
+					if (hero.Buffs.Find(x => x.BuffID == 4) != null)
+						hero.Buffs.Find(x => x.BuffID == 4).IntensitySet(hero.Buffs.Find(x => x.BuffID == 4).Intensity.GetValueOrDefault()*2);
 					break;
 				case "Offering":
 					hero.SelfDamage(6);
@@ -383,7 +383,7 @@ namespace STV
 				case "Heel Hook":
 					target = hero.DetermineTarget(encounter);
 					hero.SingleAttack(encounter[target], 5);
-					if (encounter[target].Buffs.Contains(encounter[target].Buffs.Find(x => x.getBuffID().Equals(2))))
+					if (encounter[target].Buffs.Find(x => x.BuffID == 2) != null)
 						hero.GainEnergy(1);
 					break;
 				case "Leg Sweep":
@@ -772,7 +772,7 @@ namespace STV
 				case "Fear No Evil":
 					target = hero.DetermineTarget(encounter);
 					hero.SingleAttack(encounter[target], 8);
-					List<string> list = new List<string>(Actor.AttackIntents());
+					List<string> list = new List<string>(Enemy.AttackIntents());
 					if (list.Contains(encounter[target].Intent))
 						hero.SwitchStance("Calm", discardPile, hand);
 					break;
@@ -850,8 +850,8 @@ namespace STV
 					target = hero.DetermineTarget(encounter);
 					encounter[target].AddBuff(12, 8);
 					for (int i = 0; i < encounter.Count; i++)
-						if (encounter[i].Buffs.Contains(encounter[i].Buffs.Find(x => x.getBuffID().Equals(12))))
-							hero.NonAttackDamage(encounter[i], encounter[i].Buffs.Find(x => x.getBuffID() == 12).Intensity.GetValueOrDefault());
+						if (encounter[i].Buffs.Find(x => x.BuffID == 12) != null)
+							hero.NonAttackDamage(encounter[i], encounter[i].Buffs.Find(x => x.BuffID == 12).Intensity.GetValueOrDefault());
 					break;
 				case "Prostrate":
 					hero.AddBuff(10, 2);
