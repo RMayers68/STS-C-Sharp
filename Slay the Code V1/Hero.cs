@@ -8,13 +8,13 @@ namespace STV
         public int MaxEnergy { get; set; }
         public int Energy { get; set; }
         public int OrbSlots { get; set; }
+        public int EasyFights { get; set; }
         public List<Relic> Relics { get; set; }
         public List<Orb> Orbs { get; set; }
         public List<Potion> Potions { get; set; }
 
         public Hero(string name, int maxHP)
         {
-            //this.Type = "Hero";
             this.Name = name;
             this.MaxHP = maxHP;
             this.Hp = maxHP;
@@ -27,12 +27,12 @@ namespace STV
             this.Orbs = new();
             this.OrbSlots = 1;
             this.Gold = 99;
+            this.EasyFights = 0;
         }
 
         public Hero(Hero hero)
         {
             {
-                //this.Type = "Hero";
                 this.Name = hero.Name;
                 this.MaxHP = hero.MaxHP;
                 this.Hp = hero.MaxHP;
@@ -45,6 +45,7 @@ namespace STV
                 this.Orbs = new();
                 this.OrbSlots = 1;
                 this.Gold = 99;
+                this.EasyFights = 0;
             }
         }
         // Hero exclusive methods

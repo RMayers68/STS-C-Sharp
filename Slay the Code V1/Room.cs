@@ -3,6 +3,7 @@
     public class Room : IEquatable<Room>, IComparable<Room>
     {
         public string Location { get; set; }
+        public char ShortHand { get; set; }
         public int RoomNumber { get; set; }
         public int Floor { get; set; }
         public List<Room> Connections { get; set; }
@@ -25,6 +26,45 @@
             Connections = new List<Room>();
         }
 
+        // location modifiers
+        public void ChangeName(string name)
+        {
+            switch(name)
+            {
+                default: break;
+                case "Monster":
+                    Location = "Monster";
+                    ShortHand = 'M';
+                    break;
+                case "Event":
+                    Location = "Event";
+                    ShortHand = '?';
+                    break;
+                case "Elite":
+                    Location = "Elite";
+                    ShortHand = 'E';
+                    break;
+                case "Rest Site":
+                    Location = "Rest Site";
+                    ShortHand = 'R';
+                    break;
+                case "Merchant":
+                    Location = "Merchant";
+                    ShortHand = '$';
+                    break;
+                case "Treasure":
+                    Location = "Treasure";
+                    ShortHand = 'T';
+                    break;
+
+            }
+        }
+
+        //string method
+        public override string ToString()
+        {
+            return $"[{RoomNumber}: {Location}]";
+        }
         // return distinct list of connecting rooms
         public void DistinctRooms()
         {
@@ -60,6 +100,7 @@
 
             return floor1.CompareTo(floor2);
         }
+
 
         // Default comparer for Part type.
         public int CompareTo(Room r)

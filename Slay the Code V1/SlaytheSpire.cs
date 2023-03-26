@@ -56,13 +56,38 @@ namespace STV
                                 hero.Stance = "None";
                                 break;
                         }
-                        List<Card> Deck = CreateDeck(hero);
+                        List<Card> deck = CreateDeck(hero);
                         Console.WriteLine($"You have chosen the {hero.Name}! Here is the {hero.Name} Deck.\n");                    
-                        ConsoleTableExt.ConsoleTableBuilder.From(Deck).ExportAndWriteLine(TableAligntment.Center);
+                        ConsoleTableExt.ConsoleTableBuilder.From(deck).ExportAndWriteLine(TableAligntment.Center);
                         Pause();
-                        MapGeneration();
-                        List<Enemy> encounter = CreateEncounter();
-                        int debugCheck = Debug();
+                        
+                        for (int act = 1; act <= 3; act++)
+                        {
+                            Console.WriteLine($"You have entered Act {act}!");
+                            List<Room> map = MapGeneration();
+                            List<Room> choices = new List<Room>();
+                            Room activeRoom = null;
+                            for (int floor = 1; floor <= 16; floor++)
+                            {
+                                if (floor == 1)
+                                    choices = map.FindAll(x => x.Floor == 1);
+                                else choices = activeRoom.Connections.FindAll(x => x.Floor == floor);
+                                DrawMap(map);
+                                int roomNumber = 0;
+                                Console.WriteLine("\nWhat room would you like to enter?\n");
+                                foreach (Room r in choices)
+                                {
+                                    Console.Write(r.ToString() + "\t");
+                                }
+                                while (!Int32.TryParse(Console.ReadLine(), out roomNumber) || choices.Find(x => x.RoomNumber == roomNumber) == null)
+                                    Console.WriteLine("Invalid input, enter again:");
+                                activeRoom = new Room(choices.Find(x => x.RoomNumber == roomNumber));
+                                RoomDecider(hero,deck,activeRoom.Location,act*5-5);
+                            }
+                        }
+                        
+                        
+                        /*int debugCheck = Debug();                                // Debug Switch
                         if (debugCheck != 0)
                         {
                             hero.Hp = 9999;
@@ -76,12 +101,12 @@ namespace STV
                             }
                             for (int i = 0; i < Dict.potionL.Count; i++)
                                 hero.Potions.Add(new Potion(Dict.potionL[i]));
-                        }                        
-                        Combat(hero, encounter, Deck);
+                        }*/                 
+                        
                         break;
                     case 2:                                                             // LIBRARY
                         Console.Clear();
-                        ConsoleTableBuilder.From(Dict.cardL.Values.ToList()).ExportAndWriteLine(TableAligntment.Center);
+                        ConsoleTableBuilder.From(Dict.cardL.Values.ToList()).ExportAndWriteLine();
                         Pause();
                         break;
                     /*case 4:                                                       // Programming Test Case Area
@@ -92,7 +117,49 @@ namespace STV
                 }
             }
         }
+        // Method to determine next event based on room
+        public static void RoomDecider(Hero hero,List<Card> deck,string location,int actModifier)
+        {
+            List<Enemy> encounter = new();
+            switch (location)
+            {
+                default: break;
+                /*case "Monster":
+                    if (hero.EasyFights < 3)
+                    {
+                        encounter = CreateEncounter(1+actModifier);
+                        hero.EasyFights++;
+                    }
+                    else encounter = CreateEncounter(2+actModifier);
+                    Combat(hero, encounter, deck);
+                    break;*/
+                case "Event":
+                    EventDecider(hero,deck);
+                    break;
+                case "Rest Site":
+                    //Eventually add in Upgrade and Recall
+                    hero.HealHP(hero.MaxHP / 3);
+                    break;
+                case "Merchant":
+                    break;
+                case "Treasure":
+                    hero.GoldChange(100);
+                    break;
+                case "Elite":
+                    encounter = CreateEncounter(3 + actModifier);
+                    Combat(hero, encounter, deck);
+                    break;
+                case "Boss":
+                    encounter = CreateEncounter(4 + actModifier);
+                    Combat(hero, encounter, deck);
+                    break;
+            }
+        }
 
+        public static void EventDecider(Hero hero, List<Card> deck) 
+        {
+            return;
+        }
         //COMBAT METHODS
         public static void Combat(Hero hero, List<Enemy> Encounter, List<Card> Deck)
         {
@@ -274,15 +341,15 @@ namespace STV
                         Console.Clear();
                         for (int i = 0; i < Encounter.Count; i++)
                         {
-                            Console.WriteLine("********************\n");
-                            Console.WriteLine($"Enemy {i + 1}: {Encounter[i].Name}{Tab(3)}HP:{Encounter[i].Hp}/{Encounter[i].MaxHP}{Tab(3)}Block:{Encounter[i].Block}\n");
-                            Console.WriteLine($"Intent:{Encounter[i].Intent}\n");
+                            Console.WriteLine("************************************************************************\n");
+                            Console.WriteLine($"Enemy {i + 1}: {Encounter[i].Name}{Tab(2)}HP:{Encounter[i].Hp}/{Encounter[i].MaxHP}{Tab(2)}Block:{Encounter[i].Block}\n");
+                            Console.WriteLine($"Intent: {Encounter[i].Intent}\n");
                             Console.Write($"Buffs/Debuffs: ");
                             if (Encounter[i].Buffs.Count == 0)
                                 Console.Write("None\n");
                             else for (int j = 0; j < Encounter[i].Buffs.Count; j++)
                                     Console.WriteLine($"{Encounter[i].Buffs[j].Name} - {Encounter[i].Buffs[j].Description()}\n");
-                            Console.WriteLine("\n********************");
+                            Console.WriteLine("************************************************************************\n");
                         }
                         Pause();
                         break;
@@ -545,68 +612,201 @@ namespace STV
 
         }
 
-        public static List<Enemy> CreateEncounter()
+        public static List<Enemy> CreateEncounter(int list)
         {
             Random enemyRNG = new Random();
-            List<Enemy> list = new();
-            int encounterChoice = enemyRNG.Next(0, 4);
-            switch (encounterChoice)
+            List<Enemy> encounter = new();
+            int encounterChoice = 0;
+            /* Looks at specific list (Encounter Type plus Act Modifier )
+             * Encounter Types:
+             * 1. Debut (first 3 normal combats each floor)
+             * 2. Normal
+             * 3. Elite
+             * 4. Boss
+             * 5. Event Combats
+             * 
+             * Level Modifier:
+             * Act 1: 0
+             * Act 2: 5
+             * Act 3: 10
+             * 
+             * Example(Act 3 Elites): 10+3 = Case 13
+             */
+            switch (list)
             {
-                case 0:
-                    list.Add(new Enemy(Dict.enemyL[0]));
-                    break;
-                case 1:
-                    list.Add(new Enemy(Dict.enemyL[1]));
+                default:       
+                    encounterChoice = enemyRNG.Next(4);
+                    switch (encounterChoice)
+                    {
+                        default:     //Cultist
+                            encounter.Add(new Enemy(Dict.enemyL[0]));
+                            break;
+                        case 1:     //Jaw Worm
+                            encounter.Add(new Enemy(Dict.enemyL[1]));
+                            break;
+                        case 2:     // 2 Louses (Red or Green)
+                            for (int i = 0; i < 2; i++)
+                                encounter.Add(new Enemy(Dict.enemyL[2+enemyRNG.Next(2)]));
+                            break;
+                        case 3:     // Small Slimes
+                            if (enemyRNG.Next(2) == 0)
+                            {
+                                encounter.Add(new Enemy(Dict.enemyL[7]));
+                                encounter.Add(new Enemy(Dict.enemyL[4]));
+                            }
+                            else
+                            {
+                                encounter.Add(new Enemy(Dict.enemyL[6]));
+                                encounter.Add(new Enemy(Dict.enemyL[5]));
+                            }
+                            break;
+                    }
                     break;
                 case 2:
-                    for (int i = 0; i < 2; i++)
-                    { 
-                        if (enemyRNG.Next(0,2) == 0)
-                            list.Add(new Enemy(Dict.enemyL[2]));
-                        else list.Add(new Enemy(Dict.enemyL[7]));
-                    }                   
+                    encounterChoice = enemyRNG.Next(0, 10);
+                    switch (encounterChoice)
+                    {
+                        default:        // Gremlin Gang
+                            for (int i = 0; i < 4; i++)
+                            {
+                                encounter.Add(new Enemy(Dict.enemyL[12+enemyRNG.Next(5)]));
+                                break;
+                            }
+                            break;
+                        case 1:         // Large Slime
+                            if (enemyRNG.Next(2) == 0)
+                                encounter.Add(new Enemy(Dict.enemyL[21]));
+                            else
+                                encounter.Add(new Enemy(Dict.enemyL[22]));
+                            break;
+                        case 2:         // Lots of Slimes
+                            for (int i = 0; i < 3; i++)
+                                encounter.Add(new Enemy(Dict.enemyL[6]));
+                            for (int i = 0; i < 2; i++)
+                                encounter.Add(new Enemy(Dict.enemyL[5]));
+                            break;
+                        case 3:         // Blue Slaver
+                            encounter.Add(new Enemy(Dict.enemyL[8]));
+                            break;
+                        case 4:         // Red Slaver
+                            encounter.Add(new Enemy(Dict.enemyL[9]));
+                            break;
+                        case 5:         // 3 Louses
+                            for (int i = 0; i < 3; i++)
+                            {
+                                encounter.Add(new Enemy(Dict.enemyL[2 + enemyRNG.Next(2)]));
+                            }
+                            break;
+                        case 6:         // Fungi Beasts
+                            for (int i = 0; i < 2; i++)
+                                encounter.Add(new Enemy(Dict.enemyL[10]));
+                            break;
+                        case 7:         // Exordium Thugs
+                            encounter.Add(new Enemy(Dict.enemyL[2+enemyRNG.Next(4)]));
+                            switch (enemyRNG.Next(4))
+                            {
+                                default:
+                                    encounter.Add(new Enemy(Dict.enemyL[11]));
+                                    break;
+                                case 1:
+                                    encounter.Add(new Enemy(Dict.enemyL[1]));
+                                    break;
+                                case 2:
+                                    encounter.Add(new Enemy(Dict.enemyL[8]));
+                                    break;
+                                case 3:
+                                    encounter.Add(new Enemy(Dict.enemyL[9]));
+                                    break;
+                            }
+                            break;
+                        case 8:         // Exordium Wildlife
+                            if (enemyRNG.Next(2) == 0)
+                                encounter.Add(new Enemy(Dict.enemyL[0]));
+                            else encounter.Add(new Enemy(Dict.enemyL[10]));
+                            encounter.Add(new Enemy(Dict.enemyL[2 + enemyRNG.Next(4)]));
+                            break;
+                        case 9:         //Looter
+                            encounter.Add(new Enemy(Dict.enemyL[11]));
+                            break;
+                    }
                     break;
                 case 3:
-                    int slimeSwitch = enemyRNG.Next(0, 2);
-                    switch (slimeSwitch)
+                    encounterChoice = enemyRNG.Next(3);
+                    switch (encounterChoice)
                     {
-                        case 0:
-                            list.Add(new Enemy(Dict.enemyL[6]));
-                            list.Add(new Enemy(Dict.enemyL[3]));
+                        default:     // Lagavulin
+                            encounter.Add(new Enemy(Dict.enemyL[18]));
                             break;
-                        case 1:
-                            list.Add(new Enemy(Dict.enemyL[5]));
-                            list.Add(new Enemy(Dict.enemyL[4]));
+                        case 1:     // Gremlin Nob
+                            encounter.Add(new Enemy(Dict.enemyL[17]));
                             break;
-                        default:
+                        case 2:     // 3 Sentries
+                            for (int i = 0; i < 3; i++)
+                                encounter.Add(new Enemy(Dict.enemyL[19]));
                             break;
                     }
                     break;
                 case 4:
-                    list.Add(new Enemy(Dict.enemyL[11]));
+                    encounterChoice = enemyRNG.Next(3);
+                    switch (encounterChoice)
+                    {
+                        default:     // Slime Boss
+                            encounter.Add(new Enemy(Dict.enemyL[20]));
+                            break;
+                        case 1:     // The Guardian
+                            encounter.Add(new Enemy(Dict.enemyL[23]));
+                            break;
+                        case 2:     // Hexaghost
+                            for (int i = 0; i < 3; i++)
+                                encounter.Add(new Enemy(Dict.enemyL[24]));
+                            break;
+                    }
                     break;
-                default: break;
+                case 5:
+                    break;
+                case 6:
+                    break;
+                case 7:
+                    break;
+                case 8:
+                    break;
+                case 9:
+                    break;
+                case 10:
+                    break;
+                case 11:
+                    break;
+                case 12:
+                    break;
+                case 13:
+                    break;
+                case 14:
+                    break;
+                case 15:
+                    break;
+
             }
-            for (int i = 0; i < list.Count; i++)
+            
+            for (int i = 0; i < encounter.Count; i++)
             {
-                list[i].MaxHP = list[i].EnemyHealthSet(list[i].BottomHP, list[i].TopHP);
-                list[i].Hp = list[i].MaxHP;
-                list[i].Hp = list[i].MaxHP;
-                switch (list[i].EnemyID)
+                encounter[i].MaxHP = encounter[i].EnemyHealthSet(encounter[i].BottomHP, encounter[i].TopHP);
+                encounter[i].Hp = encounter[i].MaxHP;
+                encounter[i].Hp = encounter[i].MaxHP;
+                switch (encounter[i].EnemyID)
                 {
                     default:
                         break;
                     case 2 or 7:
                         Random random = new Random();
-                        list[i].AddBuff(5,random.Next(3, 8));
+                        encounter[i].AddBuff(5,random.Next(3, 8));
                         break;
                     case 11:
-                        list[i].AddBuff(18, 15);
+                        encounter[i].AddBuff(18, 15);
                         break;
 
                 }
             }
-            return list;
+            return encounter;
         }
 
         public static int Debug()
@@ -619,7 +819,7 @@ namespace STV
             else return 0;
         }
 
-        public static void MapGeneration()
+        public static List<Room> MapGeneration()
         {
             Console.Clear();
             // Variable Init
@@ -667,8 +867,7 @@ namespace STV
             }
 
             // Sort List by floors for assigning locations and visualization
-            distinct.Sort();
-
+            distinct = distinct.OrderBy(x => x.Floor).ThenBy(x => x.RoomNumber).ToList();
             // Assign locations to each room, starting on bottom floor
             for (int i = 1; i < 16; i++)
             {
@@ -680,19 +879,19 @@ namespace STV
                 if (i == 1)
                 {
                     foreach (Room r in distinct.Where(x => x.Floor == i))
-                        r.Location = "M";
+                        r.ChangeName("Monster");
                     continue;
                 }
                 else if (i == 9)
                 {
                     foreach (Room r in distinct.Where(x => x.Floor == i))
-                        r.Location = "T";
+                        r.ChangeName("Treasure");
                     continue;
                 }
                 else if (i == 15)
                 {
                     foreach (Room r in distinct.Where(x => x.Floor == i))
-                        r.Location = "R";
+                        r.ChangeName("Rest Site");
                     continue;
                 }
 
@@ -719,43 +918,46 @@ namespace STV
                     {
                         choice = rng.Next(merchant);
                         if (choice < monster)
-                            r.Location = "M";
+                            r.ChangeName("Monster");
                         else if (choice < eVent)
-                            r.Location = "?";
+                            r.ChangeName("Event");
                         else if (choice < elite)
                         {
-                            if (r.Connections.Find(x => x.Location == "E") == null)
-                                r.Location = "E";
+                            if (r.Connections.Find(x => x.Location == "Elite") == null)
+                                r.ChangeName("Elite");
                         }
                         else if (choice < restSite)
                         {
-                            if (r.Connections.Find(x => x.Location == "R") == null)
-                                r.Location = "R";
+                            if (r.Connections.Find(x => x.Location == "Rest Site") == null)
+                                r.ChangeName("Rest Site");
                         }
                         else
                         {
-                            if (r.Connections.Find(x => x.Location == "$") == null)
-                                r.Location = "$";
+                            if (r.Connections.Find(x => x.Location == "Merchant") == null)
+                                r.ChangeName("Merchant");
                         }
                         if (r.Location != "Undecided")
                             break;
                     }
                 }
             }
+            return distinct;
+        }
 
-
+        public static void DrawMap(List<Room> map)
+        {
             // Drawing the Map   
+            Console.WriteLine("\t\t\tBoss\t\t\t\n");
             for (int i = 15; i >= 1; i--)
             {
                 for (int j = 0; j < 7; j++)
                 {
-                    if (distinct.Find(x => x.RoomNumber == j && x.Floor == i) == null)
+                    if (map.Find(x => x.RoomNumber == j && x.Floor == i) == null)
                         Console.Write(" \t");
-                    else Console.Write(distinct.Find(x => x.RoomNumber == j && x.Floor == i).Location + "\t");
+                    else Console.Write(map.Find(x => x.RoomNumber == j && x.Floor == i).ShortHand + "\t");
                 }
                 Console.WriteLine("\n\n");
             }
-            Console.ReadKey();
         }
     }
 }

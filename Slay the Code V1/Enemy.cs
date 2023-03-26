@@ -9,7 +9,6 @@
 
         public Enemy(int enemyID, string name, int bottomHP, int topHP, string intent)
         {
-            //this.Type = "Enemy";
             this.EnemyID = enemyID;
             this.Name = name;
             this.MaxHP = topHP;
