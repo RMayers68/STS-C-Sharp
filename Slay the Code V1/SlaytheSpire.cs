@@ -124,7 +124,7 @@ namespace STV
             switch (location)
             {
                 default: break;
-                /*case "Monster":
+                case "Monster":
                     if (hero.EasyFights < 3)
                     {
                         encounter = CreateEncounter(1+actModifier);
@@ -132,7 +132,7 @@ namespace STV
                     }
                     else encounter = CreateEncounter(2+actModifier);
                     Combat(hero, encounter, deck);
-                    break;*/
+                    break;
                 case "Event":
                     EventDecider(hero,deck);
                     break;
@@ -556,9 +556,9 @@ namespace STV
 
         public static string Tab(int i)
         {
-            string tab = "";
+            string tab = " ";
             for (int j = 0; j < i; j++)
-                tab += "\t";
+                tab += "\t";             
             return tab;
         }
 
@@ -947,18 +947,74 @@ namespace STV
         public static void DrawMap(List<Room> map)
         {
             // Drawing the Map   
-            Console.WriteLine("\t\t\tBoss\t\t\t\n");
+            Console.WriteLine("\t   Boss\t\n");
             for (int i = 15; i >= 1; i--)
             {
+                // Rules for drawing lines with rooms
                 for (int j = 0; j < 7; j++)
                 {
                     if (map.Find(x => x.RoomNumber == j && x.Floor == i) == null)
-                        Console.Write(" \t");
-                    else Console.Write(map.Find(x => x.RoomNumber == j && x.Floor == i).ShortHand + "\t");
+                        Console.Write("    ");
+                    else Console.Write(map.Find(x => x.RoomNumber == j && x.Floor == i).ShortHand + "   ");
                 }
-                Console.WriteLine("\n\n");
+                Console.WriteLine();
+                // Rules for drawing paths inbetween Rooms
+                for (int j = 0; j < 7; j++)
+                {
+                    Room currentRoom = FindRoom(i, j, map), nextRoom = FindRoom(i, j + 1, map);
+                    bool currentExists = currentRoom != null, nextExists = nextRoom != null;
+
+                    //Null move position to next to check
+                    if (!currentExists)
+                    {
+                        Console.Write("  ");
+                    }
+                    else
+                    {
+                        // Middle Check
+                        if (FindRoom(i - 1, j, currentRoom.Connections) == null)
+                            Console.Write("  ");
+                        else
+                            Console.Write("| ");
+                    }
+                            
+                    // Diagonal Checks
+                    if (j != 6)
+                    {
+                        bool leftPathExists = false, rightPathExists = false;
+                        if (nextExists)
+                            leftPathExists = FindRoom(i - 1, j, nextRoom.Connections) != null;
+                        if (currentExists)
+                            rightPathExists = FindRoom(i - 1, j + 1, currentRoom.Connections) != null;
+                        switch (rightPathExists, leftPathExists)
+                        {
+                            default:
+                                Console.Write("  ");
+                                break;
+                            case (true, true):
+                                Console.Write("X ");
+                                break;
+                            case (true, false):
+                                Console.Write("\\ ");
+                                break;
+                            case (false, true):
+                                Console.Write("/ ");
+                                break;
+                        }
+
+                    }
+                    else; //Right check on last room is impossible path, skip
+                }                   
+                Console.WriteLine();
             }
+        }
+
+        public static Room FindRoom(int i, int j, List<Room> list)
+        {
+            Room room = list.Find(x => x.RoomNumber == j && x.Floor == i);
+            return room;
         }
     }
 }
+
 

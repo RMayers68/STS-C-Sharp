@@ -23,7 +23,7 @@
             this.Location = room.Location;
             this.Floor = room.Floor;
             this.RoomNumber = room.RoomNumber;
-            Connections = new List<Room>();
+            Connections = room.Connections;
         }
 
         // location modifiers
@@ -33,27 +33,27 @@
             {
                 default: break;
                 case "Monster":
-                    Location = "Monster";
+                    Location = name;
                     ShortHand = 'M';
                     break;
                 case "Event":
-                    Location = "Event";
+                    Location = name;
                     ShortHand = '?';
                     break;
                 case "Elite":
-                    Location = "Elite";
+                    Location = name;
                     ShortHand = 'E';
                     break;
                 case "Rest Site":
-                    Location = "Rest Site";
+                    Location = name;
                     ShortHand = 'R';
                     break;
                 case "Merchant":
-                    Location = "Merchant";
+                    Location = name;
                     ShortHand = '$';
                     break;
                 case "Treasure":
-                    Location = "Treasure";
+                    Location = name;
                     ShortHand = 'T';
                     break;
 
