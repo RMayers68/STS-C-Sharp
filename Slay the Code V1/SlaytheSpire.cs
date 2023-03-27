@@ -17,7 +17,7 @@ namespace STV
             //MAIN MENU
             while (menuChoice != 3)                                                     
             {
-                Console.Clear();
+                ScreenWipe();
                 Console.BackgroundColor = ConsoleColor.Black;
                 ConsoleTableExt.ConsoleTableBuilder.From(mainMenu).ExportAndWriteLine(TableAligntment.Center);
                 while (!Int32.TryParse(Console.ReadLine(), out menuChoice) || menuChoice < 1 || menuChoice > 4)
@@ -25,7 +25,7 @@ namespace STV
                 switch (menuChoice)
                 {
                     case 1:      // PLAY                                                       
-                        Console.Clear();
+                        ScreenWipe();
                         int heroChoice = 0;
                         Console.WriteLine("What hero would you like to choose? Each comes with their own set of cards and playstyles:");
                         string[] characters = { "1: Ironclad", "2: Silent", "3: Defect", "4: Watcher" };
@@ -34,28 +34,28 @@ namespace STV
                         while (!Int32.TryParse(Console.ReadLine(), out heroChoice) || heroChoice < 1 || heroChoice > 4)
                             Console.WriteLine("Invalid input, enter again:");
                         Hero hero = new Hero(Dict.heroL[heroChoice]);
-                        Console.Clear();
                         switch (hero.Name)
                         {
                             case "Ironclad":
                                 hero.Relics.Add(new Relic(Dict.relicL[0]));
-                                //Console.BackgroundColor = ConsoleColor.DarkRed;
+                                Console.BackgroundColor = ConsoleColor.DarkRed;
                                 break;
                             case "Silent":
                                 hero.Relics.Add(new Relic(Dict.relicL[1]));
-                                //Console.BackgroundColor = ConsoleColor.DarkGreen;
+                                Console.BackgroundColor = ConsoleColor.DarkGreen;
                                 break;
                             case "Defect":
                                 hero.Relics.Add(new Relic(Dict.relicL[2]));
-                                //Console.BackgroundColor = ConsoleColor.DarkCyan;
+                                Console.BackgroundColor = ConsoleColor.DarkCyan;
                                 hero.OrbSlots = 3;
                                 break;
                             case "Watcher":
                                 hero.Relics.Add(new Relic(Dict.relicL[3]));
-                                //Console.BackgroundColor = ConsoleColor.DarkBlue;
+                                Console.BackgroundColor = ConsoleColor.DarkBlue;
                                 hero.Stance = "None";
                                 break;
                         }
+                        ScreenWipe();
                         List<Card> deck = CreateDeck(hero);
                         Console.WriteLine($"You have chosen the {hero.Name}! Here is the {hero.Name} Deck.\n");                    
                         ConsoleTableExt.ConsoleTableBuilder.From(deck).ExportAndWriteLine(TableAligntment.Center);
@@ -65,23 +65,57 @@ namespace STV
                         {
                             Console.WriteLine($"You have entered Act {act}!");
                             List<Room> map = MapGeneration();
-                            List<Room> choices = new List<Room>();
+                            List<Room> choices = new List<Room>();                            
                             Room activeRoom = null;
                             for (int floor = 1; floor <= 16; floor++)
                             {
-                                if (floor == 1)
-                                    choices = map.FindAll(x => x.Floor == 1);
-                                else choices = activeRoom.Connections.FindAll(x => x.Floor == floor);
-                                DrawMap(map);
                                 int roomNumber = 0;
-                                Console.WriteLine("\nWhat room would you like to enter?\n");
-                                foreach (Room r in choices)
+                                DrawMap(map);
+                                if (floor == 1)
                                 {
-                                    Console.Write(r.ToString() + "\t");
+                                    choices = map.FindAll(x => x.Floor == 1);
+                                    Console.WriteLine("\nWhat room would you like to enter?\n");
+                                    foreach (Room r in choices)
+                                    {
+                                        Console.Write(r.ToString() + "\t");
+                                    }                                   
+                                    while (!Int32.TryParse(Console.ReadLine(), out roomNumber) || choices.Find(x => x.RoomNumber == roomNumber) == null)
+                                        Console.WriteLine("Invalid input, enter again:");
+                                    activeRoom = new Room(choices.Find(x => x.RoomNumber == roomNumber));
                                 }
-                                while (!Int32.TryParse(Console.ReadLine(), out roomNumber) || choices.Find(x => x.RoomNumber == roomNumber) == null)
-                                    Console.WriteLine("Invalid input, enter again:");
-                                activeRoom = new Room(choices.Find(x => x.RoomNumber == roomNumber));
+                                else
+                                {
+                                    roomNumber = activeRoom.RoomNumber;
+                                    Dictionary<string,int> directions = new();
+                                    Console.WriteLine("\nWhat path would you like to go down?\n");
+                                    for (int i = -1; i < 2; i++)
+                                    {
+                                        if (FindRoom(floor, activeRoom.RoomNumber + i, activeRoom.Connections) != null)
+                                            switch (i) 
+                                            {
+                                                case -1:
+                                                    directions.Add("L", roomNumber - 1);
+                                                    Console.Write("(L)eft\t");
+                                                    break;
+                                                case 0:
+                                                    directions.Add("M", roomNumber);
+                                                    Console.Write("(M)iddle\t");
+                                                    break;
+                                                default:
+                                                    directions.Add("R", roomNumber + 1);
+                                                    Console.Write("(R)ight\t");
+                                                    break;
+                                            }
+                                    }
+                                    string directionChoice = Console.ReadLine();
+                                    while (!directions.ContainsKey(directionChoice))
+                                    {
+                                        Console.WriteLine("Invalid input, enter again:");
+                                        directionChoice = Console.ReadLine();
+                                    }
+                                    activeRoom = new Room(FindRoom(floor, directions[directionChoice],map));
+                                }                               
+                                
                                 RoomDecider(hero,deck,activeRoom.Location,act*5-5);
                             }
                         }
@@ -105,7 +139,7 @@ namespace STV
                         
                         break;
                     case 2:                                                             // LIBRARY
-                        Console.Clear();
+                        ScreenWipe();
                         ConsoleTableBuilder.From(Dict.cardL.Values.ToList()).ExportAndWriteLine();
                         Pause();
                         break;
@@ -124,7 +158,7 @@ namespace STV
             switch (location)
             {
                 default: break;
-                case "Monster":
+                /*case "Monster":
                     if (hero.EasyFights < 3)
                     {
                         encounter = CreateEncounter(1+actModifier);
@@ -148,7 +182,7 @@ namespace STV
                 case "Elite":
                     encounter = CreateEncounter(3 + actModifier);
                     Combat(hero, encounter, deck);
-                    break;
+                    break;*/
                 case "Boss":
                     encounter = CreateEncounter(4 + actModifier);
                     Combat(hero, encounter, deck);
@@ -164,7 +198,7 @@ namespace STV
         public static void Combat(Hero hero, List<Enemy> Encounter, List<Card> Deck)
         {
             Random cardRNG = new();
-            Console.Clear();
+            ScreenWipe();
             Console.WriteLine("Next encounter:");
             foreach (Actor actor in Encounter) 
                 Console.WriteLine(actor.Name);
@@ -243,7 +277,7 @@ namespace STV
                 Console.WriteLine("Enemy's Turn!\n");
                 EnemyTurn(hero, Encounter, drawPile, discardPile, hand);
             }
-            Console.Clear();
+            ScreenWipe();
             if (hero.Hp == 0)
                 Console.WriteLine("\nYou were Defeated!\n");
             else
@@ -269,7 +303,7 @@ namespace STV
             int playerChoice = 0;
             while (playerChoice != 5 && (!Encounter.All(x => x.Hp == 0)) && hero.Hp != 0)
             {
-                Console.Clear();
+                ScreenWipe();
 
                 CombatMenu(hero, Encounter, drawPile, hand, discardPile,exhaustPile,turnNumber);
                 while (!Int32.TryParse(Console.ReadLine(), out playerChoice) || playerChoice < 1 || playerChoice > 5)
@@ -338,7 +372,7 @@ namespace STV
                         HealthUnderZero(hero,Encounter);
                         break;
                     case 4:                                                                             // Enemy Info Menu
-                        Console.Clear();
+                        ScreenWipe();
                         for (int i = 0; i < Encounter.Count; i++)
                         {
                             Console.WriteLine("************************************************************************\n");
@@ -359,7 +393,7 @@ namespace STV
                         {
                             Encounter[i].Block = 0;
                         }
-                        Console.Clear();
+                        ScreenWipe();
                         break;
                 }
 
@@ -562,6 +596,11 @@ namespace STV
             return tab;
         }
 
+        public static void ScreenWipe()
+        {
+            Console.Clear();
+            Console.WriteLine("\x1b[3J");
+        }
         // INITILIAZE METHODS
 
         public static List<Card> CreateDeck(Actor hero)
@@ -821,7 +860,6 @@ namespace STV
 
         public static List<Room> MapGeneration()
         {
-            Console.Clear();
             // Variable Init
             Random rng = new Random();
             Dictionary<int, List<Room>> MapTemplate = new();
@@ -946,6 +984,7 @@ namespace STV
 
         public static void DrawMap(List<Room> map)
         {
+            ScreenWipe();
             // Drawing the Map   
             Console.WriteLine("\t   Boss\t\n");
             for (int i = 15; i >= 1; i--)
