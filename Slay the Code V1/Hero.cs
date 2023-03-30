@@ -24,6 +24,7 @@ namespace STV
             this.Buffs = new();
             this.Relics = new();
             this.Potions = new();
+            this.Actions = new();
             this.Orbs = new();
             this.OrbSlots = 1;
             this.Gold = 99;
@@ -42,6 +43,7 @@ namespace STV
                 this.Buffs = new();
                 this.Relics = new();
                 this.Potions = new();
+                this.Actions = new();
                 this.Orbs = new();
                 this.OrbSlots = 1;
                 this.Gold = 99;
@@ -177,12 +179,18 @@ namespace STV
             }
         }
 
+        // Method for adding to current energy amount for the turn
         public void GainTurnEnergy(int energy)
         {
             this.Energy += energy;
             Console.WriteLine($"The {Name} gained {energy} Energy!");
         }
 
+        //  Method for adding to current max amount of energy that lasts for the battle.
+        public void GainBattleEnergy(int energy)
+        {
+            this.MaxEnergy += energy;
+        }
         public void GoldChange(int amount) //For when rewards are set
         {
             Gold += amount;

@@ -1,6 +1,7 @@
 ﻿// Richard Mayers, Sept 11th, 2022
 
 using ConsoleTableExt;
+using System.Collections.Generic;
 
 namespace STV
 {
@@ -340,19 +341,7 @@ namespace STV
                                 Console.WriteLine($"You failed to play the card. You need {card.EnergyCost} to play {card.Name}.");
                             else
                             {
-                                hand.Remove(card);
-                                Console.WriteLine($"You played {card.Name}.");                               
-                                hero.Energy -= (Int32.Parse(card.EnergyCost));
-                                card.CardAction(card, hero, Encounter, drawPile, discardPile, hand, exhaustPile,rng);
-                                if (card.Description.Contains("Exhaust"))
-                                    card.Exhaust(exhaustPile);
-                                else if (card.Name == "Tantrum")
-                                {
-                                    drawPile.Add(card);
-                                    Shuffle(drawPile, rng);
-                                }                                  
-                                else if (card.Type != "Power")
-                                    discardPile.Add(card);
+                                card.UseCard(hero, Encounter, drawPile, discardPile, hand, exhaustPile, rng);
                                 HealthUnderZero(hero, Encounter);
                             }
                             Pause();
@@ -462,19 +451,17 @@ namespace STV
 
         public static void DrawCards(List<Card> drawPile, List<Card> hand, List<Card> discardPile, Random rng, int cards)
         {
-            int cardsDrew = 0;
             while (hand.Count < 10)
             {
                 if (drawPile.Count == 0)
                     Discard2Draw(drawPile, discardPile, rng);
                 if (drawPile.Count == 0)
                     break;
-                int n = drawPile.Count;
-                hand.Add(drawPile[n - 1]);
-                drawPile.RemoveAt(n - 1);
-                cardsDrew++;
-                if (cardsDrew == cards)
-                    break;
+                hand.Add(drawPile[drawPile.Count - 1]);
+                drawPile.RemoveAt(drawPile.Count - 1);
+                cards--;
+                if (cards == 0)
+                    return;
             }
         }
 
@@ -495,6 +482,13 @@ namespace STV
             while (!Int32.TryParse(Console.ReadLine(), out cardChoice) || cardChoice < 1 || cardChoice > list.Count)
                 Console.WriteLine("Invalid input, enter again:");
             return list[cardChoice-1];
+        }
+
+        public static List<Card> RandomCards(Hero hero, int count)
+        {
+            List<Card> cards = new List<Card>();
+            // add in randomness after cards are done
+            return cards;
         }
 
         //MENU AND UI METHODS
