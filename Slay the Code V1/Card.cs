@@ -102,13 +102,27 @@ namespace STV
 					hero.SingleAttack(encounter[target], 6);
 					discardPile.Add(new Card(card));
 					break;
+				case "Armaments":
+					hero.GainBlock(5);
+					//Upgrade card
+					break;
+				case "Barricade":
+					hero.AddBuff(20, 1);
+					break;				
 				case "Bash":
 					target = hero.DetermineTarget(encounter);
 					hero.SingleAttack(encounter[target], 8);
 					encounter[target].AddBuff(1, 2);
 					break;
-				case "Bloodletting":
-					hero.GainEnergy(1);
+                case "Battle Trance":
+                    STS.DrawCards(drawPile, discardPile, hand, rng, 3);
+                    hero.AddBuff(21, 1);
+                    break;
+				case "Beserk":
+					hero.AddBuff(1, 2);
+					hero.
+                case "Bloodletting":
+					hero.GainTurnEnergy(1);
 					hero.SelfDamage(3);
 					break;
 				case "Bludgeon":
@@ -139,7 +153,7 @@ namespace STV
 					target = hero.DetermineTarget(encounter);
 					hero.SingleAttack(encounter[target], 5);
 					if (encounter[target].Buffs.Find(x => x.BuffID.Equals(1)) != null)
-						hero.GainEnergy(1);
+						hero.GainTurnEnergy(1);
 					break;
 				case "Entrench":
 					hero.Block *= 2;
@@ -210,7 +224,7 @@ namespace STV
 					break;
 				case "Offering":
 					hero.SelfDamage(6);
-					hero.GainEnergy(2);
+					hero.GainTurnEnergy(2);
 					STS.DrawCards(drawPile, hand, discardPile, rng, 3);
 					break;
 				case "Pommel Strike":
@@ -241,7 +255,7 @@ namespace STV
 					hero.CardBlock(5);
 					break;
 				case "Seeing Red":
-					hero.GainEnergy(2);
+					hero.GainTurnEnergy(2);
 					break;
 				case "Shockwave":
 					foreach (var enemy in encounter)
@@ -293,7 +307,7 @@ namespace STV
 					STS.Discard(hand, discardPile,STS.ChooseCard(hand));
 					break;
 				case "Adrenaline":
-					hero.GainEnergy(1);
+					hero.GainTurnEnergy(1);
 					STS.DrawCards(drawPile, hand, discardPile, rng, 2);
 					break;
 				case "Alchemize":
@@ -326,7 +340,7 @@ namespace STV
 				case "Concentrate":
 					for (int i= 0; i < 3; i++)
 						STS.Discard(hand, discardPile,STS.ChooseCard(hand));
-					hero.GainEnergy(2);
+					hero.GainTurnEnergy(2);
 					break;
 				case "Cloak and Dagger":
 					hero.CardBlock(6);
@@ -384,7 +398,7 @@ namespace STV
 					target = hero.DetermineTarget(encounter);
 					hero.SingleAttack(encounter[target], 5);
 					if (encounter[target].Buffs.Find(x => x.BuffID == 2) != null)
-						hero.GainEnergy(1);
+						hero.GainTurnEnergy(1);
 					break;
 				case "Leg Sweep":
 					target = hero.DetermineTarget(encounter);
@@ -464,7 +478,7 @@ namespace STV
 					break;
 																																//DEFECT CARDS
 				case "Aggregate":
-					hero.GainEnergy(drawPile.Count / 4);
+					hero.GainTurnEnergy(drawPile.Count / 4);
 					break;
 				case "All For One":
 					target = hero.DetermineTarget(encounter);
@@ -552,7 +566,7 @@ namespace STV
 					hero.ChannelOrb(encounter, 2);
 					break;
 				case "Double Energy":
-					hero.GainEnergy(hero.Energy*2);
+					hero.GainTurnEnergy(hero.Energy*2);
 					break;
 				case "Dualcast":
 					hero.Evoke(encounter);
@@ -566,7 +580,7 @@ namespace STV
 						hero.Orbs.Remove(Orb);
 						fission++;
 					}
-					hero.GainEnergy(fission);
+					hero.GainTurnEnergy(fission);
 					STS.DrawCards(drawPile, hand, discardPile, rng, fission);
 					break;
 				case "Fusion":
@@ -681,7 +695,7 @@ namespace STV
 					target = hero.DetermineTarget(encounter);
 					hero.SingleAttack(encounter[target], 24);
 					if (encounter[target].Hp <= 0)
-						hero.GainEnergy(3);
+						hero.GainTurnEnergy(3);
 					break;
 				case "Sweeping Beam":
 					hero.AttackAll(encounter, 6);
@@ -692,7 +706,7 @@ namespace STV
 						hero.ChannelOrb(encounter,0);
 					break;
 				case "TURBO":
-					hero.GainEnergy(2);
+					hero.GainTurnEnergy(2);
 					discardPile.Add(Dict.cardL[359]);
 					break;
 				case "Zap":
@@ -999,7 +1013,7 @@ namespace STV
 					hero.SingleAttack(encounter[target], drawPile.Count);
 					break;
 				case "Miracle":
-					hero.GainEnergy(1);
+					hero.GainTurnEnergy(1);
 					break;
 				case "Panacea":
 					hero.AddBuff(8, 1);

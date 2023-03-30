@@ -173,11 +173,11 @@ namespace STV
             }
             else
             {
-                GainEnergy(2);
+                GainTurnEnergy(2);
             }
         }
 
-        public void GainEnergy(int energy)
+        public void GainTurnEnergy(int energy)
         {
             this.Energy += energy;
             Console.WriteLine($"The {Name} gained {energy} Energy!");

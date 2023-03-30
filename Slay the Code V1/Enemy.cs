@@ -4,7 +4,7 @@
     {
         public int EnemyID { get; set; } // ID correlates to method ran (Name without spaces)
         public string? Intent { get; set; }
-        public List<string> Actions { get; set; }
+        
 
 
         public Enemy(int enemyID, string name, int bottomHP, int topHP, string intent)

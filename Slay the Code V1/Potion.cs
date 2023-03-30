@@ -39,7 +39,7 @@
                     hero.NonAttackDamage(encounter[target], 20);
                     break;
                 case "Energy Potion":
-                    hero.GainEnergy(2);
+                    hero.GainTurnEnergy(2);
                     break;
                 case "Strength Potion":
                     hero.AddBuff(4,2);

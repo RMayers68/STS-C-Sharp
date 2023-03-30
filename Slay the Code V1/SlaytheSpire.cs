@@ -107,11 +107,11 @@ namespace STV
                                                     break;
                                             }
                                     }
-                                    string directionChoice = Console.ReadLine();
+                                    string directionChoice = Console.ReadLine().ToUpper();
                                     while (!directions.ContainsKey(directionChoice))
                                     {
                                         Console.WriteLine("Invalid input, enter again:");
-                                        directionChoice = Console.ReadLine();
+                                        directionChoice = Console.ReadLine().ToUpper();
                                     }
                                     activeRoom = new Room(FindRoom(floor, directions[directionChoice],map));
                                 }                               

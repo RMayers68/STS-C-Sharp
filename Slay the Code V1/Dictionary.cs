@@ -17,7 +17,7 @@
             { 2, new Card(2, "Barricade", "Power", "Rare", "3", "Block no longer expires at the start of your turn.") },
             { 3, new Card(3, "Bash", "Attack", "Common", "2", "Deal 8 damage. Apply 2 Vulnerable.") },
             { 4, new Card(4, "Battle Trance", "Skill", "Uncommon", "0", "Draw 3 cards. You cannot draw additional cards this turn.") },
-            { 5, new Card(5, "Berserk", "Power", "Rare", "0", "Gain 2 Vulnerable. At the start of your turn, gain 1 .") },
+            { 5, new Card(5, "Berserk", "Power", "Rare", "0", "Gain 2 Vulnerable. At the start of your turn, gain 1 Energy.") },
             { 6, new Card(6, "Blood for Blood", "Attack", "Uncommon", "4", "Costs 1 less  for each time you lose HP in combat. Deal 18 damage.") },
             { 7, new Card(7, "Bloodletting", "Skill", "Uncommon", "0", "Lose 3 HP. Gain 2 Energy.") },
             { 8, new Card(8, "Bludgeon", "Attack", "Rare", "3", "Deal 32 damage.") },
@@ -29,7 +29,7 @@
             { 14, new Card(14, "Cleave", "Attack", "Common", "1", "Deal 8 damage to ALL enemies.") },
             { 15, new Card(15, "Clothesline", "Attack", "Common", "2", "Deal 12 damage. Apply 2 Weak.") },
             { 16, new Card(16, "Combust", "Power", "Uncommon", "1", "At the end of your turn, lose 1 HP and deal 5 damage to ALL enemies.") },
-            { 17, new Card(17, "Corruption", "Power", "Uncommon", "3", "Skills cost 0. Whenever you play a Skill, Exhaust it.") },
+            { 17, new Card(17, "Corruption", "Power", "Rare", "3", "Skills cost 0. Whenever you play a Skill, Exhaust it.") },
             { 18, new Card(18, "Dark Embrace", "Power", "Rare", "2", "Whenever a card is Exhausted, draw 1 card.") },
             { 19, new Card(19, "Demon Form", "Power", "Rare", "3", "At the start of each turn, gain 2 Strength.") },
             { 20, new Card(20, "Disarm", "Skill", "Uncommon", "1", "Enemy loses 2 Strength. Exhaust.") },
@@ -388,7 +388,7 @@
 
         public static Dictionary<int, Buff> buffL = new()                                            // Buffs and Debuffs Reference Dictionary
         {
-            { 0, new Buff(0, "",false, 0) },
+            { 0, new Buff(0, "",false, 0,) },
             { 1, new Buff(1, "Vulnerable", false, 1) },
             { 2, new Buff(2, "Weak", false, 1) },
             { 3, new Buff(3, "Ritual", true, 2) },
@@ -396,9 +396,9 @@
             { 5, new Buff(5,"Curl Up", true, 3) },
             { 6, new Buff(6,"Frail", false, 1)},
             { 7, new Buff(7,"Focus", true, 3)},
-            { 8, new Buff(8,"Artifact", true, 5)},
+            { 8, new Buff(8,"Artifact", true, 4)},
             { 9, new Buff(9,"Dexterity", true, 3)},
-            { 10, new Buff(10,"Mantra", true, 5)},
+            { 10, new Buff(10,"Mantra", true, 4)},
             { 11, new Buff(11,"Mental Fortress", true, 3)},
             { 12, new Buff(12,"Mark", false, 3)},
             { 13, new Buff(13,"No Block", false, 1)},
@@ -408,15 +408,28 @@
             { 17, new Buff(17,"Sharp Hide",true,3)},
             { 18, new Buff(18,"Thievery",true,3)},
             { 19, new Buff(19,"Enrage",true,3)},
-            { 20, new Buff(20,"Wrath",true,3)},
+            { 20, new Buff(20,"Barricade",true,3)},
+            { 21, new Buff(21,"No Draw",false,2) },
+            { 22, new Buff(22,"Energized",true,2) },
+            { 23, new Buff(23,"Brutality",true,3) },
+            { 24, new Buff(24,"Combust",true,3) },
+            { 25, new Buff(25,"Corruption",true,3) },
+            { 26, new Buff(26,"Dark Embrace",true,3) },
+            { 27, new Buff(27,"Double Tap", true, 4)},
+            { 28, new Buff(28,"Evolve", true, 3)},
+            { 29, new Buff(29,"Feel No Pain", true, 3)},
+            { 30, new Buff(30,"Strength Down", true, 3)},
+            { 31, new Buff(31,"Juggernaut", true, 3)},
+            { 32, new Buff(32,"Metallicize", true, 3)},
+            { 33, new Buff(33,"Rage", true, 3)},
+            { 34, new Buff(34,"Rupture", true, 3)},
 
             /*
              * Buff types:
              * 1: Duration effect
-             * 2: Proc Intensity effect
+             * 2: Next Turn Intensity effect
              * 3: Constant Intensity effect
-             * 4: One time Intensity effect
-             * 5: Counter
+             * 4: Counter
             */
         };
 

@@ -14,7 +14,7 @@
 
         //constructor
 
-        public Buff(int buffID, string name, bool buffDebuff, byte type)
+        public Buff(int buffID, string name, bool buffDebuff, byte type, string description)
         {
             this.BuffID = buffID;
             this.Name = name;
@@ -48,6 +48,29 @@
                 case 9: return $"Increases Block gained from Cards by {Intensity}.";
                 case 10: return $"When you obtain 10 Mantra, enter Divinity. (current Mantra:{Counter})";
                 case 11: return $"Whenever you switch stances, gain {Intensity}.";
+                case 12: return $"Whenever you play Pressure Points, all enemy with Mark loses {Intensity} HP.";
+                case 13: return $"You may not gain Block from cards for the next {Duration} turns.";
+                case 14: return $"You may not play any Attacks this turn.";
+                case 15: return $"This enemy is sleeping and damaging its health will awaken it.";
+                case 16: return $"After receiving {Intensity} damage, changes to a defensive mode.";
+                case 17: return $"Whenever you play an attack, take {Intensity} damage.";
+                case 18: return $"Steals {Intensity} Gold whenever it attacks.";
+                case 19: return $"Whenever you play a skill, gains {Intensity} Strength.";
+                case 20: return $"Block is not removed at the start of turn.";
+                case 21: return $"You may not draw any more cards this turn.";
+                case 22: return $"Gain {Intensity} additional Energy next turn.";
+                case 23: return $"At the start of your turn, lose {Intensity} HP and draw {Intensity} cards.";
+                case 24: return $"At the end of your turn, lose {Intensity} HP and deal {Intensity * 5} damage to ALL enemies.";
+                case 25: return $"Skills cost 0. Whenever you play a Skill, Exhaust it.";
+                case 26: return $"Whenever a card is Exhausted, draw {Intensity} card.";
+                case 27: return $"This turn, your next {Counter} Attack is played twice.";
+                case 28: return $"Whenever you draw a Status, draw {Intensity} card.";
+                case 29: return $"Whenever a card is Exhausted, gain {Intensity} Block.";
+                case 30: return $"Lose {Intensity} Strength at the end of the turn.";
+                case 31: return $"Whenever you gain Block, deal {Intensity} damage to a random enemy.";
+                case 32: return $"At the end of your turn, gain {Intensity} Block.";
+                case 33: return $"Whenever you play an Attack this turn, gain {Intensity} Block.";
+                case 34: return $"Whenever you lose HP from a card, gain {Intensity} Strength.";
             }
         }
 

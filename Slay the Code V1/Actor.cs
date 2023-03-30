@@ -12,11 +12,11 @@
         public int Gold { get; set; }
         public string? Stance { get; set; }
         public List<Buff> Buffs { get; set; }
+        public List<string> Actions { get; set; }
 
 
-
-		//constructor
-		public Actor() { }
+        //constructor
+        public Actor() { }
 
 
 		// Inclusive methods
@@ -47,15 +47,15 @@
 				Buffs.Add(new Buff(Dict.buffL[ID]));
 			byte b = Dict.buffL[ID].Type switch
 			{
-				byte i when i >= 0 && i <= 1 => 1,
-				byte i when i >= 2 && i <= 4 => 2,
-				byte i when i >= 5 && i <= 5 => 3,
+				byte i when i == 1 =>  1,
+				byte i when i >= 2 && i <= 3 => 2,
+				byte i when i == 4 => 3,
 			};
 			switch (b)
 			{
 				case 1:
 					Buffs.Find(y => y.BuffID.Equals(ID)).DurationSet(effect);
-					Console.WriteLine($"{Name} is now {Dict.buffL[ID].Name} for {effect} turns!");
+					Console.WriteLine($"{Name} is now {Dict.buffL[ID].Name} for {Buffs.Find(y => y.BuffID.Equals(ID)).Duration} turns!");
 					break;
 				case 2:
 					Buffs.Find(y => y.BuffID.Equals(ID)).IntensitySet(effect);
