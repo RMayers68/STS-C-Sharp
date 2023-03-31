@@ -80,9 +80,9 @@ namespace STV
                                     {
                                         Console.Write(r.ToString() + "\t");
                                     }                                   
-                                    while (!Int32.TryParse(Console.ReadLine(), out roomNumber) || choices.Find(x => x.RoomNumber == roomNumber) == null)
+                                    while (!Int32.TryParse(Console.ReadLine(), out roomNumber) || FindRoom(floor,roomNumber,choices) == null)
                                         Console.WriteLine("Invalid input, enter again:");
-                                    activeRoom = new Room(choices.Find(x => x.RoomNumber == roomNumber));
+                                    activeRoom = new Room(FindRoom(floor, roomNumber, choices));
                                 }
                                 else
                                 {
@@ -196,21 +196,21 @@ namespace STV
             return;
         }
         //COMBAT METHODS
-        public static void Combat(Hero hero, List<Enemy> Encounter, List<Card> Deck)
+        public static void Combat(Hero hero, List<Enemy> encounter, List<Card> deck)
         {
             Random cardRNG = new();
             ScreenWipe();
             Console.WriteLine("Next encounter:");
-            foreach (Actor actor in Encounter) 
+            foreach (Actor actor in encounter) 
                 Console.WriteLine(actor.Name);
-            List<Card> drawPile = Shuffle(Deck, cardRNG);
+            List<Card> drawPile = new(Shuffle(deck, cardRNG));
             List<Card> hand = new();
             List<Card> discardPile = new();
             List<Card> exhaustPile = new();
             int turnNumber = 0;
 
             //Check HP values to end encounter when one group is reduced to 0
-            while ((!Encounter.All(x => x.Hp == 0)) && (hero.Hp != 0) && Encounter.Count > 0)
+            while ((!encounter.All(x => x.Hp == 0)) && (hero.Hp != 0) && encounter.Count > 0)
             {
                 // Modify buffs for hero
                 for (int i = 0; i < hero.Buffs.Count; i++)                                          
@@ -224,32 +224,32 @@ namespace STV
                     }
                 }
                 // Same for enemy
-                for (int i = 0; i < Encounter.Count; i++)
+                for (int i = 0; i < encounter.Count; i++)
                 {
-                    for (int j = Encounter[i].Buffs.Count - 1; j >= 0; j--)
+                    for (int j = encounter[i].Buffs.Count - 1; j >= 0; j--)
                     {
                         bool removeBuff = false;
-                        Encounter[i].Buffs[j].DurationDecrease();
-                        if (Encounter[i].Buffs[j].DurationEnded())
+                        encounter[i].Buffs[j].DurationDecrease();
+                        if (encounter[i].Buffs[j].DurationEnded())
                         {
                             string buffDebuff = "";
-                            if (Encounter[i].Buffs[j].BuffDebuff)
+                            if (encounter[i].Buffs[j].BuffDebuff)
                                 buffDebuff = "Buff";
                             else buffDebuff = "Debuff";
-                            Console.WriteLine($"\nThe {Encounter[i].Name}'s {Encounter[i].Buffs[j].Name} {buffDebuff} has ran out.");
+                            Console.WriteLine($"\nThe {encounter[i].Name}'s {encounter[i].Buffs[j].Name} {buffDebuff} has ran out.");
                             removeBuff = true;
                         }
-                        if (Encounter[i].Buffs[j].Name == "Ritual" && turnNumber != 1)
-                            Encounter[i].AddBuff(4,Encounter[i].Buffs.Find(x => x.Name.Equals("Ritual")).Intensity.GetValueOrDefault(3)); // Adds Ritual Intensity to Strength
+                        if (encounter[i].Buffs[j].Name == "Ritual")
+                            encounter[i].AddBuff(4, Actor.FindBuff("Ritual", encounter[i].Buffs).Intensity.GetValueOrDefault(3)); // Adds Ritual Intensity to Strength
                         if (removeBuff)
-                            Encounter[i].Buffs.RemoveAt(j);
+                            encounter[i].Buffs.RemoveAt(j);
                     }
                 }
                 turnNumber++;                                                        
-                for (int i = 0; i < Encounter.Count; i++)
-                    Encounter[i].SetEnemyIntent(turnNumber,Encounter);
+                for (int i = 0; i < encounter.Count; i++)
+                    encounter[i].SetEnemyIntent(turnNumber,encounter);
                 Pause();
-                PlayerTurn(hero, Encounter, drawPile, hand, discardPile,cardRNG,exhaustPile,turnNumber);
+                PlayerTurn(hero, encounter, drawPile, hand, discardPile,cardRNG,exhaustPile,turnNumber);
 
                 // In between Player and Enemy Turn
                 Random random = new Random();
@@ -259,9 +259,9 @@ namespace STV
                     switch (orb.OrbID)
                     {
                         case 0:
-                            int target = random.Next(0, Encounter.Count);
-                            hero.NonAttackDamage(Encounter[target], 3);
-                            Console.WriteLine($"The {Encounter[target].Name} took 3 damage from the Lightning Orb!");
+                            int target = random.Next(0, encounter.Count);
+                            hero.NonAttackDamage(encounter[target], 3);
+                            Console.WriteLine($"The {encounter[target].Name} took 3 damage from the Lightning Orb!");
                             break;
                         case 1:
                             hero.GainBlock(2);
@@ -276,7 +276,7 @@ namespace STV
 
                 // Start of Enemy Turn
                 Console.WriteLine("Enemy's Turn!\n");
-                EnemyTurn(hero, Encounter, drawPile, discardPile, hand);
+                EnemyTurn(hero, encounter, drawPile, discardPile, hand);
             }
             ScreenWipe();
             if (hero.Hp == 0)
@@ -337,8 +337,6 @@ namespace STV
                             Card card = hand[playCard - 1];
                             if (card.EnergyCost == "X")
                                 card.EnergyCost = $"{hero.Energy}";
-                            if (Int32.Parse(card.EnergyCost) > hero.Energy)
-                                Console.WriteLine($"You failed to play the card. You need {card.EnergyCost} to play {card.Name}.");
                             else
                             {
                                 card.UseCard(hero, Encounter, drawPile, discardPile, hand, exhaustPile, rng);
@@ -390,7 +388,10 @@ namespace STV
             for (int i = hand.Count; i > 0; i--)                    //Discard at end of turn (Comment to find easy for disabling)
             {
                 if (hand[i-1].Description.Contains("Retain."))
-                    break;
+                {
+                    hero.Actions.Add($"{hand[i-1].Name} Retained");
+                    continue;
+                }                   
                 else
                 {
                     if (hand[i-1].Description.Contains("Ethereal"))
@@ -463,14 +464,6 @@ namespace STV
                 if (cards == 0)
                     return;
             }
-        }
-
-        public static void Discard(List<Card> hand, List<Card> discardPile, Card card)
-        {
-            if (!hand.Any())
-                return;
-            discardPile.Add(card);
-            hand.Remove(card);
         }
 
         public static Card ChooseCard(List<Card> list)
@@ -981,20 +974,20 @@ namespace STV
             ScreenWipe();
             // Drawing the Map   
             Console.WriteLine("\t   Boss\t\n");
-            for (int i = 15; i >= 1; i--)
+            for (int floor = 15; floor >= 1; floor--)
             {
                 // Rules for drawing lines with rooms
-                for (int j = 0; j < 7; j++)
+                for (int roomNumber = 0; roomNumber < 7; roomNumber++)
                 {
-                    if (map.Find(x => x.RoomNumber == j && x.Floor == i) == null)
+                    if (FindRoom(floor,roomNumber,map) == null)
                         Console.Write("    ");
-                    else Console.Write(map.Find(x => x.RoomNumber == j && x.Floor == i).ShortHand + "   ");
+                    else Console.Write(FindRoom(floor, roomNumber, map).ShortHand + "   ");
                 }
                 Console.WriteLine();
                 // Rules for drawing paths inbetween Rooms
-                for (int j = 0; j < 7; j++)
+                for (int roomNumber = 0; roomNumber < 7; roomNumber++)
                 {
-                    Room currentRoom = FindRoom(i, j, map), nextRoom = FindRoom(i, j + 1, map);
+                    Room currentRoom = FindRoom(floor, roomNumber, map), nextRoom = FindRoom(floor, roomNumber + 1, map);
                     bool currentExists = currentRoom != null, nextExists = nextRoom != null;
 
                     //Null move position to next to check
@@ -1005,20 +998,20 @@ namespace STV
                     else
                     {
                         // Middle Check
-                        if (FindRoom(i - 1, j, currentRoom.Connections) == null)
+                        if (FindRoom(floor - 1, roomNumber, currentRoom.Connections) == null)
                             Console.Write("  ");
                         else
                             Console.Write("| ");
                     }
                             
                     // Diagonal Checks
-                    if (j != 6)
+                    if (roomNumber != 6)
                     {
                         bool leftPathExists = false, rightPathExists = false;
                         if (nextExists)
-                            leftPathExists = FindRoom(i - 1, j, nextRoom.Connections) != null;
+                            leftPathExists = FindRoom(floor - 1, roomNumber, nextRoom.Connections) != null;
                         if (currentExists)
-                            rightPathExists = FindRoom(i - 1, j + 1, currentRoom.Connections) != null;
+                            rightPathExists = FindRoom(floor - 1, roomNumber + 1, currentRoom.Connections) != null;
                         switch (rightPathExists, leftPathExists)
                         {
                             default:
@@ -1042,9 +1035,9 @@ namespace STV
             }
         }
 
-        public static Room FindRoom(int i, int j, List<Room> list)
+        public static Room FindRoom(int floor, int roomNumber, List<Room> list)
         {
-            Room room = list.Find(x => x.RoomNumber == j && x.Floor == i);
+            Room room = list.Find(x => x.RoomNumber == roomNumber && x.Floor == floor);
             return room;
         }
     }

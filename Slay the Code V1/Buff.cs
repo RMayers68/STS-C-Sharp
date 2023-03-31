@@ -14,7 +14,7 @@
 
         //constructor
 
-        public Buff(int buffID, string name, bool buffDebuff, byte type, string description)
+        public Buff(int buffID, string name, bool buffDebuff, byte type)
         {
             this.BuffID = buffID;
             this.Name = name;
@@ -34,8 +34,8 @@
         //string method
         public string Description()
         {
-            switch (BuffID)
-            {
+             switch (BuffID)
+             {
                 default: return "";
                 case 1: return $"Takes 50% more damage from attacks for {Duration} turns.";
                 case 2: return $"Deal 25% less damage with attacks for {Duration} turns.";
@@ -71,6 +71,57 @@
                 case 32: return $"At the end of your turn, gain {Intensity} Block.";
                 case 33: return $"Whenever you play an Attack this turn, gain {Intensity} Block.";
                 case 34: return $"Whenever you lose HP from a card, gain {Intensity} Strength.";
+                case 35: return $"Whenever you play a card, deal {Intensity} damage to ALL enemies.";
+                case 36: return $"Shivs deal {Intensity} additional damage.";
+                case 37: return $"Whenever you play a card, gain {Intensity} Block.";
+                case 38: return $"Block is not removed at the start of your next {Duration} turns.";
+                case 39: return $"At the beginning of its turn, the target loses {Intensity} HP and 1 stack of Poison.";
+                case 40: return $"This turn, your next {Counter} Skill is played twice.";
+                case 41: return $"Whenever you are attacked, deal {Intensity} damage to the attacker.";
+                case 42: return $"Whenever you play a card this turn, targeted enemy loses {Intensity} HP.";
+                case 43: return $"When this enemy dies, deal damage equal to its MAX HP * {Intensity} to ALL enemies.";
+                case 44: return $"Next turn, gain {Intensity} Block.";
+                case 45: return $"Next turn, draw {Intensity} additional card(s).";
+                case 46: return $"Whenever an attack deals unblocked damage, apply {Intensity} Poison.";
+                case 47: return $"At the start of your turn, add {Intensity} Shiv to your hand.";
+                case 48: return $"At the start of your turn, apply {Intensity} Poison to ALL enemies.";
+                case 49: return $"On your next {Counter} turn(s), your Attack damage is doubled.";
+                case 50: return $"Next turn, discard {Intensity} card(s).";
+                case 51: return $"At the end of your turn, Retain up to {Intensity} card(s).";
+                case 52: return $"Reduce any damage dealt to 1.";
+                case 53: return $"Lose {Intensity} Dexterity at the end of your turn.";
+                case 54: return $"This turn, your next {Counter} Power is played twice.";
+                case 55: return $"Lose {Intensity} Focus at the end of your turn.";
+                case 56: return $"Prevent the next {Counter} time(s) you would lose HP.";
+                case 57: return $"Orbs deal 50% more damage to the this enemy for {Duration} turn(s).";
+                case 58: return $"At the start of each turn, add {Intensity} random Power card(s) to your hand.";
+                case 59: return $"The first {Counter} cards you play each turn are played twice.";
+                case 60: return $"Whenever you play a Power card, draw {Intensity} card(s).";
+                case 61: return $"At the start of your turn, add {Intensity} random Common card(s) into your hand.";
+                case 62: return $"At the start of your turn, use the passive ability of your first Orb {Intensity} time(s).";
+                case 63: return $"Draw {Intensity} additional card(s) at the start of each turn.";
+                case 64: return $"Place the next {Intensity} card(s) you play this turn on top of your draw pile.";
+                case 65: return $"At the end of combat, heal {Intensity} HP.";
+                case 66: return $"Whenever you take attack damage, Channel {Intensity} Lightning.";
+                case 67: return $"Whenever you play a Power, Channel {Intensity} Lightning.";
+                case 68: return $"Lightning now hits ALL enemies.";
+                case 69: return $"Retain your hand this turn.";
+                case 70: return $"At the start of each turn, add {Intensity} Smite(s) into your hand.";
+                case 71: return $"Die next turn.";
+                case 72: return $"Put Miracle+ into your hand at the start of your next {Duration} turns.";
+                case 73: return $"At the start of your turn, gain {Intensity} Energy and increase this gain by 1.";
+                case 74: return $"At the start of your turn, gain {Intensity} Mantra.";
+                case 75: return $"Whenever a card is Retained, reduce its cost by {Intensity} this combat.";
+                case 76: return $"At the start of your turn, Scry {Intensity}.";
+                case 77: return $"At the end of your turn, if you are in Calm, gain {Intensity} Block.";
+                case 78: return $"Whenever a card is created during combat, Upgrade it.";
+                case 79: return $"Whenever you Scry, gain {Intensity} Block.";
+                case 80: return $"Whenever you enter Wrath, draw {Intensity} cards.";
+                case 81: return $"At the start of your next turn, enter Wrath and draw {Intensity} cards.";
+                case 82: return $"At the end of your turn, shuffle {Intensity} Insight(s) into your draw pile.";
+                case 83: return $"Whenever you attack this enemy, gain {Intensity} Block.";
+                case 84: return $"Whenever you gain Block this turn, apply {Intensity} Weak to ALL enemies.";
+                case 85: return $"Your next Attack deals {Intensity} additional damage.";
             }
         }
 

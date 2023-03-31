@@ -70,13 +70,13 @@ namespace STV
                 if (Hp <= 0) return;
                 foreach (var target in encounter)
                 {
-                    if (Buffs.Find(x => x.Name == "Strength") != null)
-                        damage += Buffs.Find(x => x.Name == "Strength").Intensity.GetValueOrDefault(0);
+                    if (FindBuff("Strength", Buffs) != null)
+                        damage += FindBuff("Strength", Buffs).Intensity.GetValueOrDefault(0);
                     if (Stance == "Wrath")
                         damage = damage * 2;
-                    if (Buffs.Find(x => x.Name == "Weak") != null)
+                    if (FindBuff("Weak", Buffs) != null)
                         damage = Convert.ToInt32(damage * 0.75);
-                    if (target.Buffs.Find(x => x.Name == "Vulnerable") != null)
+                    if (FindBuff("Vulnerable",target.Buffs) != null)
                         damage = Convert.ToInt32(damage * 1.5);
                     if (target.Block > 0)
                     {
@@ -91,14 +91,13 @@ namespace STV
                         target.Hp -= damage;
 
                     Console.WriteLine($"{Name} attacked all enemies for {damage} damage!");
-                    if ((target.EnemyID == 2 || target.EnemyID == 7) && target.Buffs.Find(x => x.Name == "Curl Up") != null)      // Louse Curl Up Effect
+                    if (FindBuff("Curl Up", target.Buffs) != null)      // Louse Curl Up Effect
                     {
                         Console.WriteLine($"The Louse has curled up and gained {target.Buffs[0].Intensity} Block!");
                         target.Block += target.Buffs[0].Intensity.GetValueOrDefault();
                         target.Buffs.RemoveAt(0);
                     }
                 }
-
             }
         }
 
@@ -123,8 +122,8 @@ namespace STV
                         Console.WriteLine($"{Name} has left {oldStance} Stance.");
                         break;
                 }
-            if (Buffs.Find(x => x.Name == "Mental Fortress") != null)                              // Mental Fortress Check
-                GainBlock(Buffs.Find(x => x.Name == "Mental Fortress").Intensity.GetValueOrDefault());
+            if (FindBuff("Mental Fortress", Buffs) != null)                              // Mental Fortress Check
+                GainBlock(FindBuff("Mental Fortress", Buffs).Intensity.GetValueOrDefault());
             if (oldStance != Stance && oldStance == "Calm")
                 Energy += 2;
             else if (oldStance != Stance && Stance == "Divinity")
@@ -142,13 +141,16 @@ namespace STV
         public void ChannelOrb(List<Enemy> encounter, int orbID)
         {
             if (Hp <= 0) return;
+            Orb channeledOrb = new Orb(Dict.orbL[orbID]);
             if (Orbs.Count == OrbSlots)
             {
                 Evoke(encounter);
                 Orbs.RemoveAt(0);
-            }
-            Orbs.Add(new Orb(Dict.orbL[orbID]));
+            }               
+            Orbs.Add(channeledOrb);
+            Actions.Add($"Channel {channeledOrb.Name} Orb");
         }
+
         public void Evoke(List<Enemy> encounter)
         {
             if (Hp <= 0) return;
@@ -177,6 +179,7 @@ namespace STV
             {
                 GainTurnEnergy(2);
             }
+            Actions.Add($"Evoked {Orbs[0].Name} Orb");
         }
 
         // Method for adding to current energy amount for the turn

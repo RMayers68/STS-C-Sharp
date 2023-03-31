@@ -148,19 +148,20 @@
                     break;
                 case "Lunge":
                     SingleAttack(hero, 12);
-                    hero.Gold -= Buffs.Find(x => x.Name == "Thievery").Intensity.GetValueOrDefault(15);
-                    Gold += Buffs.Find(x => x.Name == "Thievery").Intensity.GetValueOrDefault(15);
+                    hero.Gold -= FindBuff("Thievery", Buffs).Intensity.GetValueOrDefault(15);
+                    Gold += FindBuff("Thievery", Buffs).Intensity.GetValueOrDefault(15);
                     Console.WriteLine($"The {Name} stole 15 Gold!");
                     break;
                 case "Mug":
                     SingleAttack(hero, 10);
-                    hero.Gold -= Buffs.Find(x => x.Name == "Thievery").Intensity.GetValueOrDefault(15);
-                    Gold += Buffs.Find(x => x.Name == "Thievery").Intensity.GetValueOrDefault(15);
+                    hero.Gold -= FindBuff("Thievery", Buffs).Intensity.GetValueOrDefault(15);
+                    Gold += FindBuff("Thievery", Buffs).Intensity.GetValueOrDefault(15);
                     Console.WriteLine($"The {Name} stole 15 Gold!");
                     break;
                 case "Protect":
-                    while (target != encounter.FindIndex(x => x == this))
+                    do 
                         target = rng.Next(0, encounter.Count);
+                    while (target != encounter.FindIndex(x => x == this));                        
                     encounter[target].GainBlock(7);
                     break;
                 case "Puncture":
@@ -253,7 +254,7 @@
                 case "Twin Slam":
                     for (int i = 0; i < 2; i++)
                         SingleAttack(hero, 8);
-                    Buffs.Remove(Buffs.Find(x => x.Name == "Sharp Hide"));
+                    Buffs.Remove(FindBuff("Sharp Hide",Buffs));
                     AddBuff(16, 30);
                     Actions.Clear();
                     break;
@@ -419,7 +420,7 @@
                     Repeat3Prevent("Skull Bash", "Rush");
                     break;
                 case 18:                                                            // Lagavulin
-                    if (Buffs.Find(x => x.Name == "Asleep") != null)
+                    if (FindBuff("Asleep",Buffs) != null)
                         break;
                     else if (Actions.Count >= 3 && Actions[Actions.Count - 1] == "Attack" && Actions[Actions.Count - 2] == "Attack")
                         Intent = "Siphon Soul";
@@ -461,7 +462,7 @@
                     Repeat3Prevent("Flame Tackle", "Lick");
                     break;
                 case 23:                                                            // The Guardian
-                    if (Buffs.Find(x => x.Name == "Mode Shift") != null)
+                    if (FindBuff("Mode Shift", Buffs) != null)
                     {
                         Intent = (Actions.Count % 4) switch
                         {

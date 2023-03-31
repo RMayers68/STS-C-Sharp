@@ -22,29 +22,36 @@
 		// Inclusive methods
 		public void CardBlock(int block)
 		{
-			if (Buffs.Find(x => x.Name == "No Block") != null)
+			if (FindBuff("No Block",Buffs) != null)
 				return;
 			GainBlock(block);
 		}
 		public void GainBlock(int block)
 		{
 			if (Hp <= 0) return;
-			if (Buffs.Find(x => x.Name == "Dexterity") != null)
-				block += Buffs.Find(x => x.Name == "Dexterity").Intensity.GetValueOrDefault();
+			if (FindBuff("Dexterity", Buffs) != null)
+				block += FindBuff("Dexterity",Buffs).Intensity.GetValueOrDefault();
 			if (Buffs.Find(x => x.Name == "Frail") != null)
 				block = Convert.ToInt32(block * 0.75);
 			Block += block;
 			Console.WriteLine($"The {Name} gained {block} Block.");
 		}
+
 		public void AddBuff(int ID, int effect)
 		{
-			if ((!Dict.buffL[ID].BuffDebuff || effect < 0) && Buffs.Find(x => x.Name == "Artifact") != null)
+			Buff buff = new Buff(Dict.buffL[ID]);
+            // Artifact stopping debuffs
+            if ((!Dict.buffL[ID].BuffDebuff || effect < 0) && FindBuff("Artifact", Buffs) != null)
 			{
-				Buffs.Find(x => x.Name == "Artifact").Counter--;
+                FindBuff("Artifact", Buffs).Counter--;
 				return;
 			}
-			if (Buffs.Find(x => x.BuffID.Equals(ID)) == null)
-				Buffs.Add(new Buff(Dict.buffL[ID]));
+
+			// If buff is not there, add it to target's list
+			if (FindBuff(buff.Name,Buffs) == null)
+				Buffs.Add(buff);
+
+			// Add attributes based on type of Buff
 			byte b = Dict.buffL[ID].Type switch
 			{
 				byte i when i == 1 =>  1,
@@ -53,34 +60,39 @@
 			};
 			switch (b)
 			{
-				case 1:
-					Buffs.Find(y => y.BuffID.Equals(ID)).DurationSet(effect);
-					Console.WriteLine($"{Name} is now {Dict.buffL[ID].Name} for {Buffs.Find(y => y.BuffID.Equals(ID)).Duration} turns!");
+				case 1: //Duration
+					buff.DurationSet(effect);
+					Console.WriteLine($"{Name} is now {Dict.buffL[ID].Name} for {buff.Duration} turns!");
 					break;
-				case 2:
-					Buffs.Find(y => y.BuffID.Equals(ID)).IntensitySet(effect);
-					Console.WriteLine($"{Name} gained {effect} {Dict.buffL[ID].Name}!");
+				case 2: //Intensity
+					buff.IntensitySet(effect);
+					Console.WriteLine($"{Name} gained {effect} {buff.Name}!");
 					break;
-				case 3:
-					Buffs.Find(y => y.BuffID.Equals(ID)).CounterSet(effect);
-					Console.WriteLine($"{Name}'s {Dict.buffL[ID].Name} is now at {effect}!");
+				case 3: //Counter
+					buff.CounterSet(effect);
+					Console.WriteLine($"{Name}'s {buff.Name} is now at {effect}!");
 					break;
 				default:
 					return;
 			}
 		}
 
-		//HP Altering Methods
-		public void SingleAttack(Actor target, int damage)
+        public static Buff FindBuff(string name, List<Buff> list)
+        {
+            return list.Find(x => x.Name == name);
+        }
+
+        //HP Altering Methods
+        public void SingleAttack(Actor target, int damage)
 		{
 			if (Hp <= 0) return;
-			if (Buffs.Find(x => x.Name.Equals("Strength")) != null)
-				damage += Buffs.Find(x => x.Name.Equals("Strength")).Intensity.GetValueOrDefault(0);
+			if (FindBuff("Strength", Buffs) != null)
+				damage += FindBuff("Strength",Buffs).Intensity.GetValueOrDefault(0);
             if (Stance == "Wrath" || target.Stance == "Wrath")
                 damage *= 2;
-			if (Buffs.Find(x => x.Name.Equals("Weak")) != null)
+			if (FindBuff("Weak", Buffs) != null)
 				damage = Convert.ToInt32(damage * 0.75);
-			if (target.Buffs.Find(x => x.Name.Equals("Vulnerable")) != null)
+			if (FindBuff("Vulnerable",target.Buffs) != null)
 				damage = Convert.ToInt32(damage * 1.5);
 			if (target.Block > 0)
 			{
@@ -94,7 +106,7 @@
 			else
 				target.Hp -= damage;
 			Console.WriteLine($"{Name} attacked for {damage} damage!");
-			if (target.Buffs.Find(x => x.Name.Equals("Curl Up")) != null)      // Louse Curl Up Effect
+			if (FindBuff("Curl Up", target.Buffs) != null)      // Louse Curl Up Effect
 			{
 				Console.WriteLine($"The Louse has curled up and gained {target.Buffs[0].Intensity} Block!");
 				target.Block += target.Buffs[0].Intensity.GetValueOrDefault();
@@ -118,6 +130,12 @@
 				target.Hp -= damage;
 		}
 		
+		public void PoisonDamage(int damage)
+		{
+			Hp -= damage;
+			FindBuff("Poison",Buffs).Duration -= 1;
+		}
+
 		public void HealHP(int heal)
 		{
 			Hp += heal;

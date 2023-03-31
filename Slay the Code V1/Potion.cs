@@ -64,7 +64,9 @@
                 case "Cultist Potion":
                     hero.AddBuff(3, 1);
                     break;
-
+                case "Liquid Bronze":
+                    hero.AddBuff(41,3); 
+                    break;  
             }
         }
     }
