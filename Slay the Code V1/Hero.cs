@@ -1,5 +1,5 @@
 ﻿using STV;
-
+using System.ComponentModel.Design;
 
 namespace STV
 {
@@ -9,10 +9,12 @@ namespace STV
         public int Energy { get; set; }
         public int OrbSlots { get; set; }
         public int EasyFights { get; set; }
+        public int PotionSlots { get; set; }
+        public int PotionChance { get; set; }
         public List<Relic> Relics { get; set; }
         public List<Orb> Orbs { get; set; }
         public List<Potion> Potions { get; set; }
-
+        
         public Hero(string name, int maxHP)
         {
             this.Name = name;
@@ -29,6 +31,8 @@ namespace STV
             this.OrbSlots = 1;
             this.Gold = 99;
             this.EasyFights = 0;
+            this.PotionSlots = 3;
+            this.PotionChance = 1;
         }
 
         public Hero(Hero hero)
@@ -48,6 +52,8 @@ namespace STV
                 this.OrbSlots = 1;
                 this.Gold = 99;
                 this.EasyFights = 0;
+                this.PotionSlots = 3;
+                this.PotionChance = 1;
             }
         }
         // Hero exclusive methods
@@ -197,6 +203,46 @@ namespace STV
         public void GoldChange(int amount) //For when rewards are set
         {
             Gold += amount;
+            if (amount > 0)
+                Console.WriteLine($"The {Name} gained {amount} Gold!");
+            else Console.WriteLine($"The {Name} lost {amount * -1} Gold!");
+        }
+
+        public List<Card> RandomCards(int count, Random rng)
+        {
+            List<Card> cards = new List<Card>();
+            for (int i = 0; i < count; i++)
+            {
+                switch (Name)
+                {
+                    default:
+                        cards.Add(new Card(Dict.cardL[rng.Next(73)]));
+                        break;
+                    case "Silent":
+                        cards.Add(new Card(Dict.cardL[rng.Next(73, 146)]));
+                        break;
+                    case "Defect":
+                        cards.Add(new Card(Dict.cardL[rng.Next(146, 219)]));
+                        break;
+                    case "Watcher":
+                        cards.Add(new Card(Dict.cardL[rng.Next(221, 294)]));
+                        break;
+                }
+            }
+            return cards;
+        }
+
+        public void CombatRewards(List<Card> deck, Random rng)
+        {
+            List<Card> cardReward = RandomCards(3, rng);
+            deck.Add(STS.ChooseCard(cardReward));
+            GoldChange(35);
+            if (rng.Next(10) < PotionChance)
+            {
+                Potions.Add(Dict.potionL[rng.Next(10)]);
+                PotionChance--;
+            }
+            else PotionChance++;
         }
     }
 }

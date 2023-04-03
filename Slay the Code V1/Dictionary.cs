@@ -531,7 +531,7 @@
             { 5, new Potion(5, "Swift Potion", "Common", "Draw 3 cards.") },
             { 6, new Potion(6, "Weak Potion", "Common", "Apply 3 Weak.") },
             { 7, new Potion(7, "Cultist Potion", "Rare", "Gain 1 Ritual.") },
-            {8, new Potion(8,"Focus Potion","Common","Gain 2 Focus.") },
+            { 8, new Potion(8,"Focus Potion","Common","Gain 2 Focus.") },
             { 9, new Potion(9, "Liquid Bronze", "Uncommon", "Gain 3 Thorns.") },
         };
     }

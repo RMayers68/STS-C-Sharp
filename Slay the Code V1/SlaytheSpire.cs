@@ -18,6 +18,7 @@ namespace STV
             //MAIN MENU
             while (menuChoice != 3)                                                     
             {
+                Console.BackgroundColor = ConsoleColor.Black;
                 ScreenWipe();
                 Console.BackgroundColor = ConsoleColor.Black;
                 ConsoleTableExt.ConsoleTableBuilder.From(mainMenu).ExportAndWriteLine(TableAligntment.Center);
@@ -117,8 +118,12 @@ namespace STV
                                     activeRoom = new Room(FindRoom(floor, directions[directionChoice],map));
                                 }                               
                                 
-                                RoomDecider(hero,deck,activeRoom.Location,act*5-5);
+                                RoomDecider(hero,deck,activeRoom,act*5-5);
+                                if (hero.Hp <= 0)
+                                    break;
                             }
+                            if (hero.Hp <= 0)
+                                break;
                         }
                         
                         
@@ -153,20 +158,20 @@ namespace STV
             }
         }
         // Method to determine next event based on room
-        public static void RoomDecider(Hero hero,List<Card> deck,string location,int actModifier)
+        public static void RoomDecider(Hero hero,List<Card> deck,Room activeRoom,int actModifier)
         {
             List<Enemy> encounter = new();
-            switch (location)
+            switch (activeRoom.Location)
             {
                 default: break;
-                /*case "Monster":
+                case "Monster":
                     if (hero.EasyFights < 3)
                     {
                         encounter = CreateEncounter(1+actModifier);
                         hero.EasyFights++;
                     }
                     else encounter = CreateEncounter(2+actModifier);
-                    Combat(hero, encounter, deck);
+                    Combat(hero, encounter, deck,activeRoom);
                     break;
                 case "Event":
                     EventDecider(hero,deck);
@@ -182,11 +187,11 @@ namespace STV
                     break;
                 case "Elite":
                     encounter = CreateEncounter(3 + actModifier);
-                    Combat(hero, encounter, deck);
-                    break;*/
+                    Combat(hero, encounter, deck,activeRoom);
+                    break;
                 case "Boss":
                     encounter = CreateEncounter(4 + actModifier);
-                    Combat(hero, encounter, deck);
+                    Combat(hero, encounter, deck,activeRoom);
                     break;
             }
         }
@@ -195,8 +200,9 @@ namespace STV
         {
             return;
         }
+
         //COMBAT METHODS
-        public static void Combat(Hero hero, List<Enemy> encounter, List<Card> deck)
+        public static void Combat(Hero hero, List<Enemy> encounter, List<Card> deck,Room activeRoom)
         {
             Random cardRNG = new();
             ScreenWipe();
@@ -285,7 +291,8 @@ namespace STV
             {
                 Console.WriteLine("\nVictorious, the creature is slain!\n");
                 if (hero.Relics[0].Name == "Burning Blood")
-                    hero.HealHP(6);                
+                    hero.HealHP(6);
+                hero.CombatRewards(deck,cardRNG);
             }                
             Pause();
         }
@@ -477,12 +484,7 @@ namespace STV
             return list[cardChoice-1];
         }
 
-        public static List<Card> RandomCards(Hero hero, int count)
-        {
-            List<Card> cards = new List<Card>();
-            // add in randomness after cards are done
-            return cards;
-        }
+        
 
         //MENU AND UI METHODS
         public static void CombatMenu(Hero hero, List<Enemy> Encounter, List<Card> drawPile, List<Card> hand, List<Card> discardPile, List<Card> exhaustPile, int turnNumber)
