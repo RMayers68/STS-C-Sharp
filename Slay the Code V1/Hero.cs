@@ -11,6 +11,7 @@ namespace STV
         public int EasyFights { get; set; }
         public int PotionSlots { get; set; }
         public int PotionChance { get; set; }
+        public List<Card> Deck { get; set; }
         public List<Relic> Relics { get; set; }
         public List<Orb> Orbs { get; set; }
         public List<Potion> Potions { get; set; }
@@ -23,6 +24,7 @@ namespace STV
             this.MaxEnergy = 3;
             this.Energy = 3;
             this.Block = 0;
+            this.Deck = new List<Card>();
             this.Buffs = new();
             this.Relics = new();
             this.Potions = new();
@@ -44,6 +46,7 @@ namespace STV
                 this.MaxEnergy = 3;
                 this.Energy = 3;
                 this.Block = 0;
+                this.Deck = new List<Card>();
                 this.Buffs = new();
                 this.Relics = new();
                 this.Potions = new();
@@ -95,8 +98,7 @@ namespace STV
                     }
                     else
                         target.Hp -= damage;
-
-                    Console.WriteLine($"{Name} attacked all enemies for {damage} damage!");
+                    Console.WriteLine($"{Name} attacked {target.Name} for {damage} damage!");
                     if (FindBuff("Curl Up", target.Buffs) != null)      // Louse Curl Up Effect
                     {
                         Console.WriteLine($"The Louse has curled up and gained {target.Buffs[0].Intensity} Block!");
@@ -104,6 +106,7 @@ namespace STV
                         target.Buffs.RemoveAt(0);
                     }
                 }
+                
             }
         }
 
@@ -118,7 +121,9 @@ namespace STV
         {
             string oldStance = Stance;
             Stance = newStance;
-            if (oldStance != Stance)
+            if (oldStance == Stance)
+                return;
+            else
                 switch (Stance)
                 {
                     default:
@@ -208,12 +213,12 @@ namespace STV
             else Console.WriteLine($"The {Name} lost {amount * -1} Gold!");
         }
 
-        public List<Card> RandomCards(int count, Random rng)
+        public List<Card> RandomCards(string type,int count, Random rng)
         {
             List<Card> cards = new List<Card>();
             for (int i = 0; i < count; i++)
             {
-                switch (Name)
+                switch (type)
                 {
                     default:
                         cards.Add(new Card(Dict.cardL[rng.Next(73)]));
@@ -227,6 +232,9 @@ namespace STV
                     case "Watcher":
                         cards.Add(new Card(Dict.cardL[rng.Next(221, 294)]));
                         break;
+                    case "Colorless":
+                        cards.Add(new Card(Dict.cardL[rng.Next(297, 332)]));
+                        break;
                 }
             }
             return cards;
@@ -234,7 +242,7 @@ namespace STV
 
         public void CombatRewards(List<Card> deck, Random rng)
         {
-            List<Card> cardReward = RandomCards(3, rng);
+            List<Card> cardReward = RandomCards(Name,3, rng);
             deck.Add(STS.ChooseCard(cardReward));
             GoldChange(35);
             if (rng.Next(10) < PotionChance)

@@ -1537,7 +1537,9 @@ namespace STV
 				case "Wreath of Flame":
 					hero.AddBuff(85, 5);
 					break;
-																				// Colorless Cards
+				// COLORLESS CARDS (294 - 340)
+				case "Apotheosis":
+					break;
 				case "Bandage Up":
 					hero.HealHP(4);
 					break;
@@ -1554,8 +1556,19 @@ namespace STV
 					target = hero.DetermineTarget(encounter);
 					encounter[target].AddBuff(2, 2);
 					break;
-				case "Deep Breath":
-					for (int i = discardPile.Count;i> 0;i--)
+				case "Chrysalis":
+					List<Card> chrysalis = new List<Card>(hero.RandomCards(hero.Name, 3, rng));
+					foreach (Card card in chrysalis)
+						card.EnergyCost = "0";
+					drawPile.AddRange(chrysalis);
+					STS.Shuffle(drawPile, rng);
+					break;
+				case "Dark Shackles":
+                    hero.AddBuff(4, -9);
+                    hero.AddBuff(30, -9);
+                    break;
+                case "Deep Breath":
+					for (int i = discardPile.Count;i > 0;i--)
                     {
 						drawPile.Add(discardPile[i - 1]);
 						discardPile.RemoveAt(i-1);
@@ -1563,8 +1576,18 @@ namespace STV
 					STS.Shuffle(drawPile,rng);
 					STS.DrawCards(drawPile, hand, discardPile, rng, 1);
 					break;
+				case "Discovery":
+					Card discovery = new(STS.ChooseCard(hero.RandomCards(hero.Name, 3, rng)));
+					discovery.EnergyCost = "0";
+					hand.Add(discovery);
+					break;
 				case "Dramatic Entrance":
 					hero.AttackAll(encounter, 8);
+					break;
+				case "Enlightment":
+					foreach (Card c in hand)
+						if (Int32.Parse(c.EnergyCost) > 1)
+							c.EnergyCost = "1";
 					break;
 				case "Finesse":
 					hero.CardBlock(2);
@@ -1575,21 +1598,27 @@ namespace STV
 					hero.SingleAttack(encounter[target], 3);
 					STS.DrawCards(drawPile, hand, discardPile, rng, 1);
 					break;
+				case "Forethought":
+					Card forethought = STS.ChooseCard(hand);
+					forethought.EnergyCost = "0";
+					hand.Remove(forethought);
+					drawPile.Prepend(forethought);
+					break;
 				case "Good Instincts":
 					hero.CardBlock(6);
+					break;
+				case "Jack of All Trades":
+					Card jackOfAllTrades = new Card(STS.ChooseCard(hero.RandomCards("Colorless",3,rng)));	
+					hand.Add(jackOfAllTrades);
 					break;
 				case "Hand of Greed":
 					target = hero.DetermineTarget(encounter);
 					hero.SingleAttack(encounter[target], 20);
 					if (encounter[target].Hp <= 0)
-						hero.Gold += 20;
+						hero.GoldChange(20);
 					break;
 				case "Impatience":
-					bool noAttack = true;
-					foreach(Card c in hand)
-						if(c.Type == "Attack")
-							noAttack = false;
-					if (noAttack)
+					if (!hand.Any(x => x.Type == "Attack"))
 						STS.DrawCards(drawPile, hand,discardPile, rng, 2);
 					break;
 				case "Insight":
@@ -1599,10 +1628,27 @@ namespace STV
 					hero.SelfDamage(3);
 					hero.AddBuff(4, 2);
 					break;
+				case "Madness":
+					if (hand.Count > 0)
+						hand[rng.Next(hand.Count)].EnergyCost = "0";
+					break;
+				case "Magnetism":
+					hero.AddBuff(86, 1);
+					break;
 				case "Master of Strategy":
 					STS.DrawCards(drawPile, hand, discardPile, rng, 3);
 					break;
-				case "Mind Blast":
+				case "Mayhem":
+					hero.AddBuff(88, 1);
+					break;
+				case "Metamorphosis":
+                    List<Card> metamorphosis = new List<Card>(hero.RandomCards(hero.Name, 3, rng));
+                    foreach (Card card in metamorphosis)
+                        card.EnergyCost = "0";
+                    drawPile.AddRange(metamorphosis);
+                    STS.Shuffle(drawPile, rng);
+                    break;
+                case "Mind Blast":
 					target = hero.DetermineTarget(encounter);
 					hero.SingleAttack(encounter[target], drawPile.Count);
 					break;
@@ -1616,6 +1662,10 @@ namespace STV
 					hero.CardBlock(30);
 					hero.AddBuff(13, 2);
 					break;
+				case "Purity":
+					for (int i = 0; i < 3; i++)
+						STS.ChooseCard(hand).Exhaust(exhaustPile, hand);
+					break;
 				case "Ritual Dagger":
 					target = hero.DetermineTarget(encounter);
 					string ritualDagger = Description;
@@ -1625,6 +1675,9 @@ namespace STV
 					Description = ritualDagger;
 					if (encounter[target].Hp <= 0) ;
 						//Add way to add to total damage.
+					break;
+				case "Sadistic Nature":
+					hero.AddBuff(87, 3);
 					break;
 				case "Safety":
 					hero.CardBlock(12);
@@ -1659,45 +1712,44 @@ namespace STV
 					target = hero.DetermineTarget(encounter);
 					hero.SingleAttack(encounter[target], 7);
 					break;
+				case "The Bomb":
+					hero.AddBuff(89, 3);
+					break;
+				case "Thinking Ahead":
+					STS.DrawCards(drawPile, hand, discardPile, rng, 2);
+					Card thinkingAhead = new(STS.ChooseCard(hand));
+					drawPile.Add(thinkingAhead);
+					hand.Remove(thinkingAhead);
+					break;
 				case "Through Violence":
 					target = hero.DetermineTarget(encounter);
 					hero.SingleAttack(encounter[target], 20);
+					break;
+				case "Transmutation":
+					for(int i = 0;i < hero.Energy; i++)
+					{
+						if (hand.Count < 10)
+						{
+							hand.Add(new Card(hero.RandomCards("Colorless", 1, rng)[0]));
+						}
+						else discardPile.Add(new Card(hero.RandomCards("Colorless", 1, rng)[0]));
+                    }
 					break;
 				case "Trip":
 					target = hero.DetermineTarget(encounter);
 					encounter[target].AddBuff(1, 2);
 					break;
 				case "Violence":
-					List<Card> violenceList = new();
-					foreach (Card c in drawPile)
-						if (c.Type == "Attack")
-							violenceList.Add(c);
-					Card violence1,violence2,violence3 = new();
 					for (int i = 0; i < 3; i++)
 					{
 						Card violence = new Card();
-						violence = violenceList[rng.Next(0, violenceList.Count)];
-						switch (i)
-						{
-							case 0: 
-								violence1 = violence; 
-								if (hand.Count < 10)
-									hand.Add(violence1);
-								else discardPile.Add(violence1);
-								break;
-							case 1: 
-								violence2 = violence;
-								if (hand.Count < 10)
-									hand.Add(violence2);
-								else discardPile.Add(violence2);
-								break;
-							case 2: 
-								violence3 = violence;
-								if (hand.Count < 10)
-									hand.Add(violence3);
-								else discardPile.Add(violence3);
-								break;
-						}
+						while(violence.Type != "Attack" && drawPile.Any(x => x.Type == "Attack"))
+							violence = drawPile[rng.Next(0, drawPile.Count)];
+						if (violence == null)
+							break;
+						if (hand.Count < 10)
+							hand.Add(violence);
+						else discardPile.Add(violence);
 						drawPile.Remove(violence);
 					}					
 					break;
@@ -1751,7 +1803,7 @@ namespace STV
 		public static void Scry(List<Card> drawPile, List<Card> discardPile,List<Card> hand, int amount)
 		{
 			int scryChoice = -1;
-			while (scryChoice != 0 || amount == 0)
+			while (scryChoice != 0 && amount > 0)
 			{
                 Console.WriteLine($"\nEnter the number of the card you would like to scry into your discard pile or hit 0 to move on.");
                 for (int i = 1; i <= amount; i++)

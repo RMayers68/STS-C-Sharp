@@ -58,9 +58,9 @@ namespace STV
                                 break;
                         }
                         ScreenWipe();
-                        List<Card> deck = CreateDeck(hero);
+                        hero.Deck = CreateDeck(hero);
                         Console.WriteLine($"You have chosen the {hero.Name}! Here is the {hero.Name} Deck.\n");                    
-                        ConsoleTableExt.ConsoleTableBuilder.From(deck).ExportAndWriteLine(TableAligntment.Center);
+                        ConsoleTableExt.ConsoleTableBuilder.From(hero.Deck).ExportAndWriteLine(TableAligntment.Center);
                         Pause();
                         
                         for (int act = 1; act <= 3; act++)
@@ -118,7 +118,7 @@ namespace STV
                                     activeRoom = new Room(FindRoom(floor, directions[directionChoice],map));
                                 }                               
                                 
-                                RoomDecider(hero,deck,activeRoom,act*5-5);
+                                RoomDecider(hero,activeRoom,act*5-5);
                                 if (hero.Hp <= 0)
                                     break;
                             }
@@ -158,8 +158,8 @@ namespace STV
             }
         }
         // Method to determine next event based on room
-        public static void RoomDecider(Hero hero,List<Card> deck,Room activeRoom,int actModifier)
-        {
+        public static void RoomDecider(Hero hero,Room activeRoom,int actModifier)
+        { 
             List<Enemy> encounter = new();
             switch (activeRoom.Location)
             {
@@ -171,45 +171,103 @@ namespace STV
                         hero.EasyFights++;
                     }
                     else encounter = CreateEncounter(2+actModifier);
-                    Combat(hero, encounter, deck,activeRoom);
+                    Combat(hero, encounter,activeRoom);
                     break;
                 case "Event":
-                    EventDecider(hero,deck);
+                    EventDecider(hero);
                     break;
                 case "Rest Site":
                     //Eventually add in Upgrade and Recall
                     hero.HealHP(hero.MaxHP / 3);
                     break;
                 case "Merchant":
+                    Shop(hero,rng);
                     break;
                 case "Treasure":
                     hero.GoldChange(100);
                     break;
                 case "Elite":
                     encounter = CreateEncounter(3 + actModifier);
-                    Combat(hero, encounter, deck,activeRoom);
+                    Combat(hero, encounter,activeRoom);
                     break;
                 case "Boss":
                     encounter = CreateEncounter(4 + actModifier);
-                    Combat(hero, encounter, deck,activeRoom);
+                    Combat(hero, encounter,activeRoom);
                     break;
             }
         }
 
-        public static void EventDecider(Hero hero, List<Card> deck) 
+        private static void Shop(Hero hero)
+        {
+            int shopChoice = -1;        
+            Random shopRNG = new Random();
+            Dictionary<Card,int> shopList = new();
+            Dictionary<Potion,int> shopList2 = new();
+            for (int i = 0; i < 7; i++)
+            {
+                Card shopCard = new();
+                while (shopCard.Type != "Attack" && i < 2)
+                    shopCard = hero.RandomCards(hero.Name, 1, shopRNG)[0];
+                while (shopCard.Type != "Skill" && i >= 2 && i < 4)
+                    shopCard = hero.RandomCards(hero.Name, 1, shopRNG)[0];
+                while (shopCard.Type != "Power" && i == 4)
+                    shopCard = hero.RandomCards(hero.Name, 1, shopRNG)[0];
+                while (shopCard.Rarity != "Uncommon" && i == 5)
+                    shopCard = hero.RandomCards("Colorless", 1, shopRNG)[0];
+                while (shopCard.Rarity != "Rare" && i == 6)
+                    shopCard = hero.RandomCards("Colorless", 1, shopRNG)[0];
+                shopList.Add(shopCard,shopCard.Rarity == "Rare" ? shopRNG.Next(135, 166) : shopCard.Rarity == "Uncommon" ? shopRNG.Next(68, 83) : shopRNG.Next(45, 56)); 
+            }
+            for (int i = 0; i < 3; i++)
+            {
+                Potion shopPotion = new Potion(Dict.potionL[shopRNG.Next(Dict.potionL.Count)]);
+                shopList2.Add(shopPotion, shopPotion.Rarity == "Rare" ? shopRNG.Next(95, 106) : shopPotion.Rarity == "Uncommon" ? shopRNG.Next(72, 79) : shopRNG.Next(48, 53));
+            }
+            string removeCard = "Remove Card";            
+            while (shopChoice != 0)
+            {
+                int choices = 1;
+                List<Object> shoppingOptions = new();
+                ScreenWipe();
+                Console.WriteLine($"Hello {hero.Name}! You have {hero.Gold}. What would you like to purchase? Enter your option or press 0 to leave.");
+                foreach(Card shopCard in shopList.Keys)
+                {
+                    Console.WriteLine($"{choices}: {shopCard.Name} - {shopList[shopCard]}");
+                    choices++;
+                    shoppingOptions.Add(shopCard);
+                }
+                foreach(Potion shopPotion in shopList2.Keys)
+                {
+                    Console.WriteLine($"{choices}: {shopPotion.Name} - {shopList2[shopPotion]}");
+                    choices++;
+                    shoppingOptions.Add(shopPotion);
+                }
+                if (removeCard == "Remove Card")
+                {
+                    Console.WriteLine($"{choices}: {removeCard} - 75");
+                    shoppingOptions.Add(removeCard);
+                }                    
+                else choices--;
+                while (!Int32.TryParse(Console.ReadLine(), out shopChoice) || shopChoice < 0 || shopChoice > choices)
+                    Console.WriteLine("Invalid input, enter again:");
+                //Add lines dealing with choice because I'm tired and need break
+            }                       
+        }
+
+        public static void EventDecider(Hero hero) 
         {
             return;
         }
 
         //COMBAT METHODS
-        public static void Combat(Hero hero, List<Enemy> encounter, List<Card> deck,Room activeRoom)
+        public static void Combat(Hero hero, List<Enemy> encounter,Room activeRoom)
         {
             Random cardRNG = new();
             ScreenWipe();
             Console.WriteLine("Next encounter:");
             foreach (Actor actor in encounter) 
                 Console.WriteLine(actor.Name);
-            List<Card> drawPile = new(Shuffle(deck, cardRNG));
+            List<Card> drawPile = new(Shuffle(hero.Deck, cardRNG));
             List<Card> hand = new();
             List<Card> discardPile = new();
             List<Card> exhaustPile = new();
@@ -292,7 +350,7 @@ namespace STV
                 Console.WriteLine("\nVictorious, the creature is slain!\n");
                 if (hero.Relics[0].Name == "Burning Blood")
                     hero.HealHP(6);
-                hero.CombatRewards(deck,cardRNG);
+                hero.CombatRewards(hero.Deck,cardRNG);
             }                
             Pause();
         }

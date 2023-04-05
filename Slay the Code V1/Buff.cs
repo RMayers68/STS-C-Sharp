@@ -47,8 +47,8 @@
                 case 8: return $"Prevents the next {Counter} debuffs from being applied.";
                 case 9: return $"Increases Block gained from Cards by {Intensity}.";
                 case 10: return $"When you obtain 10 Mantra, enter Divinity. (current Mantra:{Counter})";
-                case 11: return $"Whenever you switch stances, gain {Intensity}.";
-                case 12: return $"Whenever you play Pressure Points, all enemy with Mark loses {Intensity} HP.";
+                case 11: return $"Whenever you switch stances, gain {Intensity} Block.";
+                case 12: return $"Whenever you play Pressure Points, this enemy loses {Intensity} HP.";
                 case 13: return $"You may not gain Block from cards for the next {Duration} turns.";
                 case 14: return $"You may not play any Attacks this turn.";
                 case 15: return $"This enemy is sleeping and damaging its health will awaken it.";
@@ -122,6 +122,10 @@
                 case 83: return $"Whenever you attack this enemy, gain {Intensity} Block.";
                 case 84: return $"Whenever you gain Block this turn, apply {Intensity} Weak to ALL enemies.";
                 case 85: return $"Your next Attack deals {Intensity} additional damage.";
+                case 86: return $"t the start of each turn, add {Intensity} random Colorless card(s) to your hand.";
+                case 87: return $"Whenever you apply a Debuff to an enemy, they take {Intensity} damage.";
+                case 88: return $"At the start of your turn, play the {Intensity} top card(s) of your draw pile.";
+                case 89: return $"At the end of {Duration} turn(s), deal 40 damage to ALL enemies.";
             }
         }
 
