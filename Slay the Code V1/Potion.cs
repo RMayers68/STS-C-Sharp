@@ -7,8 +7,16 @@
         public string Name { get; set; }
         public string Description { get; set; }
         public string Rarity { get; set; }
+        public int GoldCost { get; set; }
 
         //constructors
+        public Potion()
+        {
+            this.PotionID = -1;
+            this.Name = "Purchased";
+            this.GoldCost = 0;
+        }
+
         public Potion(int potionID, string name, string description, string rarity)
         {
             this.PotionID = potionID;
@@ -23,6 +31,8 @@
             this.Name = potion.Name;
             this.Description = potion.Description;
             this.Rarity = potion.Rarity;
+            Random rng = new Random();
+            this.GoldCost = Rarity == "Rare" ? rng.Next(95, 106) : Rarity == "Uncommon" ? rng.Next(72, 79) : rng.Next(48, 53);
         }
         //string method
         public override string ToString()

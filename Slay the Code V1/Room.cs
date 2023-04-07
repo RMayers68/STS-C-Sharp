@@ -63,7 +63,7 @@
         //string method
         public override string ToString()
         {
-            return $"[{RoomNumber}]";
+            return $"({RoomNumber})";
         }
         // return distinct list of connecting rooms
         public void DistinctRooms()

@@ -1,6 +1,7 @@
 ﻿// Richard Mayers, Sept 11th, 2022
 
 using ConsoleTableExt;
+using System;
 using System.Collections.Generic;
 
 namespace STV
@@ -174,14 +175,14 @@ namespace STV
                     Combat(hero, encounter,activeRoom);
                     break;
                 case "Event":
-                    EventDecider(hero);
+                    EventDecider(hero, actModifier);
                     break;
                 case "Rest Site":
                     //Eventually add in Upgrade and Recall
                     hero.HealHP(hero.MaxHP / 3);
                     break;
                 case "Merchant":
-                    Shop(hero,rng);
+                    Shop(hero);
                     break;
                 case "Treasure":
                     hero.GoldChange(100);
@@ -201,61 +202,104 @@ namespace STV
         {
             int shopChoice = -1;        
             Random shopRNG = new Random();
-            Dictionary<Card,int> shopList = new();
-            Dictionary<Potion,int> shopList2 = new();
+            List<Card> shopCards = new();
+            List<Potion> shopPotions = new();
             for (int i = 0; i < 7; i++)
             {
                 Card shopCard = new();
                 while (shopCard.Type != "Attack" && i < 2)
-                    shopCard = hero.RandomCards(hero.Name, 1, shopRNG)[0];
+                    shopCard = Card.RandomCards(hero.Name, 1, shopRNG)[0];
                 while (shopCard.Type != "Skill" && i >= 2 && i < 4)
-                    shopCard = hero.RandomCards(hero.Name, 1, shopRNG)[0];
+                    shopCard = Card.RandomCards(hero.Name, 1, shopRNG)[0];
                 while (shopCard.Type != "Power" && i == 4)
-                    shopCard = hero.RandomCards(hero.Name, 1, shopRNG)[0];
+                    shopCard = Card.RandomCards(hero.Name, 1, shopRNG)[0];
                 while (shopCard.Rarity != "Uncommon" && i == 5)
-                    shopCard = hero.RandomCards("Colorless", 1, shopRNG)[0];
+                    shopCard = Card.RandomCards("Colorless", 1, shopRNG)[0];
                 while (shopCard.Rarity != "Rare" && i == 6)
-                    shopCard = hero.RandomCards("Colorless", 1, shopRNG)[0];
-                shopList.Add(shopCard,shopCard.Rarity == "Rare" ? shopRNG.Next(135, 166) : shopCard.Rarity == "Uncommon" ? shopRNG.Next(68, 83) : shopRNG.Next(45, 56)); 
+                    shopCard = Card.RandomCards("Colorless", 1, shopRNG)[0];
+                shopCards.Add(shopCard); 
             }
             for (int i = 0; i < 3; i++)
             {
                 Potion shopPotion = new Potion(Dict.potionL[shopRNG.Next(Dict.potionL.Count)]);
-                shopList2.Add(shopPotion, shopPotion.Rarity == "Rare" ? shopRNG.Next(95, 106) : shopPotion.Rarity == "Uncommon" ? shopRNG.Next(72, 79) : shopRNG.Next(48, 53));
+                shopPotions.Add(shopPotion);
             }
             string removeCard = "Remove Card";            
             while (shopChoice != 0)
             {
-                int choices = 1;
-                List<Object> shoppingOptions = new();
                 ScreenWipe();
-                Console.WriteLine($"Hello {hero.Name}! You have {hero.Gold}. What would you like to purchase? Enter your option or press 0 to leave.");
-                foreach(Card shopCard in shopList.Keys)
-                {
-                    Console.WriteLine($"{choices}: {shopCard.Name} - {shopList[shopCard]}");
-                    choices++;
-                    shoppingOptions.Add(shopCard);
-                }
-                foreach(Potion shopPotion in shopList2.Keys)
-                {
-                    Console.WriteLine($"{choices}: {shopPotion.Name} - {shopList2[shopPotion]}");
-                    choices++;
-                    shoppingOptions.Add(shopPotion);
-                }
-                if (removeCard == "Remove Card")
-                {
-                    Console.WriteLine($"{choices}: {removeCard} - 75");
-                    shoppingOptions.Add(removeCard);
-                }                    
-                else choices--;
-                while (!Int32.TryParse(Console.ReadLine(), out shopChoice) || shopChoice < 0 || shopChoice > choices)
+                Console.WriteLine($"Hello {hero.Name}! You have {hero.Gold} Gold. What would you like to purchase? Enter your option or press 0 to leave.\n");
+                Console.WriteLine("\nCards:\n*************************************");
+                for (int i = 1; i <= 7; i++)
+                    Console.WriteLine($"{i}: {shopCards[i-1].Name} {(shopCards[i-1].Name == "Purchased" ? "" : "- " + shopCards[i-1].getGoldCost())}");
+                Console.WriteLine("\nPotions:\n*************************************");
+                for (int i = 8; i <= 10; i++)
+                    Console.WriteLine($"{i}: {shopPotions[i - 8].Name} {(shopPotions[i - 8].Name == "Purchased" ? "" : "- " + shopPotions[i - 8].GoldCost)}");
+                Console.WriteLine($"*************************************\n11: {removeCard} {(removeCard == "Remove Card" ? "- 75" : "")}");                  
+                while (!Int32.TryParse(Console.ReadLine(), out shopChoice) || shopChoice < 0 || shopChoice > 11)
                     Console.WriteLine("Invalid input, enter again:");
-                //Add lines dealing with choice because I'm tired and need break
+                int newHeroGold = 0;
+                if (shopChoice > 0 && shopChoice < 8)
+                {
+                    Card shopCard = shopCards[shopChoice - 1];
+                    if (shopCard.Name != "Purchased")
+                    {
+                        newHeroGold = hero.Gold - shopCard.getGoldCost();
+                        if (newHeroGold >= 0)
+                        {
+                            hero.Gold = newHeroGold;
+                            hero.Deck.Add(shopCard);
+                            Console.WriteLine($"You have purchased {shopCard.Name}");
+                            shopCards[shopChoice - 1] = new Card();
+                        }
+                        else Console.WriteLine("You don't have enough Gold to buy this card.");
+                    }
+                    else Console.WriteLine("Card has already been purchased.");
+                }
+                else if (shopChoice > 7 && shopChoice < 11)
+                {
+                    Potion shopPotion = shopPotions[shopChoice - 8];
+                    if (shopPotion.Name != "Purchased")
+                    {
+                        if (hero.Potions.Count <= hero.PotionSlots)
+                        {
+                            newHeroGold = hero.Gold - shopPotion.GoldCost;
+                            if (newHeroGold >= 0)
+                            {
+                                hero.Gold = newHeroGold;
+                                hero.Potions.Add(shopPotion);
+                                Console.WriteLine($"You have purchased {shopPotion.Name}");
+                                shopPotions[shopChoice - 8] = new Potion();
+                            }
+                            else Console.WriteLine("You don't have enough Gold to buy this potion.");
+                        }
+                        else Console.WriteLine("You don't have any empty potions slots.");
+                    }
+                    else Console.WriteLine("Potion has already been purchased.");
+                }
+                else if (shopChoice == 11)
+                {
+                    if (removeCard == "Remove Card")
+                    {
+                        newHeroGold = hero.Gold - 75;
+                        if (newHeroGold >= 0)
+                        {
+                            hero.Gold = newHeroGold;
+                            hero.Deck.Remove(STS.ChooseCard(hero.Deck, "remove from your Deck"));
+                            removeCard = "Removed";
+                        }
+                        else Console.WriteLine("You don't have enough Gold to remove a card.");
+                    }
+                    else Console.WriteLine("You have already removed a card.");
+                }
+                else break;
+                Pause();
             }                       
         }
 
-        public static void EventDecider(Hero hero) 
+        public static void EventDecider(Hero hero, int actModifier) 
         {
+            Random eventRNG = new Random();
             return;
         }
 
@@ -366,52 +410,91 @@ namespace STV
                 DrawCards(drawPile, hand, discardPile, rng, 7);
             else DrawCards(drawPile, hand, discardPile, rng, 5);
             hero.Energy = hero.MaxEnergy;
-            int playerChoice = 0;
-            while (playerChoice != 5 && (!Encounter.All(x => x.Hp == 0)) && hero.Hp != 0)
+            string playerChoice = "";
+            while (playerChoice != "E" && (!Encounter.All(x => x.Hp == 0)) && hero.Hp != 0)
             {
                 ScreenWipe();
 
-                CombatMenu(hero, Encounter, drawPile, hand, discardPile,exhaustPile,turnNumber);
-                while (!Int32.TryParse(Console.ReadLine(), out playerChoice) || playerChoice < 1 || playerChoice > 5)
-                    Console.WriteLine("Invalid input, enter again:");
-                switch (playerChoice)
+                //Menu creation
+                Console.WriteLine($"\tActions:{Tab(5)}TURN {turnNumber}{Tab(5)}Hand:\n********************{Tab(9)}********************\n");
+                for (int i = 1; i < 11; i++)
                 {
-                    case 1:
+                    switch (i)
+                    {
+                        case 1:
+                            Console.WriteLine($"(R)ead Card's Effects {(hand.Count >= i ? Tab(9) + i + ":" + hand[i - 1].Name : "")}\n");
+                            break;
+                        case 2:
+                            Console.WriteLine($"(V)iew Your Buffs/Debuffs {(hand.Count >= i ? Tab(8) + i + ":" + hand[i - 1].Name : "")}\n");
+                            break;
+                        case 3:
+                            Console.WriteLine($"Use (P)otion {(hand.Count >= i ? Tab(10) + i + ":" + hand[i - 1].Name : "")}\n");
+                            break;
+                        case 4:
+                            Console.WriteLine($"View Enemy (I)nformation {(hand.Count >= i ? Tab(8) + i + ":" + hand[i - 1].Name : "")}\n");
+                            break;
+                        case 5:
+                            Console.WriteLine($"(E)nd Turn {(hand.Count >= i ? Tab(10) + i + ":" + hand[i - 1].Name : "")}\n");
+                            break;
+                        case 6:
+                            Console.WriteLine($"******************** {(hand.Count >= i ? Tab(9) + i + ":" + hand[i - 1].Name : "")}\n");
+                            break;
+                        case 7:
+                            Console.WriteLine($"{hero.Name} Information: {(hand.Count >= i ? Tab(9) + i + ":" + hand[i - 1].Name : "")}\n");
+                            break;
+                        case 8:
+                            Console.WriteLine($"Draw Pile:{drawPile.Count}\tDiscard Pile:{discardPile.Count}{Tab(2)}Exhausted:{exhaustPile.Count} {(hand.Count >= i ? Tab(5) + i + ":" + hand[i - 1].Name : "")}\n");
+                            break;
+                        case 9:
+                            Console.WriteLine($"HP:{hero.Hp}/{hero.MaxHP} + {hero.Block} Block\tEnergy:{hero.Energy}/{hero.MaxEnergy} {(hand.Count >= i ? Tab(7) + i + ":" + hand[i - 1].Name : "")}\n");
+                            break;
+                        case 10:
+                            Console.WriteLine($"{(hand.Count >= i ? Tab(11) + i + ":" + hand[i - 1].Name : "")}\n");
+                            break;
+                    }
+                }               
+                if (hero.Stance != null)
+                    Console.WriteLine($"{hero.Name}'s Stance: {hero.Stance}");
+                if (hero.Orbs.Count > 0)
+                {
+                    int orbNumber = 0;
+                    Console.Write($"{hero.Name}'s Orbs:\n");
+                    foreach (var orb in hero.Orbs)
+                    {
+                        orbNumber++;
+                        Console.Write($"{orbNumber}: {orb.Name} - {orb.Effect}{Tab(2)}");
+                    }
+                }
+
+                // Waiting for correct player choice
+                playerChoice = Console.ReadLine().ToUpper();
+
+                // Play Card function
+                if (Int32.TryParse(playerChoice,out int cardChoice) && cardChoice > 0 && cardChoice <= hand.Count)
+                {
+                    hand[cardChoice-1].CardAction(hero, Encounter, drawPile, discardPile, hand, exhaustPile, rng);
+                    HealthUnderZero(hero, Encounter);
+                    Pause(); 
+                }
+
+                // Other menu functions
+                else switch (playerChoice)
+                {
+                    default: 
+                        Console.WriteLine("Invalid input, enter again:"); 
+                        break;
+                    case "R":
                         ConsoleTableBuilder.From(hand).ExportAndWriteLine(TableAligntment.Center);
-                        /*Console.WriteLine("\nWhat card would you like to read? Enter the number or enter 0 to choose another option.\n");
-                        int viewCard = 1;
-                        while (viewCard != 0)
-                        {
-                            while (!Int32.TryParse(Console.ReadLine(), out viewCard) || viewCard < 0 || viewCard > hand.Count)
-                                Console.WriteLine("Invalid input, enter again:");
-                            if (viewCard == 0)
-                                break;
-                            Console.WriteLine("\n" + hand[viewCard - 1].String());
-                        }*/
                         Pause();
                         break;
-                    case 2:
-                        int playCard = 1;
-                        while (playCard != 0)
+                    case "B":
+                        foreach (var buff in hero.Buffs)
                         {
-                            Console.WriteLine($"\nWhat card would you like to play? Enter the number or enter 0 to choose another option.");
-                            while (!Int32.TryParse(Console.ReadLine(), out playCard) || playCard < 0 || playCard > hand.Count)
-                                Console.WriteLine("Invalid input, enter again:");
-                            if (playCard == 0)
-                                break;
-                            Card card = hand[playCard - 1];
-                            if (card.EnergyCost == "X")
-                                card.EnergyCost = $"{hero.Energy}";
-                            else
-                            {
-                                card.UseCard(hero, Encounter, drawPile, discardPile, hand, exhaustPile, rng);
-                                HealthUnderZero(hero, Encounter);
-                            }
-                            Pause();
-                            break;
+                            Console.WriteLine($"{buff.BuffDebuff} - {buff.Name} - {buff.Description()}\n");
                         }
+                        Pause();
                         break;
-                    case 3:
+                    case "P":
                         int usePotion = 0;
                         for (int i = 0; i < hero.Potions.Count; i++)
                             Console.WriteLine($"{i+1}: {hero.Potions[i].ToString()}");
@@ -423,10 +506,12 @@ namespace STV
                         hero.Potions[usePotion-1].UsePotion(hero, Encounter, drawPile, discardPile, hand, exhaustPile, rng);
                         HealthUnderZero(hero,Encounter);
                         break;
-                    case 4:                                                                             // Enemy Info Menu
+                    case "I":                                                                             // Enemy Info Menu
                         ScreenWipe();
                         for (int i = 0; i < Encounter.Count; i++)
                         {
+                            if (Encounter[i].Hp == 0)
+                                continue;
                             Console.WriteLine("************************************************************************\n");
                             Console.WriteLine($"Enemy {i + 1}: {Encounter[i].Name}{Tab(2)}HP:{Encounter[i].Hp}/{Encounter[i].MaxHP}{Tab(2)}Block:{Encounter[i].Block}\n");
                             Console.WriteLine($"Intent: {Encounter[i].Intent}\n");
@@ -439,7 +524,7 @@ namespace STV
                         }
                         Pause();
                         break;
-                    case 5:
+                    case "E":
                         HealthUnderZero(hero, Encounter);
                         for (int i = 0; i < Encounter.Count; i++)
                         {
@@ -448,21 +533,19 @@ namespace STV
                         ScreenWipe();
                         break;
                 }
-
             }
-            for (int i = hand.Count; i > 0; i--)                    //Discard at end of turn (Comment to find easy for disabling)
+            for(int i = hand.Count-1; i > 0; i--)                   //Discard at end of turn (Comment to find easy for disabling)
             {
-                if (hand[i-1].Description.Contains("Retain."))
+                if (hand[i].Description.Contains("Retain."))
                 {
-                    hero.Actions.Add($"{hand[i-1].Name} Retained");
+                    hero.Actions.Add($"{hand[i].Name} Retained");
                     continue;
                 }                   
                 else
                 {
-                    if (hand[i-1].Description.Contains("Ethereal"))
-                        hand[i-1].Exhaust(exhaustPile);
-                    else discardPile.Add(hand[i-1]);
-                    hand.RemoveAt(i-1);
+                    if (hand[i].Description.Contains("Ethereal"))
+                        hand[i].Exhaust(exhaustPile, hand);
+                    else hand[i].MoveCard(hand, discardPile);
                 }
             }
         }
@@ -476,7 +559,6 @@ namespace STV
                     Encounter[i].EnemyAction(hero, drawPile, discardPile, Encounter);
                     HealthUnderZero(hero, Encounter);
                 }  
-                else Console.WriteLine($"The {Encounter[i].Name} is dead and therefore... does nothing.");
             }
             hero.Block = 0;
         }
@@ -531,12 +613,13 @@ namespace STV
             }
         }
 
-        public static Card ChooseCard(List<Card> list)
+        public static Card ChooseCard(List<Card> list, string action)
         {
             int cardChoice = 0;
+            if (list.Count < 0) { return null;}
+            Console.WriteLine($"Which card would you like to {action}?");
             for (int i = 0; i < list.Count; i++)
-                Console.WriteLine($"{i + 1}:{list[i].Name}");
-            Console.WriteLine("Which card would you like to choose?");
+                Console.WriteLine($"{i + 1}:{list[i].Name}");          
             while (!Int32.TryParse(Console.ReadLine(), out cardChoice) || cardChoice < 1 || cardChoice > list.Count)
                 Console.WriteLine("Invalid input, enter again:");
             return list[cardChoice-1];
@@ -547,87 +630,7 @@ namespace STV
         //MENU AND UI METHODS
         public static void CombatMenu(Hero hero, List<Enemy> Encounter, List<Card> drawPile, List<Card> hand, List<Card> discardPile, List<Card> exhaustPile, int turnNumber)
         {
-            Console.WriteLine($"\tActions:{Tab(5)}TURN {turnNumber}{Tab(5)}Hand:\n********************{Tab(9)}********************\n");
-            for (int i = 1; i < 11; i++)
-            {
-                switch (i)
-                {
-                    case 1:
-                        if (hand.Count >= 1)
-                            Console.WriteLine($"1: Read card's effects{Tab(9)}{i}:{hand[0].Name}\n");
-                        else Console.WriteLine("1: Read card's effects\n");
-                        break;
-                    case 2:
-                        if (hand.Count >= 2)
-                            Console.WriteLine($"2: Play a card       {Tab(9)}{i}:{hand[1].Name}\n");
-                        else Console.WriteLine("2: Play a card\n");
-                        break;
-                    case 3:
-                        if (hand.Count >= 3)
-                            Console.WriteLine($"3: Use a potion      {Tab(9)}{i}:{hand[2].Name}\n");
-                        else Console.WriteLine("3: Use a potion\n");
-                        break;
-                    case 4:
-                        if (hand.Count >= 4)
-                            Console.WriteLine($"4: View enemy information{Tab(8)}{i}:{hand[3].Name}\n");
-                        else Console.WriteLine("4: View enemy information\n");
-                        break;
-                    case 5:
-                        if (hand.Count >= 5)
-                            Console.WriteLine($"5: End your turn     {Tab(9)}{i}:{hand[4].Name}\n");
-                        else Console.WriteLine("5: End your turn\n");
-                        break;
-                    case 6:
-                        if (hand.Count >= 6)
-                            Console.WriteLine($"********************{Tab(9)}{i}:{hand[5].Name}\n");
-                        else Console.WriteLine("********************\n");
-                        break;
-                    case 7:
-                        if (hand.Count >= 7)
-                            Console.WriteLine($"{hero.Name} Information:{Tab(9)}{i}:{hand[6].Name}\n");
-                        else Console.WriteLine($"{hero.Name} Information:\n");
-                        break;
-                    case 8:
-                        if (hand.Count >= 8)
-                            Console.WriteLine($"Draw Pile:{drawPile.Count}\tDiscard Pile:{discardPile.Count}{Tab(2)}Exhausted:{exhaustPile.Count}{Tab(5)}{i}:{hand[7].Name}\n");
-                        else Console.WriteLine($"Draw Pile:{drawPile.Count}\tDiscard Pile:{discardPile.Count}\tExhausted:{exhaustPile.Count}\n");
-                        break;
-                    case 9:
-                        if (hand.Count >= 9)
-                            Console.WriteLine($"HP:{hero.Hp}/{hero.MaxHP} + {hero.Block} Block\tEnergy:{hero.Energy}/{hero.MaxEnergy} {Tab(7)}{i}:{hand[8].Name}\n");
-                        else Console.WriteLine($"HP:{hero.Hp}/{hero.MaxHP} + {hero.Block} Block\tEnergy:{hero.Energy}/{hero.MaxEnergy}\n");
-                        break;
-                    case 10:
-                        if (hand.Count >= 10)
-                        {
-                            if (hero.Buffs.Count == 0)
-                                Console.WriteLine($"{hero.Name}'s Buffs/Debuffs: None{Tab(8)}{i}:{hand[9].Name}\n");
-                            else Console.WriteLine($"{hero.Name}'s Buffs/Debuffs:{Tab(8)}{i}:{hand[9].Name}\n");
-                        }
-                        else if (hero.Buffs.Count == 0)
-                            Console.WriteLine($"{hero.Name}'s Buffs/Debuffs: None\n");
-                        else Console.WriteLine($"{hero.Name}'s Buffs/Debuffs:\n");
-                        break;
-                }
-            }
-            foreach (var buff in hero.Buffs)
-            {
-                Console.WriteLine($"{buff.BuffDebuff} - {buff.Name} - {buff.Description()}\n");
-            }
-            if (hero.Stance != null)
-                Console.WriteLine($"{hero.Name}'s Stance: {hero.Stance}");
-            if (hero.Orbs.Count > 0)
-            {
-                int orbNumber = 0;
-                Console.Write($"{hero.Name}'s Orbs:\n");
-                foreach (var orb in hero.Orbs)
-                {
-                    orbNumber++;
-                    Console.Write($"{orbNumber}: {orb.Name} - {orb.Effect}{Tab(2)}");
-                }
-                    
-            }
-
+            
         }
         public static void Pause()
         {
@@ -657,12 +660,12 @@ namespace STV
             {
                 while (i < 4)
                 {
-                    Deck.Add(Dict.cardL[220]);
+                    Deck.Add(new Card(Dict.cardL[220]));
                     i++;
                 }
                 while (i < 8)
                 {
-                    Deck.Add(Dict.cardL[219]);
+                    Deck.Add(new Card(Dict.cardL[219]));
                     i++;
                 }
             }

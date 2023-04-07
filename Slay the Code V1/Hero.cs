@@ -133,20 +133,16 @@ namespace STV
                         Console.WriteLine($"{Name} has left {oldStance} Stance.");
                         break;
                 }
-            if (FindBuff("Mental Fortress", Buffs) != null)                              // Mental Fortress Check
+            // Mental Fortress Check
+            if (FindBuff("Mental Fortress", Buffs) != null)                              
                 GainBlock(FindBuff("Mental Fortress", Buffs).Intensity.GetValueOrDefault());
             if (oldStance != Stance && oldStance == "Calm")
                 Energy += 2;
             else if (oldStance != Stance && Stance == "Divinity")
                 Energy += 3;
-            for (int i = discardPile.Count; i > 0; i--)											// Flurry of Blows Check
-            {
-                if (discardPile[i - 1].Name == "Flurry Of Blows" && hand.Count < 10)
-                {
-                    hand.Add(discardPile[i - 1]);
-                    discardPile.Remove(discardPile[i - 1]);
-                }
-            }
+            // Flurry of Blows Check
+            if (Card.FindCard("Flurry of Blows", discardPile) is Card flurryOfBlows && flurryOfBlows != null && hand.Count < 10) 
+                flurryOfBlows.MoveCard(discardPile, hand);               
         }
 
         public void ChannelOrb(List<Enemy> encounter, int orbID)
@@ -213,37 +209,11 @@ namespace STV
             else Console.WriteLine($"The {Name} lost {amount * -1} Gold!");
         }
 
-        public List<Card> RandomCards(string type,int count, Random rng)
-        {
-            List<Card> cards = new List<Card>();
-            for (int i = 0; i < count; i++)
-            {
-                switch (type)
-                {
-                    default:
-                        cards.Add(new Card(Dict.cardL[rng.Next(73)]));
-                        break;
-                    case "Silent":
-                        cards.Add(new Card(Dict.cardL[rng.Next(73, 146)]));
-                        break;
-                    case "Defect":
-                        cards.Add(new Card(Dict.cardL[rng.Next(146, 219)]));
-                        break;
-                    case "Watcher":
-                        cards.Add(new Card(Dict.cardL[rng.Next(221, 294)]));
-                        break;
-                    case "Colorless":
-                        cards.Add(new Card(Dict.cardL[rng.Next(297, 332)]));
-                        break;
-                }
-            }
-            return cards;
-        }
 
         public void CombatRewards(List<Card> deck, Random rng)
         {
-            List<Card> cardReward = RandomCards(Name,3, rng);
-            deck.Add(STS.ChooseCard(cardReward));
+            List<Card> cardReward = Card.RandomCards(Name,3, rng);
+            deck.Add(STS.ChooseCard(cardReward, "add to your Deck."));
             GoldChange(35);
             if (rng.Next(10) < PotionChance)
             {
