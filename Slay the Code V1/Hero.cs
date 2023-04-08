@@ -1,7 +1,4 @@
-﻿using STV;
-using System.ComponentModel.Design;
-
-namespace STV
+﻿namespace STV
 {
     public class Hero : Actor
     {
@@ -18,15 +15,15 @@ namespace STV
         
         public Hero(string name, int maxHP)
         {
-            this.Name = name;
-            this.MaxHP = maxHP;
-            this.Hp = maxHP;
+            Name = name;
+            MaxHP = maxHP;
+            Hp = maxHP;
             this.MaxEnergy = 3;
             this.Energy = 3;
             this.Block = 0;
-            this.Deck = new List<Card>();
+            this.Deck = new();
             this.Buffs = new();
-            this.Relics = new();
+            this.Relics = new();;
             this.Potions = new();
             this.Actions = new();
             this.Orbs = new();
@@ -46,7 +43,7 @@ namespace STV
                 this.MaxEnergy = 3;
                 this.Energy = 3;
                 this.Block = 0;
-                this.Deck = new List<Card>();
+                this.Deck = new();
                 this.Buffs = new();
                 this.Relics = new();
                 this.Potions = new();
@@ -59,6 +56,47 @@ namespace STV
                 this.PotionChance = 1;
             }
         }
+
+        // Initial Deck
+        public void StartingDeck()
+        {
+            for (int i = 0; i < 8; i++)
+            {
+                while (i < 4)
+                {
+                    Deck.Add(new Card(Dict.cardL[220]));
+                    i++;
+                }
+                while (i < 8)
+                {
+                    Deck.Add(new Card(Dict.cardL[219]));
+                    i++;
+                }
+            }
+            switch (Name)
+            {
+                case "Ironclad":
+                    Deck.Add(new Card(Dict.cardL[3]));
+                    Deck.Add(new Card(Dict.cardL[220]));
+                    break;
+                case "Silent":
+                    Deck.Add(new Card(Dict.cardL[220]));
+                    Deck.Add(new Card(Dict.cardL[219]));
+                    Deck.Add(new Card(Dict.cardL[121]));
+                    Deck.Add(new Card(Dict.cardL[139]));
+                    break;
+                case "Defect":
+                    Deck.Add(new Card(Dict.cardL[170]));
+                    Deck.Add(new Card(Dict.cardL[214]));
+                    break;
+                case "Watcher":
+                    Deck.Add(new Card(Dict.cardL[241]));
+                    Deck.Add(new Card(Dict.cardL[285]));
+                    break;
+            }
+            Deck.Sort();
+        }
+
         // Hero exclusive methods
         public int DetermineTarget(List<Enemy> encounter)
         {
@@ -201,6 +239,7 @@ namespace STV
         {
             this.MaxEnergy += energy;
         }
+
         public void GoldChange(int amount) //For when rewards are set
         {
             Gold += amount;

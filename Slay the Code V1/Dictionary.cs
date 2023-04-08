@@ -2,13 +2,6 @@
 {
     public class Dict
     {
-        public static Dictionary<int, Hero> heroL = new()                                             //Dictionary of Hero objects
-        {
-            { 1, new Hero("Ironclad",80) },
-            { 2, new Hero("Silent",70) },
-            { 3, new Hero("Defect",75) },
-            { 4, new Hero("Watcher",72) },
-        };
 
         public static Dictionary<int, Card> cardL = new()                                             //Dictionary of Card objects
         {
@@ -380,10 +373,10 @@
 
         public static Dictionary<int, Orb> orbL = new()                                            // Orb Reference Dictionary
         {
-            { 0, new Orb(0, "Lightning", "Strikes foes with thunder and lightning.", 3) },
-            { 1, new Orb(1, "Frost","Shield yourself behind a frozen barricade.", 4) },
-            { 2, new Orb(2, "Dark","Devour your enemies in the Void.", 6) },
-            { 3, new Orb(3, "Plasma", "Restore yourself in the blinding lights.", 1) },
+            { 0, new Orb("Lightning", "Strikes foes with thunder and lightning.", 3) },
+            { 1, new Orb("Frost","Shield yourself behind a frozen barricade.", 4) },
+            { 2, new Orb("Dark","Devour your enemies in the Void.", 6) },
+            { 3, new Orb("Plasma", "Restore yourself in the blinding lights.", 1) },
         };
 
         public static Dictionary<int, Buff> buffL = new()                                            // Buffs and Debuffs Reference Dictionary
@@ -537,6 +530,14 @@
             { 7, new Potion(7, "Cultist Potion", "Rare", "Gain 1 Ritual.") },
             { 8, new Potion(8,"Focus Potion","Common","Gain 2 Focus.") },
             { 9, new Potion(9, "Liquid Bronze", "Uncommon", "Gain 3 Thorns.") },
+        };
+
+        public static Dictionary<int, Hero> heroL = new()                                             //Dictionary of Hero objects
+        {
+            { 1, new Hero("Ironclad",80) },
+            { 2, new Hero("Silent",70) },
+            { 3, new Hero("Defect",75) },
+            { 4, new Hero("Watcher",72) },
         };
     }
 }

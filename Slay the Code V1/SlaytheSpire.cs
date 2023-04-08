@@ -40,26 +40,23 @@ namespace STV
                         switch (hero.Name)
                         {
                             case "Ironclad":
-                                hero.Relics.Add(new Relic(Dict.relicL[0]));
-                                Console.BackgroundColor = ConsoleColor.DarkRed;
+                                Console.BackgroundColor = ConsoleColor.DarkRed;                                
                                 break;
                             case "Silent":
-                                hero.Relics.Add(new Relic(Dict.relicL[1]));
                                 Console.BackgroundColor = ConsoleColor.DarkGreen;
                                 break;
                             case "Defect":
-                                hero.Relics.Add(new Relic(Dict.relicL[2]));
                                 Console.BackgroundColor = ConsoleColor.DarkCyan;
                                 hero.OrbSlots = 3;
                                 break;
                             case "Watcher":
-                                hero.Relics.Add(new Relic(Dict.relicL[3]));
                                 Console.BackgroundColor = ConsoleColor.DarkBlue;
                                 hero.Stance = "None";
                                 break;
                         }
+                        hero.Relics.Add(Dict.relicL[heroChoice - 1]);
                         ScreenWipe();
-                        hero.Deck = CreateDeck(hero);
+                        hero.StartingDeck();
                         Console.WriteLine($"You have chosen the {hero.Name}! Here is the {hero.Name} Deck.\n");                    
                         ConsoleTableExt.ConsoleTableBuilder.From(hero.Deck).ExportAndWriteLine(TableAligntment.Center);
                         Pause();
@@ -67,7 +64,7 @@ namespace STV
                         for (int act = 1; act <= 3; act++)
                         {
                             Console.WriteLine($"You have entered Act {act}!");
-                            List<Room> map = MapGeneration();
+                            List<Room> map = fMapGeneration();
                             List<Room> choices = new List<Room>();                            
                             Room activeRoom = null;
                             for (int floor = 1; floor <= 16; floor++)
@@ -326,7 +323,7 @@ namespace STV
                     hero.Buffs[i].DurationDecrease();
                     if (hero.Buffs[i].DurationEnded())
                     {
-                        Console.WriteLine($"\nYour {hero.Buffs[i].Name} {hero.Buffs[i].BuffDebuff} has ran out.");
+                        Console.WriteLine($"\nYour {hero.Buffs[i].Name} {(hero.Buffs[i].BuffDebuff == true ? "Buff" : "Debuff")} has ran out.");
                         hero.Buffs.RemoveAt(i);
                         Pause();
                     }
@@ -336,21 +333,14 @@ namespace STV
                 {
                     for (int j = encounter[i].Buffs.Count - 1; j >= 0; j--)
                     {
-                        bool removeBuff = false;
                         encounter[i].Buffs[j].DurationDecrease();
                         if (encounter[i].Buffs[j].DurationEnded())
                         {
-                            string buffDebuff = "";
-                            if (encounter[i].Buffs[j].BuffDebuff)
-                                buffDebuff = "Buff";
-                            else buffDebuff = "Debuff";
-                            Console.WriteLine($"\nThe {encounter[i].Name}'s {encounter[i].Buffs[j].Name} {buffDebuff} has ran out.");
-                            removeBuff = true;
+                            Console.WriteLine($"\nThe {encounter[i].Name}'s {encounter[i].Buffs[j].Name} {(encounter[i].Buffs[j].BuffDebuff == true ? "Buff" : "Debuff")} has ran out.");
+                            encounter[i].Buffs.RemoveAt(j);
                         }
                         if (encounter[i].Buffs[j].Name == "Ritual")
-                            encounter[i].AddBuff(4, Actor.FindBuff("Ritual", encounter[i].Buffs).Intensity.GetValueOrDefault(3)); // Adds Ritual Intensity to Strength
-                        if (removeBuff)
-                            encounter[i].Buffs.RemoveAt(j);
+                            encounter[i].AddBuff(4, encounter[i].Buffs[j].Intensity.GetValueOrDefault(3)); // Adds Ritual Intensity to Strength                           
                     }
                 }
                 turnNumber++;                                                        
@@ -364,18 +354,18 @@ namespace STV
                 foreach (var orb in hero.Orbs)
                 {
                     if(orb is null) continue;
-                    switch (orb.OrbID)
+                    switch (orb.Name)
                     {
-                        case 0:
+                        case "Lightning":
                             int target = random.Next(0, encounter.Count);
                             hero.NonAttackDamage(encounter[target], 3);
                             Console.WriteLine($"The {encounter[target].Name} took 3 damage from the Lightning Orb!");
                             break;
-                        case 1:
+                        case "Frost":
                             hero.GainBlock(2);
                             Console.WriteLine($"The {hero.Name} gained 2 Block from the Frost Orb!");
                             break;
-                        case 2:
+                        case "Dark":
                             orb.Effect += 6;
                             Console.WriteLine($"The {orb.Name} Orb stored 6 more Energy!");
                             break;
@@ -407,9 +397,11 @@ namespace STV
             if (turnNumber == 1 && hero.Relics[0].Name == "Cracked Core")
                 hero.Orbs.Add(new Orb(Dict.orbL[0]));
             if (turnNumber == 1 && hero.Relics[0].Name == "Ring of the Snake")
-                DrawCards(drawPile, hand, discardPile, rng, 7);
-            else DrawCards(drawPile, hand, discardPile, rng, 5);
+                DrawCards(drawPile, hand, discardPile, rng, 2);
+            DrawCards(drawPile, hand, discardPile, rng, 5);
             hero.Energy = hero.MaxEnergy;
+            if (hero.Orbs.FindAll(x => x.Name == "Plasma").Count() > 0)
+                hero.Energy += hero.Orbs.FindAll(x => x.Name == "Plasma").Count();
             string playerChoice = "";
             while (playerChoice != "E" && (!Encounter.All(x => x.Hp == 0)) && hero.Hp != 0)
             {
@@ -652,54 +644,7 @@ namespace STV
             Console.WriteLine("\x1b[3J");
         }
         // INITILIAZE METHODS
-
-        public static List<Card> CreateDeck(Actor hero)
-        {
-            List<Card> Deck = new();
-            for (int i = 0; i < 8; i++)
-            {
-                while (i < 4)
-                {
-                    Deck.Add(new Card(Dict.cardL[220]));
-                    i++;
-                }
-                while (i < 8)
-                {
-                    Deck.Add(new Card(Dict.cardL[219]));
-                    i++;
-                }
-            }
-            switch (hero.Name)
-            {
-                case "Ironclad":
-                    Deck.Add(new Card(Dict.cardL[3]));
-                    Deck.Add(new Card(Dict.cardL[220]));
-                    break;
-                case "Silent":
-                    Deck.Add(new Card(Dict.cardL[220]));
-                    Deck.Add(new Card(Dict.cardL[219]));
-                    Deck.Add(new Card(Dict.cardL[121]));
-                    Deck.Add(new Card(Dict.cardL[139]));
-                    break;
-                case "Defect":
-                    Deck.Add(new Card(Dict.cardL[170]));
-                    Deck.Add(new Card(Dict.cardL[214]));
-                    break;
-                case "Watcher":
-                    Deck.Add(new Card(Dict.cardL[241]));
-                    Deck.Add(new Card(Dict.cardL[285]));
-                    break;
-            }
-            Deck.Sort(delegate (Card x, Card y)
-            {
-                if (x.Name == null && y.Name == null) return 0;
-                else if (x.Name == null) return -1;
-                else if (y.Name == null) return 1;
-                else return x.Name.CompareTo(y.Name);
-            });
-            return Deck;
-
-        }
+     
 
         public static List<Enemy> CreateEncounter(int list)
         {
@@ -878,8 +823,7 @@ namespace STV
             
             for (int i = 0; i < encounter.Count; i++)
             {
-                encounter[i].MaxHP = encounter[i].EnemyHealthSet(encounter[i].BottomHP, encounter[i].TopHP);
-                encounter[i].Hp = encounter[i].MaxHP;
+                encounter[i].MaxHP = encounter[i].EnemyHealthSet();
                 encounter[i].Hp = encounter[i].MaxHP;
                 switch (encounter[i].EnemyID)
                 {
@@ -911,7 +855,7 @@ namespace STV
         public static List<Room> MapGeneration()
         {
             // Variable Init
-            Random rng = new Random();
+            Random mapRng = new Random();
             Dictionary<int, List<Room>> MapTemplate = new();
             List<Room> paths = new List<Room>();
 
@@ -924,14 +868,14 @@ namespace STV
             {
 
                 // Grab starting node at random and move floor by floor to a valid room
-                paths.Add(MapTemplate[1][rng.Next(0, 7)]);
+                paths.Add(MapTemplate[1][mapRng.Next(0, 7)]);
                 for (int j = 1; j < 15; j++)
                 {
                     while (true)
                     {
                         try     // Prevents -1 or 7 index which would be out of range
                         {
-                            Room tmp = new Room(MapTemplate[j + 1][rng.Next(paths.Last().RoomNumber - 1, paths.Last().RoomNumber + 2)]);
+                            Room tmp = new Room(MapTemplate[j + 1][mapRng.Next(paths.Last().RoomNumber - 1, paths.Last().RoomNumber + 2)]);
                             tmp.Connections.Add(paths.Last());
                             paths.Last().Connections.Add(tmp);
                             paths.Add(tmp);
@@ -1004,7 +948,7 @@ namespace STV
                 {
                     while (true)
                     {
-                        choice = rng.Next(merchant);
+                        choice = mapRng.Next(merchant);
                         if (choice < monster)
                             r.ChangeName("Monster");
                         else if (choice < eVent)
@@ -1105,5 +1049,3 @@ namespace STV
         }
     }
 }
-
-

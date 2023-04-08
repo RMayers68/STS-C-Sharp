@@ -142,6 +142,4 @@
 			Console.WriteLine($"You have healed {heal} HP and are now at {Hp}/{MaxHP}!");
 		}	
 	}
-
-	
 }

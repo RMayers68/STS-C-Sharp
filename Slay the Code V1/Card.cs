@@ -62,32 +62,19 @@ namespace STV
             if (other == null) return false;
             return (this.Name.Equals(other.Name));
         }
-
-		// Default comparer for Card type.
-		public int CompareTo(Card other)
-		{
-			// A null value means that this object is greater.
-			if (other == null)
-				return 1;
-
-			else
-				return this.CardID.CompareTo(other.CardID);
-		}
-
-		public override int GetHashCode()
-		{
-			return CardID;
-		}
 		
-		// Should also override == and != operators.
+        // Default comparer for Card type.
+        public int CompareTo(Card other)
+        {
+            // A null value means that this object is greater.
+            if (Name == null && other.Name == null) return 0;
+            else if (Name == null) return -1;
+            else if (other.Name == null) return 1;
+            else return Name.CompareTo(other.Name);
+        }
 
-		public int SortbyNameAscending(Card card1, Card card2)
-		{
-			return card1.Name.CompareTo(card2.Name);
-		}
-
-		// methods
-		public override string ToString()
+        // methods
+        public override string ToString()
 		{
 			if (EnergyCost == "None")
 				return $"Name: {Name}\nType: {Type}\nEffect: {Description}";
@@ -1133,11 +1120,11 @@ namespace STV
 					hero.AddBuff(64, 1);
 					break;
                 case "Recursion":
-					hero.Evoke(encounter);
-					int tmp = hero.Orbs[0].OrbID;
+					Orb recursion = hero.Orbs[0];
+                    hero.Evoke(encounter);					
 					hero.Orbs.RemoveAt(0);
-					hero.ChannelOrb(encounter,tmp);
-					break;
+                    hero.Orbs.Add(recursion);
+                    break;
 				case "Recycle":
 					Card recycle = STS.ChooseCard(hand, "exhaust");
 					recycle.Exhaust(exhaustPile, hand);
