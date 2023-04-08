@@ -254,7 +254,7 @@
                 case "Twin Slam":
                     for (int i = 0; i < 2; i++)
                         SingleAttack(hero, 8);
-                    Buffs.Remove(FindBuff("Sharp Hide",Buffs));
+                    Buffs.Remove(FindBuff("Thorns",Buffs));
                     AddBuff(16, 30);
                     Actions.Clear();
                     break;
@@ -525,10 +525,10 @@
         }
 
         // Randomizes Enemy Health based on a range at start of encounter
-        public int EnemyHealthSet(int bottom, int top)
+        public int EnemyHealthSet()
         {
             Random r = new Random();
-            int maxHP = r.Next(bottom, top + 1);
+            int maxHP = r.Next(BottomHP, TopHP);
             return maxHP;
         }
 

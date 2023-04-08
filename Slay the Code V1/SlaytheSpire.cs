@@ -64,7 +64,7 @@ namespace STV
                         for (int act = 1; act <= 3; act++)
                         {
                             Console.WriteLine($"You have entered Act {act}!");
-                            List<Room> map = fMapGeneration();
+                            List<Room> map = MapGeneration();
                             List<Room> choices = new List<Room>();                            
                             Room activeRoom = null;
                             for (int floor = 1; floor <= 16; floor++)

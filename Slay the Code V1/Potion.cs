@@ -3,7 +3,6 @@
     public class Potion
     {
         //attributes
-        private int PotionID { get; set; }
         public string Name { get; set; }
         public string Description { get; set; }
         public string Rarity { get; set; }
@@ -12,14 +11,12 @@
         //constructors
         public Potion()
         {
-            this.PotionID = -1;
             this.Name = "Purchased";
             this.GoldCost = 0;
         }
 
-        public Potion(int potionID, string name, string description, string rarity)
+        public Potion(string name, string description, string rarity)
         {
-            this.PotionID = potionID;
             this.Name = name;
             this.Description = description;
             this.Rarity = rarity;
@@ -27,7 +24,6 @@
 
         public Potion(Potion potion)
         {
-            this.PotionID = potion.PotionID;
             this.Name = potion.Name;
             this.Description = potion.Description;
             this.Rarity = potion.Rarity;
