@@ -50,7 +50,7 @@
                 case "Entangled": return $"You may not play any Attacks this turn.";
                 case "Sleeping": return $"This enemy is sleeping and damaging it will awaken it.";
                 case "Mode Shift": return $"After receiving {Intensity} damage, changes to defensive mode.";
-                case "Sharp Hide": return $"Whenever you play an Attack, take {Intensity} damage.";
+                case "Nightmare": return $"At the start of your next turn, Copy the selected card {Intensity} time(s).";
                 case "Thievery": return $"Steals {Intensity} Gold whenever it attacks.";
                 case "Enrage": return $"Whenever you play a skill, gains {Intensity} Strength.";
                 case "Barricade": return $"Block is not removed at the start of turn.";

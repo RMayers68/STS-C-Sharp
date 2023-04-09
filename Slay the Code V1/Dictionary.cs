@@ -5,9 +5,9 @@
 
         public static Dictionary<int, Card> cardL = new()                                             //Dictionary of Card objects
         {
-            { 0, new Card("Anger","Attack","Common","0") },
-            { 1, new Card("Armaments","Skill","Common","1") },
-            { 2, new Card("Barricade","Power","Rare","3") },
+            { 0, new Card("Anger","Attack","Common","0",6,0,true) },
+            { 1, new Card("Armaments","Skill","Common","1",5) },
+            { 2, new Card("Barricade","Power","Rare","3",1) },
             { 3, new Card("Bash","Attack","Common","2") },
             { 4, new Card("Battle Trance","Skill","Uncommon","0") },
             { 5, new Card("Berserk","Power","Rare","0") },
@@ -398,7 +398,7 @@
             { 14, new Buff("Entangled", false, 1) },
             { 15, new Buff("Asleep", false, 1)},
             { 16, new Buff("Mode Shift",true,3)},
-            { 17, new Buff("Sharp Hide",true,3)},
+            { 17, new Buff("Nightmare",true,3)},
             { 18, new Buff("Thievery",true,3)},
             { 19, new Buff("Enrage",true,3)},
             { 20, new Buff("Barricade",true,3)},

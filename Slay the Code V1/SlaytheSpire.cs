@@ -282,7 +282,7 @@ namespace STV
                         if (newHeroGold >= 0)
                         {
                             hero.Gold = newHeroGold;
-                            hero.Deck.Remove(STS.ChooseCard(hero.Deck, "remove from your Deck"));
+                            hero.Deck.Remove(Card.ChooseCard(hero.Deck, "remove from your Deck"));
                             removeCard = "Removed";
                         }
                         else Console.WriteLine("You don't have enough Gold to remove a card.");
@@ -308,7 +308,7 @@ namespace STV
             Console.WriteLine("Next encounter:");
             foreach (Actor actor in encounter) 
                 Console.WriteLine(actor.Name);
-            List<Card> drawPile = new(Shuffle(hero.Deck, cardRNG));
+            List<Card> drawPile = new(Card.Shuffle(hero.Deck, cardRNG));
             List<Card> hand = new();
             List<Card> discardPile = new();
             List<Card> exhaustPile = new();
@@ -397,8 +397,8 @@ namespace STV
             if (turnNumber == 1 && hero.Relics[0].Name == "Cracked Core")
                 hero.Orbs.Add(new Orb(Dict.orbL[0]));
             if (turnNumber == 1 && hero.Relics[0].Name == "Ring of the Snake")
-                DrawCards(drawPile, hand, discardPile, rng, 2);
-            DrawCards(drawPile, hand, discardPile, rng, 5);
+                Card.DrawCards(drawPile, hand, discardPile, rng, 2);
+            Card.DrawCards(drawPile, hand, discardPile, rng, 5);
             hero.Energy = hero.MaxEnergy;
             if (hero.Orbs.FindAll(x => x.Name == "Plasma").Count() > 0)
                 hero.Energy += hero.Orbs.FindAll(x => x.Name == "Plasma").Count();
@@ -564,58 +564,6 @@ namespace STV
         }
 
         // DECK METHODS
-
-        public static List<Card> Shuffle(List<Card> Deck, Random rng)
-        {
-            int n = Deck.Count;
-            while (n > 1)
-            {
-                n--;
-                int k = rng.Next(n + 1);
-                Card value = Deck[k];
-                Deck[k] = Deck[n];
-                Deck[n] = value;
-            }
-            return Deck;
-        }
-
-        public static void Discard2Draw(List<Card> drawPile, List<Card> discardPile, Random rng)
-        {
-            for (int i = discardPile.Count; i > 0; i--)
-            {
-                drawPile.Add(discardPile[i - 1]);
-                discardPile.RemoveAt(i - 1);
-            }
-            Shuffle(drawPile, rng);
-        }
-
-        public static void DrawCards(List<Card> drawPile, List<Card> hand, List<Card> discardPile, Random rng, int cards)
-        {
-            while (hand.Count < 10)
-            {
-                if (drawPile.Count == 0)
-                    Discard2Draw(drawPile, discardPile, rng);
-                if (drawPile.Count == 0)
-                    break;
-                hand.Add(drawPile[drawPile.Count - 1]);
-                drawPile.RemoveAt(drawPile.Count - 1);
-                cards--;
-                if (cards == 0)
-                    return;
-            }
-        }
-
-        public static Card ChooseCard(List<Card> list, string action)
-        {
-            int cardChoice = 0;
-            if (list.Count < 0) { return null;}
-            Console.WriteLine($"Which card would you like to {action}?");
-            for (int i = 0; i < list.Count; i++)
-                Console.WriteLine($"{i + 1}:{list[i].Name}");          
-            while (!Int32.TryParse(Console.ReadLine(), out cardChoice) || cardChoice < 1 || cardChoice > list.Count)
-                Console.WriteLine("Invalid input, enter again:");
-            return list[cardChoice-1];
-        }
 
         
 

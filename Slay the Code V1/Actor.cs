@@ -70,7 +70,9 @@
 					break;
 				case 3: //Counter
 					buff.CounterSet(effect);
-					Console.WriteLine($"{Name}'s {buff.Name} is now at {effect}!");
+					Console.WriteLine($"{Name}'s {buff.Name} is now at {buff.Counter}!");
+					if (buff.Name == "Mantra")
+						Actions.Add($"Mantra Gained: {effect}");
 					break;
 				default:
 					return;

@@ -252,7 +252,7 @@
         public void CombatRewards(List<Card> deck, Random rng)
         {
             List<Card> cardReward = Card.RandomCards(Name,3, rng);
-            deck.Add(STS.ChooseCard(cardReward, "add to your Deck."));
+            deck.Add(Card.ChooseCard(cardReward, "add to your Deck."));
             GoldChange(35);
             if (rng.Next(10) < PotionChance)
             {

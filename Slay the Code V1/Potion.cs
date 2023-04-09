@@ -58,7 +58,7 @@
                     encounter[target].AddBuff(1, 3);
                     break;
                 case "Swift Potion":
-                    STS.DrawCards(drawPile, hand, discardPile, rng, 3);
+                    Card.DrawCards(drawPile, hand, discardPile, rng, 3);
                     break;
                 case "Weak Potion":
                     target = hero.DetermineTarget(encounter);
