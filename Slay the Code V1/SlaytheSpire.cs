@@ -22,6 +22,7 @@ namespace STV
                 Console.BackgroundColor = ConsoleColor.Black;
                 ScreenWipe();
                 Console.BackgroundColor = ConsoleColor.Black;
+                Console.Write(result);
                 ConsoleTableExt.ConsoleTableBuilder.From(mainMenu).ExportAndWriteLine(TableAligntment.Center);
                 while (!Int32.TryParse(Console.ReadLine(), out menuChoice) || menuChoice < 1 || menuChoice > 4)
                     Console.WriteLine("Invalid input, enter again:");

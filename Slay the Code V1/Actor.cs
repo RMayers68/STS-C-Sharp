@@ -22,7 +22,7 @@
 		// Inclusive methods
 		public void CardBlock(int block)
 		{
-			if (FindBuff("No Block",Buffs) != null)
+			if (FindBuff("No Block",Buffs) != null || block == 0)
 				return;
 			GainBlock(block);
 		}
