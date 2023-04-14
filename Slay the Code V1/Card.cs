@@ -1,4 +1,6 @@
 ﻿using STV;
+using System;
+using System.ComponentModel.Design;
 using System.Diagnostics;
 using System.Diagnostics.Metrics;
 using System.Xml.Linq;
@@ -12,7 +14,7 @@ namespace STV
         public string Name { get; set; }
         public string Type { get; set; } // Attack, Skill, Power, Status or Curse
         public string Rarity { get; set; } //Common,Uncommon,Rare 
-        public string EnergyCost { get; set; } // currently string because of X and Unplayable Energy Cost cards, will change in future
+        public int EnergyCost { get; set; } 
         private int AttackDamage { get; set; }
         private int AttackLoops { get; set; }
         private int BlockAmount { get; set; }
@@ -49,7 +51,12 @@ namespace STV
             this.Name = name;
             this.Type = type;
             this.Rarity = rarity;
-            this.EnergyCost = energyCost;
+            if (energyCost == "None")
+                this.EnergyCost = -2;
+            else if (energyCost == "X")
+                this.EnergyCost = -1;
+            else 
+                this.EnergyCost = Int32.Parse(energyCost);
             this.Upgraded = false;
             this.AttackDamage = attributes[0];
             this.AttackLoops = attributes[1];
@@ -86,6 +93,7 @@ namespace STV
             this.Rarity = card.Rarity;
             this.EnergyCost = card.EnergyCost;
             this.GoldCost = Rarity == "Rare" ? rng.Next(135, 166) : Rarity == "Uncommon" ? rng.Next(68, 83) : rng.Next(45, 56);
+            this.Upgraded = card.Upgraded;
             this.AttackDamage = card.AttackDamage;
             this.AttackLoops = card.AttackLoops;
             this.BlockAmount = card.BlockAmount;
@@ -119,6 +127,12 @@ namespace STV
         public int getMagicNumber()
         { return MagicNumber; }
 
+        public string getName()
+        { return $"{Name}{(Upgraded ? "+" : "")}"; }
+
+        public bool isUpgraded()
+        { return Upgraded; }
+
         //comparators and equals
         public override bool Equals(object obj)
         {
@@ -146,9 +160,9 @@ namespace STV
         // methods
         public override string ToString()
         {
-            if (EnergyCost == "None")
+            if (EnergyCost == -2)
                 return $"Name: {Name}{(Upgraded ? "+" : "")}\nType: {Type}\nEffect: {getDescription()}";
-            return $"Name: {Name}{(Upgraded ? "+" : "")}\nEnergy Cost: {EnergyCost}\tType: {Type}\nEffect: {getDescription()}";
+            return $"Name: {Name}{(Upgraded ? "+" : "")}\nEnergy Cost: {EnergyCost}\tType: {Type}\nEffect: {getDescription()}\n";
         }
 
         
@@ -223,31 +237,41 @@ namespace STV
                 weave.MoveCard(discardPile, hand);
         }
 
-        public static List<Card> RandomCards(string type, int count, Random rng)
+        public static List<Card> RandomCards(string type, int count, Random rng, string exclusion = null)
         {
             List<Card> cards = new List<Card>();
             for (int i = 0; i < count; i++)
             {
-                switch (type)
+                Card referenceCard; 
+                if (exclusion != null)
                 {
-                    default:
-                        cards.Add(new Card(Dict.cardL[rng.Next(73)]));
-                        break;
-                    case "Silent":
-                        cards.Add(new Card(Dict.cardL[rng.Next(73, 146)]));
-                        break;
-                    case "Defect":
-                        cards.Add(new Card(Dict.cardL[rng.Next(146, 219)]));
-                        break;
-                    case "Watcher":
-                        cards.Add(new Card(Dict.cardL[rng.Next(221, 294)]));
-                        break;
-                    case "Colorless":
-                        cards.Add(new Card(Dict.cardL[rng.Next(297, 332)]));
-                        break;
+                    do
+                        referenceCard = RandomCard(type, rng);
+                    while (referenceCard.Type != exclusion);
                 }
+                else referenceCard = RandomCard(type, rng);
+                cards.Add(new Card(referenceCard));
             }
             return cards;
+        }
+
+        public static Card RandomCard(string type, Random rng)
+        {
+            switch (type)
+            {
+                default:
+                    return Dict.cardL[rng.Next(73)];
+                case "Silent":
+                    return Dict.cardL[rng.Next(73, 146)];
+                case "Defect":
+                    return Dict.cardL[rng.Next(146, 219)];
+                case "Watcher":
+                    return Dict.cardL[rng.Next(221, 294)];
+                case "Colorless":
+                    return Dict.cardL[rng.Next(297, 332)];
+                case "All Heroes":
+                    return Dict.cardL[rng.Next(294)];
+            }
         }
 
         public static void DrawCards(List<Card> drawPile, List<Card> hand, List<Card> discardPile, Random rng, List<Card> exhaustPile, Hero hero, int cards)
@@ -339,7 +363,7 @@ namespace STV
                 case "Ghostly Armor": return $"Ethereal. Gain {BlockAmount} Block.";
                 case "Havoc": return $"Play the top card of your draw pile and Exhaust it.";
                 case "Headbutt": return $"Deal {AttackDamage} damage. Place a card from your discard pile on top of your draw pile.";
-                case "Heavy Blade": return $"Deal {AttackDamage} damage. Strength affects Heavy Blade {MagicNumber} times.";
+                case "Heavy Blade": return $"Deal {AttackDamage} damage. Strength affects Heavy Blade {MagicNumber+1} times.";
                 case "Hemokinesis": return $"Lose {MagicNumber} HP. {AttackDamage} damage.";
                 case "Immolate": return $"Deal {AttackDamage} damage to ALL enemies. Shuffle a Burn into your discard pile.";
                 case "Impervious": return $"Gain {BlockAmount} Block. Exhaust.";
@@ -662,7 +686,7 @@ namespace STV
                 case "Shame": return $"Unplayable. At the end of your turn, gain 1 Frail.";
                 case "Pride": return $"At the end of your turn, place a copy of this card on top of your draw pile.";
                 case "Curse of the Bell": return $"Unplayable. Cannot be removed from your deck.";
-                case "Burn": return $"Unplayable. At the end of your turn, take 2 damage.";
+                case "Burn": return $"Unplayable. At the end of your turn, take {AttackDamage} damage.";
                 case "Dazed": return $"Unplayable. Ethereal.";
                 case "Wound": return $"Unplayable.";
                 case "Slimed": return $"Exhaust.";
@@ -680,18 +704,18 @@ namespace STV
                 {
                     default:
                         foreach (string s in hero.Actions)
-                            if (s.Contains("Discard") && EnergyCost != "0")
-                                EnergyCost = $"{Int32.Parse(EnergyCost) - 1}";
+                            if (s.Contains("Discard") && EnergyCost != 0)
+                                EnergyCost--;
                         break;
 
                     case "Force Field":
                         foreach (string s in hero.Actions)
-                            if (s.Contains("Power") && EnergyCost != "0")
-                                EnergyCost = $"{Int32.Parse(EnergyCost) - 1}";
+                            if (s.Contains("Power") && EnergyCost != 0)
+                                EnergyCost--;
                         break;
                 }
             }
-            if (Int32.Parse(EnergyCost) > hero.Energy)
+            if (EnergyCost > hero.Energy)
             {
                 Console.WriteLine($"You failed to play {Name}. You need {EnergyCost} Energy to play {Name}.");
                 return;
@@ -737,16 +761,16 @@ namespace STV
             Console.WriteLine($"You played {Name}.");
             int target = 0, wallop = encounter[target].Hp, xEnergy = hero.Energy;
             string lastCardPlayed = "";
-            if (EnergyCost == "X")
+            if (EnergyCost == -1)
                 hero.Energy = 0;
-            else hero.Energy -= Int32.Parse(EnergyCost);
+            else hero.Energy -= EnergyCost;
 
 
-            // Setup Phase (if target needs to be selected or something happens prior to normal damage/block
+            // Setup Phase (if target needs to be selected or something happens prior to regular action/action numbers need to be determined
 
             if (Targetable)
                 target = hero.DetermineTarget(encounter);
-            if (Name == "Crush Joints" || Name == "Sanctity" || Name == "Follow-Up")
+            if (Name == "Crush Joints" || Name == "Sanctity" || Name == "Follow-Up" || Name == "Sash Whip")
             {
                 for (int i = hero.Actions.Count - 1; i >= 0; i--)
                     if (hero.Actions[i].Contains("Played"))
@@ -777,7 +801,7 @@ namespace STV
                 case "Heavy Blade":
                     Buff heavyBlade = Actor.FindBuff("Strength", hero.Buffs);
                     if (heavyBlade != null)
-                        AttackDamage += 14 + (heavyBlade.Intensity.GetValueOrDefault() * 3);
+                        AttackDamage += 14 + (heavyBlade.Intensity.GetValueOrDefault() * MagicNumber);
                     break;
                 case "Perfected Strike":
                     foreach (Card c in hand)
@@ -853,9 +877,11 @@ namespace STV
                     break;
                 case "Fission":
                     CardsDrawn = 0;
-                    foreach (var Orb in hero.Orbs)
+                    for(int i = hero.Orbs.Count - 1; i >= 0; i--)
                     {
-                        hero.Orbs.Remove(Orb);
+                        if (Upgraded)
+                            hero.Evoke(encounter,i);
+                        hero.Orbs.RemoveAt(i);
                         CardsDrawn++;
                     }
                     EnergyGained = CardsDrawn;
@@ -873,16 +899,16 @@ namespace STV
                 case "Recycle":
                     Card recycle = ChooseCard(hand, "exhaust");
                     recycle.Exhaust(exhaustPile, hand, hero);
-                    EnergyGained = Int32.Parse(recycle.EnergyCost);
+                    EnergyGained += recycle.EnergyCost;
                     break;
                 case "Reinforced Body":
                     BlockLoops = xEnergy;
                     break;
                 case "Stack":
-                    BlockAmount = discardPile.Count;
+                    BlockAmount = discardPile.Count + MagicNumber;
                     break;
                 case "Tempest":
-                    BlockLoops = xEnergy + MagicNumber;
+                    BlockLoops += xEnergy;
                     break;
                 case "Bowling Bash":
                     AttackLoops = encounter.Count;
@@ -893,7 +919,7 @@ namespace STV
                             AttackDamage += Int32.Parse(s.Last().ToString());
                     break;
                 case "Collect":
-                    BuffAmount = xEnergy + MagicNumber;
+                    BuffAmount += xEnergy;
                     break;
                 case "Spirit Shield":
                     BlockAmount = hand.Count * MagicNumber;
@@ -1011,97 +1037,42 @@ namespace STV
 
             if (TargetBuff)
             {
-                switch (Name)
+                if (Targetable)
                 {
-                    default:
-                        if (Name == "Go for the Eyes" && !Enemy.AttackIntents().Contains(encounter[target].Intent)) ;
-                        else encounter[target].AddBuff(BuffID, BuffAmount);
-                        break;
-                    case "Intimidate":
-                        foreach (var enemy in encounter)
-                            enemy.AddBuff(BuffID, BuffAmount);
-                        break;
-                    case "Shockwave":
-                        foreach (var enemy in encounter)
-                        {
-                            enemy.AddBuff(BuffID, BuffAmount);
-                            enemy.AddBuff(1, BuffAmount);
-                        }
-                        break;
-                    case "Thunderclap":
-                        foreach (var enemy in encounter)
-                            enemy.AddBuff(BuffID, BuffAmount);
-                        break;
-                    case "Uppercut":
-                        encounter[target].AddBuff(BuffID, BuffAmount);
-                        encounter[target].AddBuff(2, BuffAmount);
-                        break;
-                    case "Bouncing Flask":
-                        for (int i = 0; i < MagicNumber; i++)
-                            encounter[rng.Next(0, encounter.Count)].AddBuff(BuffID, BuffAmount);
-                        break;
-                    case "Corpse Explosion":
-                        encounter[target].AddBuff(BuffID, BuffAmount);
-                        encounter[target].AddBuff(43, 1);
-                        break;
-                    case "Crippling Cloud":
-                        foreach (Enemy enemy in encounter)
-                        {
-                            enemy.AddBuff(BuffID, BuffAmount);
-                            enemy.AddBuff(2, 2);
-                        }
-                        break;
-                    case "Malaise":
+                    if (Name == "Go for the Eyes" && !Enemy.AttackIntents().Contains(encounter[target].Intent)) ;
+                    else if (Name == "Sash Whip" && !lastCardPlayed.Contains("Attack")) ;
+                    else if (Name == "Crush Joints" && !lastCardPlayed.Contains("Skill")) ;
+                    else if (Name == "Malaise")
+                    {
                         encounter[target].AddBuff(BuffID, (xEnergy + BuffAmount) * -1);
                         encounter[target].AddBuff(2, xEnergy + BuffAmount);
-                        break;
-                    case "Piercing Wail":
-                        for (int i = 0; i < encounter.Count; i++)
-                        {
-                            encounter[i].AddBuff(BuffID, BuffAmount);
-                            encounter[i].AddBuff(30, BuffAmount);
-                        }
-                        break;
-                    case "Crush Joints":
-
-                        for (int i = hero.Actions.Count - 1; i >= 0; i--)
-                            if (hero.Actions[i].Contains("Played"))
-                            {
-                                lastCardPlayed = hero.Actions[i];
-                                break;
-                            }
-                        if (lastCardPlayed.Contains("Skill"))
-                            encounter[target].AddBuff(BuffID, BuffAmount);
-                        break;
-                    case "Indignation":
-                        if (hero.Stance == "Wrath")
-                            foreach (var enemy in encounter)
-                                enemy.AddBuff(BuffID, BuffAmount);
-                        else hero.SwitchStance("Wrath", discardPile, hand);
-                        break;
-                    case "Sash Whip":
-                        string sashWhip = "";
-                        for (int i = hero.Actions.Count - 1; i >= 0; i--)
-                            if (hero.Actions[i].Contains("Played"))
-                            {
-                                sashWhip = hero.Actions[i];
-                                break;
-                            }
-                        if (sashWhip.Contains("Attack"))
-                            encounter[target].AddBuff(BuffID, BuffAmount);
-                        break;
-                    case "Dark Shackles":
-                        encounter[target].AddBuff(BuffID, BuffAmount);
-                        encounter[target].AddBuff(30, BuffAmount);
-                        break;
-                    case "Deep Breath":
-                        for (int i = discardPile.Count; i > 0; i--)
-                        {
-                            Card deepBreath = discardPile[i - 1];
-                            deepBreath.MoveCard(discardPile, drawPile);
-                        }
-                        Shuffle(drawPile, rng);
-                        break;
+                    }
+                    else encounter[target].AddBuff(BuffID, BuffAmount);
+                    if (Name == "Uppercut")
+                            encounter[target].AddBuff(2, BuffAmount);                     
+                    else if (Name == "Corpse Explosion" )
+                            encounter[target].AddBuff(43, 1);                                       
+                    else if (Name == "Dark Shackles")
+                            encounter[target].AddBuff(30, BuffAmount);
+                }
+                else
+                {
+                    if (Name == "Bouncing Flask")
+                        for (int i = 0; i < MagicNumber; i++)
+                            encounter[rng.Next(0, encounter.Count)].AddBuff(BuffID, BuffAmount);
+                    else if (Name == "Indignation" && hero.Stance != "Wrath")
+                        hero.SwitchStance("Wrath", discardPile, hand);
+                    else foreach (Enemy e in encounter)
+                        e.AddBuff(BuffID, BuffAmount);
+                    if (Name == "Shockwave")
+                        foreach (Enemy e in encounter)
+                            e.AddBuff(1, BuffAmount);
+                    else if (Name == "Crippling Cloud")
+                        foreach (Enemy e in encounter)
+                            e.AddBuff(2, 2);
+                    else if (Name == "Piercing Wail")
+                        foreach (Enemy e in encounter)
+                            e.AddBuff(30, BuffAmount);
                 }
             }
 
@@ -1110,25 +1081,30 @@ namespace STV
             {
                 if (Name == "Scrawl")
                     CardsDrawn = 10 - hand.Count;
-                if (Name == "Expertise")
+                else if (Name == "Expertise")
                     CardsDrawn -= hand.Count;
-                if (Name == "Compile Driver")
+                else if (Name == "Compile Driver")
                     CardsDrawn = hero.Orbs.Distinct().Count();
+                else if (Name == "Deep Breath")
+                    Discard2Draw(drawPile, discardPile, rng);
                 if ((Name == "Impatience" && hand.Any(x => x.Type == "Attack")) || (Name == "FTL" && hero.Actions.Count > MagicNumber) || (Name == "Sanctity" && lastCardPlayed != "Skill"))
                     break;
-                if (Name == "Inner Peace" && hero.Stance != "Calm")
+                else if (Name == "Inner Peace" && hero.Stance != "Calm")
                 {
                     hero.SwitchStance("Calm", discardPile, hand);
                     break;
                 }
-                if (Name == "Scrape")
+                else if (Name == "Scrape")
+                {
                     for (int i = 0; i < CardsDrawn; i++)
                     {
                         if (hand.Count == 10) break;
                         DrawCards(drawPile, hand, discardPile, rng, exhaustPile, hero, 1);
-                        if (hand[hand.Count - 1].EnergyCost != "0")
+                        if (hand[hand.Count - 1].EnergyCost != 0)
                             Discard(hero, hand, discardPile, hand[hand.Count - 1], drawPile, exhaustPile, rng);
                     }
+                    break;
+                }                    
                 else DrawCards(drawPile, hand, discardPile, rng, exhaustPile, hero, CardsDrawn);
                 if (Name == "Escape Plan" && hand.Last().Type == "Skill" && Actor.FindBuff("No Draw", hero.Buffs) != null)
                     hero.CardBlock(BlockAmount);
@@ -1138,34 +1114,13 @@ namespace STV
             // Gain Turn Energy Phase
             if (EnergyGained > 0)
             {
-                switch (Name)
-                {
-                    default:
-                        hero.GainTurnEnergy(EnergyGained);
-                        break;
-                    case "Dropkick":
-                        if (Actor.FindBuff("Vulnerable", encounter[target].Buffs) != null)
-                        {
-                            hero.GainTurnEnergy(EnergyGained);
-                            DrawCards(drawPile, hand, discardPile, rng, exhaustPile, hero, CardsDrawn);
-                        }								
-                        break;
-                    case "Heel Hook":
-                        if (Actor.FindBuff("Weak", encounter[target].Buffs) != null)
-                        {
-                            hero.GainTurnEnergy(EnergyGained);
-                            DrawCards(drawPile, hand, discardPile, rng, exhaustPile, hero, CardsDrawn);
-                        }
-                        break;
-                    case "Sneaky Strike":
-                        if (hero.Actions.Contains("Discard"))
-                            hero.GainTurnEnergy(EnergyGained);
-                        break;
-                    case "Sunder":
-                        if (encounter[target].Hp <= 0)
-                            hero.GainTurnEnergy(EnergyGained);
-                        break;
-                }
+                if (Name == "Dropkick" && Actor.FindBuff("Vulnerable", encounter[target].Buffs) == null) ;
+                else if (Name == "Heel Hook" && Actor.FindBuff("Vulnerable", encounter[target].Buffs) == null) ;
+                else if (Name == "Sneaky Strike" && !hero.Actions.Contains("Discard")) ;
+                else if (Name == "Sunder" && encounter[target].Hp > 0) ;
+                else hero.GainTurnEnergy(EnergyGained);
+                if ((Name == "Dropkick" && Actor.FindBuff("Vulnerable", encounter[target].Buffs) != null) || (Name == "Heel Hook" && Actor.FindBuff("Vulnerable", encounter[target].Buffs) != null))
+                    DrawCards(drawPile, hand, discardPile, rng, exhaustPile, hero, CardsDrawn);
             }
 
             // Post-Damage Effects
@@ -1176,10 +1131,15 @@ namespace STV
                     discardPile.Add(new Card(this));
                     break;
                 case "Armaments":
-                    //Upgrade card
+                    if (hand.All(x => x.Upgraded))
+                        break;
+                    Card armaments = hand[rng.Next(hand.Count)];
+                    while (armaments.Upgraded)
+                        armaments = hand[rng.Next(hand.Count)];
+                    armaments.UpgradeCard();
                     break;
                 case "Berserk":
-                    hero.GainBattleEnergy(1);
+                    hero.MaxEnergy++;
                     break;
                 case "Dual Wield":
                     Card dualWield = new Card();
@@ -1201,10 +1161,7 @@ namespace STV
                     break;
                 case "Feed":                                                //minion buff add
                     if (encounter[target].Hp <= 0)
-                    {
-                        hero.HealHP(3);
-                        hero.MaxHP += 3;
-                    }
+                        hero.setMaxHP(MagicNumber);
                     break;
                 case "Havoc":
                     Card havoc = drawPile.Last();
@@ -1224,7 +1181,7 @@ namespace STV
                     while (infernalBlade.Type != "Attack")
                         infernalBlade = Dict.cardL[rng.Next(0, 73)];
                     hand.Add(infernalBlade);
-                    infernalBlade.EnergyCost = "0";
+                    infernalBlade.TmpEnergyCost = 0;
                     break;
                 case "Limit Break":
                     Buff limitBreak = Actor.FindBuff("Strength", hero.Buffs);
@@ -1279,7 +1236,7 @@ namespace STV
                     break;
                 case "Bullet Time":
                     foreach (Card c in hand)
-                        c.EnergyCost = "0";
+                        c.TmpEnergyCost = 0;
                     break;
                 case "Catalyst":
                     Buff catalyst = Actor.FindBuff("Poison", encounter[target].Buffs);
@@ -1295,7 +1252,7 @@ namespace STV
                     Card distraction = new Card();
                     while (distraction.Type != "Skill")
                         distraction = Dict.cardL[rng.Next(73, 146)];
-                    distraction.EnergyCost = "0";
+                    distraction.TmpEnergyCost = 0;
                     hand.Add(distraction);
                     break;
                 case "Glass Knife":
@@ -1304,12 +1261,12 @@ namespace STV
                 case "Setup":
                     Card setup = ChooseCard(hand, "add to the top of your drawpile");
                     setup.MoveCard(hand, drawPile);
-                    setup.EnergyCost = "0";
+                    setup.TmpEnergyCost = 0;
                     break;
                 case "All For One":
                     foreach (Card zeroCost in discardPile)
                     {
-                        if (zeroCost.EnergyCost == "0" && hand.Count < 10)
+                        if (zeroCost.EnergyCost == 0 && hand.Count < 10)
                         {
                             hand.Add(zeroCost);
                             discardPile.Remove(zeroCost);
@@ -1333,13 +1290,25 @@ namespace STV
                     while (hero.OrbSlots > hero.Orbs.Count)
                         hero.Orbs.RemoveAt(hero.Orbs.Count - 1);
                     break;
+                case "Darkness":
+                    if (Upgraded)
+                    {
+                        foreach (var orb in hero.Orbs)
+                        {
+                            if (orb is null || orb.Name != "Dark") 
+                                continue;
+                            orb.Effect += 6;
+                            Console.WriteLine($"The {orb.Name} Orb stored 6 more Energy!");
+                        }
+                    }
+                    break;
                 case "Dualcast":
                     hero.Evoke(encounter);
                     hero.Evoke(encounter);
                     hero.Orbs.RemoveAt(0);
                     break;
                 case "Genetic Algorithm":                               // This card requires updates to combat Deck vs perma Deck to function properly
-                    BlockAmount += 2;
+                    BlockAmount += MagicNumber;
                     break;
                 case "Hologram":
                     Card hologram = ChooseCard(discardPile, "add into your hand");
@@ -1347,7 +1316,7 @@ namespace STV
                     discardPile.Remove(hologram);
                     break;
                 case "Multi-Cast":
-                    for (int i = 0; i < xEnergy; i++)
+                    for (int i = 0; i < xEnergy+MagicNumber; i++)
                         hero.Evoke(encounter);
                     hero.Orbs.RemoveAt(0);
                     break;
@@ -1361,7 +1330,7 @@ namespace STV
                     hero.Orbs.Add(recursion);
                     break;
                 case "Seek":
-                    for (int i = 0; 9 < MagicNumber;i++)
+                    for (int i = 0; i < MagicNumber;i++)
                         if (hand.Count < 10)
                             hand.Add(ChooseCard(drawPile, "add to your hand"));
                     break;
@@ -1369,8 +1338,8 @@ namespace STV
                     BlockAmount--;
                     break;
                 case "Streamline":
-                    if (EnergyCost != "0")
-                        EnergyCost = $"{Int32.Parse(EnergyCost) - 1}";
+                    if (EnergyCost != 0)
+                        EnergyCost--;
                     break;
                 case "TURBO":
                     discardPile.Add(Dict.cardL[359]);
@@ -1379,7 +1348,7 @@ namespace STV
                     Card whiteNoise = new Card();
                     while (whiteNoise.Type != "Power")
                         whiteNoise = Dict.cardL[rng.Next(146, 219)];
-                    whiteNoise.EnergyCost = "0";
+                    whiteNoise.TmpEnergyCost = 0;
                     hand.Add(whiteNoise);
                     break;
                 case "Alpha":
@@ -1430,21 +1399,10 @@ namespace STV
                         hero.Energy += 1;
                     break;
                 case "Foreign Influence":
-                    Card fore, ign, infl = new Card();
-                    List<Card> fi = new(MagicNumber);
-                    for (int i = 0; i < MagicNumber; i++)
-                    {
-                        Card uence = new Card();
-                        while (uence.Type != "Attack")
-                            uence = Dict.cardL[rng.Next(0, 291)];
-                        switch (i)
-                        {
-                            case 0: fore = uence; fi.Add(fore); break;
-                            case 1: ign = uence; fi.Add(ign); break;
-                            case 2: infl = uence; fi.Add(infl); break;
-                        }
-                    }
-                    hand.Add(new(ChooseCard(fi, "add to your hand")));
+                    Card foreignInfluence = new(ChooseCard(RandomCards("All Heroes",MagicNumber,rng,"Attack"), "add to your hand"));
+                    if (Upgraded)
+                        foreignInfluence.TmpEnergyCost = 0;
+                    hand.Add(foreignInfluence);
                     break;
                 case "Halt":
                     if (hero.Stance == "Wrath")
@@ -1512,12 +1470,20 @@ namespace STV
                     for (int i = 0; i < 3; i++)
                         lastWish.Add(new Card(Dict.cardL[i + 361]));
                     Card wish = ChooseCard(lastWish, "use");
+                    if (Upgraded)
+                        wish.UpgradeCard();
                     if (wish.Name == "Fame and Fortune")
                         hero.GoldChange(wish.MagicNumber);
                     else wish.CardAction(hero, encounter, drawPile, discardPile, hand, exhaustPile, rng);
                     break;
                 // COLORLESS CARDS (294 - 340)
                 case "Apotheosis":
+                    foreach (Card c in hand)
+                        c.UpgradeCard();
+                    foreach (Card c in discardPile)
+                        c.UpgradeCard();
+                    foreach (Card c in drawPile)
+                        c.UpgradeCard();
                     break;
                 case "Bandage Up":
                     hero.HealHP(4);
@@ -1532,23 +1498,28 @@ namespace STV
                 case "Chrysalis":
                     List<Card> chrysalis = new List<Card>(RandomCards(hero.Name, 3, rng));
                     foreach (Card c in chrysalis)
-                        c.EnergyCost = "0";
+                        c.EnergyCost = 0;
                     drawPile.AddRange(chrysalis);
                     Shuffle(drawPile, rng);
                     break;
                 case "Discovery":
                     Card discovery = new(ChooseCard(RandomCards(hero.Name, MagicNumber, rng), "add to your hand"));
-                    discovery.EnergyCost = "0";
+                    discovery.TmpEnergyCost = 0;
                     hand.Add(discovery);
                     break;
                 case "Enlightment":
                     foreach (Card c in hand)
-                        if (Int32.Parse(c.EnergyCost) > MagicNumber)
-                            c.EnergyCost = "1";
+                        if (EnergyCost > MagicNumber)
+                        {
+                            if (Upgraded)
+                                c.EnergyCost = 1;
+                            else c.TmpEnergyCost = 1;
+                        }                           
                     break;
                 case "Forethought":
+                    //add upgraded method that runs until you quit it
                     Card forethought = ChooseCard(hand, "add to the bottom of your drawpile");
-                    forethought.EnergyCost = "0";
+                    forethought.TmpEnergyCost = 0;
                     hand.Remove(forethought);
                     drawPile.Prepend(forethought);
                     break;
@@ -1567,12 +1538,12 @@ namespace STV
                     break;
                 case "Madness":
                     if (hand.Count > 0)
-                        hand[rng.Next(hand.Count)].EnergyCost = "0";
+                        hand[rng.Next(hand.Count)].EnergyCost = 0;
                     break;
                 case "Metamorphosis":
                     List<Card> metamorphosis = new List<Card>(RandomCards(hero.Name, 3, rng));
                     foreach (Card c in metamorphosis)
-                        c.EnergyCost = "0";
+                        c.EnergyCost = 0;
                     drawPile.AddRange(metamorphosis);
                     Shuffle(drawPile, rng);
                     break;
@@ -1618,17 +1589,16 @@ namespace STV
                     }
                     break;
                 case "Violence":
-                    for (int i = 0; i < 3; i++)
+                    for (int i = 0; i < MagicNumber; i++)
                     {
-                        Card violence = new Card();
+                        Card violence = new();
                         while (violence.Type != "Attack" && drawPile.Any(x => x.Type == "Attack"))
                             violence = drawPile[rng.Next(0, drawPile.Count)];
                         if (violence == null)
                             break;
                         if (hand.Count < 10)
-                            hand.Add(violence);
-                        else discardPile.Add(violence);
-                        drawPile.Remove(violence);
+                            violence.MoveCard(drawPile, hand);
+                        else violence.MoveCard(drawPile, discardPile);
                     }
                     break;
                 case "Necronomicurse":
@@ -1658,50 +1628,1038 @@ namespace STV
             // Discard Effects
             if (Discards)
             {
-                switch (Name)
+                if (Name == "All-Out Attack")
+                    Discard(hero, hand, discardPile, hand[rng.Next(0, hand.Count)], drawPile, exhaustPile, rng);
+                else if (Name == "Unload")
+                    for (int i = hand.Count; i > 0; i--)
+                    {
+                        if (hand[i - 1].Type == "Attack")
+                            Discard(hero, hand, discardPile, hand[i - 1], drawPile, exhaustPile, rng);
+                    }
+                else if (Name == "Storm of Steel")
                 {
-                    default:
-                        for (int i = 0; i < MagicNumber; i++)
-                            Discard(hero, hand, discardPile, ChooseCard(hand, "discard"),drawPile,exhaustPile, rng);
-                        break;
-                    case "All-Out Attack":
-                        Discard(hero, hand, discardPile, hand[rng.Next(0, hand.Count)], drawPile,exhaustPile, rng);
-                        break;
-                    case "Unload":
-                        for (int i = hand.Count; i > 0; i--)
-                        {
-                            if (hand[i - 1].Type == "Attack")
-                                Discard(hero, hand, discardPile, hand[i - 1], drawPile,exhaustPile, rng);
-                        }
-                        break;
-                    case "Storm of Steel":
-                        MagicNumber = 0;
-                        for (int i = hand.Count - 1; i > 0; i--)
-                        {
-                            Discard(hero, hand, discardPile, hand[i], drawPile,exhaustPile, rng);
-                            MagicNumber++;
-                        }
-                        for (int i = MagicNumber; i > 0; i--)
-                            hand.Add(new Card(Dict.cardL[296]));
-                        break;
-                    case "Calculated Gamble":
-                        MagicNumber = 0;
-                        for (int i = hand.Count-1; i > 0; i--)
-                        {
-                            Discard(hero, hand, discardPile, hand[i], drawPile,exhaustPile, rng);
-                            MagicNumber++;
-                        }
-                        DrawCards(drawPile, hand, discardPile, rng, exhaustPile, hero, MagicNumber);
-                        break;
+                    MagicNumber = 0;
+                    for (int i = hand.Count - 1; i > 0; i--)
+                    {
+                        Discard(hero, hand, discardPile, hand[i], drawPile, exhaustPile, rng);
+                        MagicNumber++;
+                    }
+                    for (int i = MagicNumber; i > 0; i--)
+                    {
+                        hand.Add(new Card(Dict.cardL[296]));
+                        if (Upgraded)
+                            hand.Last().UpgradeCard();
+                    }
                 }
-
-                if (FindCards("Eviscerate", hand) is List<Card> discard && discard != null)
-                    foreach (Card eviscerate in discard)
-                        if (eviscerate.EnergyCost != "0")
-                            eviscerate.EnergyCost = $"{Int32.Parse(eviscerate.EnergyCost) - 1}";
+                else if (Name == "Calculated Gamble")
+                {
+                    MagicNumber = 0;
+                    for (int i = hand.Count - 1; i > 0; i--)
+                    {
+                        Discard(hero, hand, discardPile, hand[i], drawPile, exhaustPile, rng);
+                        MagicNumber++;
+                    }
+                    DrawCards(drawPile, hand, discardPile, rng, exhaustPile, hero, MagicNumber);
+                }
+                else for (int i = 0; i < MagicNumber; i++)
+                    Discard(hero, hand, discardPile, ChooseCard(hand, "discard"), drawPile, exhaustPile, rng);
+                if (FindCards("Eviscerate", hand) is List<Card> evisCheck && evisCheck != null)
+                    foreach (Card eviscerate in evisCheck)
+                        if (eviscerate.EnergyCost != 0)
+                            eviscerate.EnergyCost--;
             }
             // End of card action, card action being documented in turn list
             hero.Actions.Add($"{Name}-{Type} Played");
+        }
+
+        public void UpgradeCard()
+        {
+            if (Upgraded && Name != "Searing Blow")
+                return;
+            switch (Name)
+            {
+                default:
+                    break;
+                case "Anger":
+                    AttackDamage += 2;
+                    break;
+                case "Barricade":
+                    EnergyCost--;
+                    break;
+                case "Bash":
+                    AttackDamage += 2;
+                    BuffAmount++;
+                    break;
+                case "Battle Trance":
+                    CardsDrawn++;
+                    break;
+                case "Berserk":
+                    BuffAmount--;
+                    break;
+                case "Blood for Blood":
+                    EnergyCost--;
+                    AttackDamage += 4;
+                    break;
+                case "Bloodletting":
+                    EnergyGained++;
+                    break;
+                case "Bludgeon":
+                    AttackDamage += 10;
+                    break;
+                case "Body Slam":
+                    EnergyCost--;
+                    break;
+                case "Burning Pact":
+                    CardsDrawn++;
+                    break;
+                case "Carnage":
+                    AttackDamage += 8;
+                    break;
+                case "Clash":
+                    AttackDamage += 4;
+                    break;
+                case "Cleave":
+                    AttackDamage += 3;
+                    break;
+                case "Clothesline":
+                    AttackDamage += 2;
+                    BuffAmount++;
+                    break;
+                case "Combust":
+                    BuffAmount += 2;
+                    break;
+                case "Corruption":
+                    EnergyCost--;
+                    break;
+                case "Dark Embrace":
+                    EnergyCost--;
+                    break;
+                case "Demon Form":
+                    BuffAmount++;
+                    break;
+                case "Disarm":
+                    BuffAmount--;
+                    break;
+                case "Double Tap":
+                    BuffAmount++;
+                    break;
+                case "Dropkick":
+                    AttackDamage += 3;
+                    break;
+                case "Dual Wield":
+                    MagicNumber++;
+                    break;
+                case "Entrench":
+                    EnergyCost--;
+                    break;
+                case "Evolve":
+                    BuffAmount++;
+                    break;
+                case "Exhume":
+                    EnergyCost--;
+                    break;
+                case "Feed":
+                    AttackDamage += 2;
+                    MagicNumber++;
+                    break;
+                case "Feel No Pain":
+                    BuffAmount++;
+                    break;
+                case "Fiend Fire":
+                    AttackDamage += 3;
+                    break;
+                case "Fire Breathing":
+                    BuffAmount += 4;
+                    break;
+                case "Flame Barrier":
+                    BlockAmount += 4;
+                    BuffAmount += 2;
+                    break;
+                case "Flex":
+                    BuffAmount += 2;
+                    break;
+                case "Ghostly Armor":
+                    BlockAmount += 3;
+                    break;
+                case "Havoc":
+                    EnergyCost--;
+                    break;
+                case "Headbutt":
+                    AttackDamage += 3;
+                    break;
+                case "Heavy Blade":
+                    MagicNumber += 2;
+                    break;
+                case "Hemokinesis":
+                    AttackDamage += 5;
+                    break;
+                case "Immolate":
+                    AttackDamage += 7;
+                    break;
+                case "Impervious":
+                    BlockAmount += 10;
+                    break;
+                case "Infernal Blade":
+                    EnergyCost--;
+                    break;
+                case "Inflame":
+                    BuffAmount++;
+                    break;
+                case "Intimidate":
+                    BuffAmount++;
+                    break;
+                case "Iron Wave":
+                    BlockAmount += 2;
+                    AttackDamage += 2;
+                    break;
+                case "Juggernaut":
+                    BuffAmount += 2;
+                    break;
+                case "Metallicize":
+                    BuffAmount++;
+                    break;
+                case "Offering":
+                    CardsDrawn += 2;
+                    break;
+                case "Perfected Strike":
+                    MagicNumber++;
+                    break;
+                case "Pommel Strike":
+                    AttackDamage++;
+                    CardsDrawn++;
+                    break;
+                case "Power Through":
+                    BlockAmount += 5;
+                    break;
+                case "Pummel":
+                    AttackLoops++;
+                    break;
+                case "Rage":
+                    BuffAmount += 2;
+                    break;
+                case "Rampage":
+                    MagicNumber += 3;
+                    break;
+                case "Reaper":
+                    AttackDamage++;
+                    break;
+                case "Reckless Charge":
+                    AttackDamage += 3;
+                    break;
+                case "Rupture":
+                    BuffAmount++;
+                    break;
+                case "Searing Blow":
+                    MagicNumber++;
+                    AttackDamage += MagicNumber + 3;
+                    break;
+                case "Second Wind":
+                    BlockAmount += 2;
+                    break;
+                case "Seeing Red":
+                    EnergyCost--;
+                    break;
+                case "Sentinel":
+                    BlockAmount += 3;
+                    EnergyGained++;
+                    break;
+                case "Sever Soul":
+                    AttackDamage += 6;
+                    break;
+                case "Shockwave":
+                    BuffAmount += 2;
+                    break;
+                case "Shrug It Off":
+                    BlockAmount += 3;
+                    break;
+                case "Spot Weakness":
+                    BuffAmount++;
+                    break;
+                case "Sword Boomerang":
+                    AttackLoops++;
+                    break;
+                case "Thunderclap":
+                    AttackDamage += 3;
+                    break;
+                case "True Grit":
+                    BlockAmount += 2;
+                    break;
+                case "Twin Strike":
+                    AttackDamage += 2;
+                    break;
+                case "Uppercut":
+                    BuffAmount++;
+                    break;
+                case "Warcry":
+                    CardsDrawn++;
+                    break;
+                case "Whirlwind":
+                    AttackDamage += 3;
+                    break;
+                case "Wild Strike":
+                    AttackDamage += 5;
+                    break;
+                case "A Thousand Cuts":
+                    BuffAmount++;
+                    break;
+                case "Accuracy":
+                    BuffAmount += 2;
+                    break;
+                case "Acrobatics":
+                    CardsDrawn++;
+                    break;
+                case "Adrenaline":
+                    EnergyGained++;
+                    break;
+                case "Alchemize":
+                    EnergyCost--;
+                    break;
+                case "All-Out Attack":
+                    AttackDamage += 4;
+                    break;
+                case "Backflip":
+                    BlockAmount += 3;
+                    break;
+                case "Backstab":
+                    AttackDamage += 4;
+                    break;
+                case "Bane":
+                    AttackDamage += 3;
+                    break;
+                case "Blade Dance":
+                    MagicNumber++;
+                    break;
+                case "Blur":
+                    BlockAmount += 3;
+                    break;
+                case "Bouncing Flask":
+                    MagicNumber++;
+                    break;
+                case "Bullet Time":
+                    EnergyCost--;
+                    break;
+                case "Burst":
+                    BuffAmount++;
+                    break;
+                case "Caltrops":
+                    BuffAmount += 2;
+                    break;
+                case "Catalyst":
+                    MagicNumber++;
+                    break;
+                case "Choke":
+                    BuffAmount += 2;
+                    break;
+                case "Cloak And Dagger":
+                    MagicNumber++;
+                    break;
+                case "Concentrate":
+                    MagicNumber--;
+                    break;
+                case "Corpse Explosion":
+                    BuffAmount += 3;
+                    break;
+                case "Crippling Cloud":
+                    BuffAmount += 3;
+                    break;
+                case "Dagger Spray":
+                    AttackDamage += 2;
+                    break;
+                case "Dagger Throw":
+                    AttackDamage += 3;
+                    break;
+                case "Dash":
+                    AttackDamage += 3;
+                    BlockAmount += 3;
+                    break;
+                case "Deadly Poison":
+                    BuffAmount += 2;
+                    break;
+                case "Deflect":
+                    BlockAmount += 3;
+                    break;
+                case "Die Die Die":
+                    AttackDamage += 4;
+                    break;
+                case "Distraction":
+                    EnergyCost--;
+                    break;
+                case "Dodge and Roll":
+                    BlockAmount += 2;
+                    BuffAmount += 2;
+                    break;
+                case "Doppelganger":
+                    BuffAmount++;
+                    break;
+                case "Endless Agony":
+                    AttackDamage += 2;
+                    break;
+                case "Envenom":
+                    EnergyCost--;
+                    break;
+                case "Escape Plan":
+                    BlockAmount += 2;
+                    break;
+                case "Eviscerate":
+                    AttackDamage += 2;
+                    break;
+                case "Expertise":
+                    CardsDrawn++;
+                    break;
+                case "Finisher":
+                    AttackDamage += 2;
+                    break;
+                case "Flechettes":
+                    AttackDamage += 2;
+                    break;
+                case "Flying Knee":
+                    AttackDamage += 3;
+                    break;
+                case "Footwork":
+                    BuffAmount++;
+                    break;
+                case "Glass Knife":
+                    AttackDamage += 4;
+                    break;
+                case "Grand Finale":
+                    AttackDamage += 10;
+                    break;
+                case "Heel Hook":
+                    AttackDamage += 3;
+                    break;
+                case "Leg Sweep":
+                    BuffAmount++;
+                    BlockAmount += 3;
+                    break;
+                case "Malaise":
+                    BuffAmount++;
+                    break;
+                case "Masterful Stab":
+                    AttackDamage += 4;
+                    break;
+                case "Neutralize":
+                    AttackDamage++;
+                    BuffAmount++;
+                    break;
+                case "Nightmare":
+                    EnergyCost--;
+                    break;
+                case "Noxious Fumes":
+                    BuffAmount++;
+                    break;
+                case "Outmaneuver":
+                    EnergyGained++;
+                    break;
+                case "Phantasmal Killer":
+                    EnergyCost--;
+                    break;
+                case "Piercing Wail":
+                    BuffAmount -= 2;
+                    break;
+                case "Poisoned Stab":
+                    AttackDamage += 2;
+                    BuffAmount++;
+                    break;
+                case "Predator":
+                    AttackDamage += 5;
+                    break;
+                case "Prepared":
+                    CardsDrawn++;
+                    MagicNumber++;
+                    break;
+                case "Quick Slash":
+                    AttackDamage += 4;
+                    break;
+                case "Reflex":
+                    CardsDrawn++;
+                    break;
+                case "Riddle with Holes":
+                    AttackDamage++;
+                    break;
+                case "Setup":
+                    EnergyCost--;
+                    break;
+                case "Skewer":
+                    AttackDamage += 3;
+                    break;
+                case "Slice":
+                    AttackDamage += 3;
+                    break;
+                case "Sneaky Strike":
+                    AttackDamage += 4;
+                    break;
+                case "Sucker Punch":
+                    AttackDamage += 2;
+                    BuffAmount++;
+                    break;
+                case "Survivor":
+                    BlockAmount += 3;
+                    break;
+                case "Tactician":EnergyGained++;
+                    break;
+                case "Terror":
+                    EnergyCost--;
+                    break;
+                case "Tools of the Trade":
+                    EnergyCost--;
+                    break;
+                case "Unload":
+                    AttackDamage += 4;
+                    break;
+                case "Well-Laid Plans":
+                    BuffAmount++;
+                    break;
+                case "Wraith Form":
+                    BuffAmount++;
+                    break;
+                case "Aggregate":
+                    MagicNumber--;
+                    break;
+                case "All For One":
+                    AttackDamage += 4;
+                    break;
+                case "Amplify":
+                    BuffAmount++;
+                    break;
+                case "Auto-Shields":
+                    BlockAmount += 4;
+                    break;
+                case "Ball Lightning":
+                    AttackDamage += 3;
+                    break;
+                case "Barrage":
+                    AttackDamage += 2;
+                    break;
+                case "Beam Cell":
+                    AttackDamage++;
+                    BuffAmount++;
+                    break;
+                case "Biased Cognition":
+                    BuffAmount++;
+                    break;
+                case "Blizzard":
+                    MagicNumber++;
+                    break;
+                case "Boot Sequence":
+                    BlockAmount += 3;
+                    break;
+                case "Buffer":
+                    BuffAmount++;
+                    break;
+                case "Bullseye":
+                    AttackDamage += 3;
+                    BuffAmount++;
+                    break;
+                case "Capacitor":
+                    MagicNumber++;
+                    break;
+                case "Chaos":
+                    BlockLoops++;
+                    break;
+                case "Charge Battery":
+                    BlockAmount += 3;
+                    break;
+                case "Claw":
+                    AttackDamage += 2;
+                    break;
+                case "Cold Snap":
+                    AttackDamage += 3;
+                    break;
+                case "Compile Driver":
+                    AttackDamage += 3;
+                    break;              
+                case "Consume":
+                    BuffAmount++;
+                    break;
+                case "Coolheaded":
+                    CardsDrawn++;
+                    break;
+                case "Core Surge":
+                    AttackDamage += 4;
+                    break;
+                case "Creative AI":
+                    EnergyCost--;
+                    break;
+                case "Defragment":
+                    BuffAmount++;
+                    break;
+                case "Doom and Gloom":
+                    AttackDamage += 4;
+                    break;
+                case "Double Energy":
+                    EnergyCost--;
+                    break;
+                case "Dualcast":
+                    EnergyCost--;
+                    break;
+                case "Electrodynamics":
+                    BlockLoops++;
+                    break;
+                case "Equilibrium":
+                    BlockAmount += 3;
+                    break;
+                case "Force Field":
+                    BlockAmount += 4;
+                    break;
+                case "FTL":
+                    AttackDamage++;
+                    MagicNumber++;
+                    break;
+                case "Fusion":
+                    EnergyCost--;
+                    break;
+                case "Genetic Algorithm":
+                    MagicNumber++;
+                    break;
+                case "Glacier":
+                    BlockAmount += 3;
+                    break;
+                case "Go for the Eyes":
+                    AttackDamage++;
+                    BuffAmount++;
+                    break;
+                case "Heatsinks":
+                    BuffAmount++;
+                    break;
+                case "Hologram":
+                    BlockAmount += 2;
+                    break;
+                case "Hyperbeam":
+                    AttackDamage += 8;
+                    break;
+                case "Leap":
+                    BlockAmount += 3;
+                    break;
+                case "Loop":
+                    BuffAmount++;
+                    break;
+                case "Melter":
+                    AttackDamage += 4;
+                    break;
+                case "Meteor Strike":
+                    AttackDamage += 6;
+                    break;
+                case "Multi-Cast":
+                    MagicNumber++;
+                    break;
+                case "Overclock":
+                    CardsDrawn++;
+                    break;
+                case "Reboot":
+                    CardsDrawn += 2;
+                    break;
+                case "Rebound":
+                    AttackDamage += 3;
+                    break;
+                case "Recursion":
+                    EnergyCost--;
+                    break;
+                case "Recycle":
+                    EnergyCost--;
+                    break;
+                case "Reinforced Body":
+                    BlockAmount += 2;
+                    break;
+                case "Reprogram":
+                    BuffAmount++;
+                    break;
+                case "Rip and Tear":
+                    AttackDamage += 2;
+                    break;
+                case "Scrape":
+                    AttackDamage += 3;
+                    CardsDrawn++;
+                    break;
+                case "Seek":
+                    MagicNumber++;
+                    break;
+                case "Self Repair":
+                    BuffAmount += 3;
+                    break;
+                case "Skim":
+                    CardsDrawn++;
+                    break;
+                case "Stack":
+                    MagicNumber += 3;
+                    break;
+                case "Static Discharge":
+                    BuffAmount++;
+                    break;
+                case "Steam Barrier":
+                    BlockAmount += 2;
+                    break;
+                case "Streamline":
+                    AttackDamage += 5;
+                    break;
+                case "Sunder":
+                    AttackDamage += 8;
+                    break;
+                case "Sweeping Beam":
+                    AttackDamage += 3;
+                    break;
+                case "Tempest":
+                    BlockLoops++;
+                    break;
+                case "Thunder Strike":
+                    AttackDamage += 2;
+                    break;
+                case "TURBO":
+                    EnergyGained++;
+                    break;
+                case "White Noise":
+                    EnergyCost--;
+                    break;
+                case "Zap":
+                    EnergyCost--;
+                    break;
+                case "Defend":
+                    BlockAmount += 3;
+                    break;
+                case "Strike":
+                    AttackDamage += 3;
+                    break;
+                case "Bowling Bash":
+                    AttackDamage += 3;
+                    break;
+                case "Brilliance":
+                    AttackDamage += 4;
+                    break;
+                case "Carve Reality":
+                    AttackDamage += 4;
+                    break;
+                case "Collect":
+                    BuffAmount++;
+                    break;
+                case "Conclude":
+                    AttackDamage += 4;
+                    break;
+                case "Conjure Blade":
+                    MagicNumber++;
+                    break;
+                case "Consecrate":
+                    AttackDamage += 3;
+                    break;
+                case "Crescendo":
+                    EnergyCost--;
+                    break;
+                case "Crush Joints":
+                    AttackDamage += 2;
+                    BuffAmount++;
+                    break;
+                case "Cut Through Fate":
+                    AttackDamage += 2;
+                    MagicNumber++;
+                    break;
+                case "Deceive Reality":
+                    BlockAmount += 3;
+                    break;
+                case "Deus Ex Machina":
+                    MagicNumber++;
+                    break;
+                case "Devotion":
+                    BuffAmount++;
+                    break;
+                case "Empty Body":
+                    BlockAmount += 3;
+                    break;
+                case "Empty Fist":
+                    AttackDamage += 5;
+                    break;
+                case "Empty Mind":
+                    CardsDrawn++;
+                    break;
+                case "Eruption":
+                    EnergyCost--;
+                    break;
+                case "Evaluate":
+                    BlockAmount += 4;
+                    break;
+                case "Fasting":
+                    BuffAmount++;
+                    break;
+                case "Fear No Evil":
+                    AttackDamage += 3;
+                    break;
+                case "Flurry Of Blows":
+                    AttackDamage += 2;
+                    break;
+                case "Flying Sleeves":
+                    AttackDamage += 2;
+                    break;
+                case "Follow-Up":
+                    AttackDamage += 4;
+                    break;
+                case "Foresight":
+                    BuffAmount++;
+                    break;
+                case "Halt":
+                    BlockAmount++;
+                    MagicNumber += 5;
+                    break;
+                case "Indignation":
+                    BuffAmount += 2;
+                    break;
+                case "Inner Peace":
+                    CardsDrawn++;
+                    break;
+                case "Judgment":
+                    MagicNumber += 10;
+                    break;
+                case "Just Lucky":
+                    MagicNumber++;
+                    AttackDamage++;
+                    BlockAmount++;
+                    break;
+                case "Lesson Learned":
+                    AttackDamage += 3;
+                    break;
+                case "Like Water":
+                    BuffAmount += 2;
+                    break;
+                case "Master Reality":
+                    EnergyCost--;
+                    break;
+                case "Meditate":
+                    MagicNumber++;
+                    break;
+                case "Mental Fortress":
+                    BuffAmount += 2;
+                    break;
+                case "Nirvana":
+                    BuffAmount++;
+                    break;
+                case "Omniscience":
+                    EnergyCost--;
+                    break;
+                case "Perseverance":
+                    BlockAmount += 2;
+                    MagicNumber++;
+                    break;
+                case "Pray":
+                    BuffAmount++;
+                    break;
+                case "Pressure Points":
+                    BuffAmount += 3;
+                    break;
+                case "Prostrate":
+                    BuffAmount++;
+                    break;
+                case "Protect":
+                    BlockAmount += 4;
+                    break;
+                case "Ragnarok":
+                    AttackDamage++;
+                    AttackLoops++;
+                    break;
+                case "Reach Heaven":
+                    AttackDamage += 5;
+                    break;
+                case "Rushdown":
+                    EnergyCost--;
+                    break;
+                case "Sanctity":
+                    BlockAmount += 3;
+                    break;
+                case "Sands of Time":
+                    AttackDamage += 6;
+                    break;
+                case "Sash Whip":
+                    AttackDamage += 2;
+                    BuffAmount++;
+                    break;
+                case "Scrawl":
+                    EnergyCost--;
+                    break;
+                case "Signature Move":
+                    AttackDamage += 10;
+                    break;
+                case "Simmering Fury":
+                    BuffAmount++;
+                    break;
+                case "Spirit Shield":
+                    MagicNumber++;
+                    break;
+                case "Study":
+                    EnergyCost--;
+                    break;
+                case "Swivel":
+                    BlockAmount += 3;
+                    break;
+                case "Talk to the Hand":
+                    AttackDamage += 2;
+                    BuffAmount++;
+                    break;
+                case "Tantrum":
+                    AttackLoops++;
+                    break;
+                case "Third Eye":
+                    BlockAmount += 2;
+                    MagicNumber += 2;
+                    break;
+                case "Tranquility":
+                    EnergyCost--;
+                    break;
+                case "Vault":
+                    EnergyCost--;
+                    break;
+                case "Vigilance":
+                    BlockAmount += 4;
+                    break;
+                case "Wallop":
+                    AttackDamage += 3;
+                    break;
+                case "Wave of the Hand":
+                    BuffAmount++;
+                    break;
+                case "Weave":
+                    AttackDamage += 2;
+                    break;
+                case "Wheel Kick":
+                    AttackDamage += 5;
+                    break;
+                case "Windmill Strike":
+                    AttackDamage += 3;
+                    MagicNumber++;
+                    break;
+                case "Wreath of Flame":
+                    BuffAmount += 3;
+                    break;
+                case "Bite":
+                    AttackDamage++;
+                    MagicNumber++;
+                    break;
+                case "J.A.X.":
+                    BuffAmount++;
+                    break;
+                case "Shiv":
+                    AttackDamage += 2;
+                    break;
+                case "Apotheosis":
+                    EnergyCost--;
+                    break;
+                case "Bandage Up":
+                    MagicNumber += 2;
+                    break;
+                case "Blind":
+                    Targetable = false;
+                    break;
+                case "Dark Shackles":
+                    BuffAmount -= 6;
+                    break;
+                case "Deep Breath":
+                    CardsDrawn++;
+                    break;
+                case "Dramatic Entrance":
+                    AttackDamage += 4;
+                    break;
+                case "Finesse":
+                    BlockAmount += 2;
+                    break;
+                case "Flash of Steel":
+                    AttackDamage += 3;
+                    break;
+                case "Good Instincts":
+                    BlockAmount += 3;
+                    break;
+                case "Jack Of All Trades":
+                    MagicNumber++;
+                    break;
+                case "Madness":
+                    EnergyCost--;
+                    break;
+                case "Magnetism":
+                    EnergyCost--;
+                    break;
+                case "Master of Strategy":
+                    CardsDrawn++;
+                    break;
+                case "Panacea":
+                    BuffAmount++;
+                    break;
+                case "Panache":
+                    BuffAmount += 4;
+                    break;
+                case "Purity":
+                    MagicNumber += 2;
+                    break;
+                case "Sadistic Nature":
+                    BuffAmount += 2;
+                    break;
+                case "Swift Strike":
+                    AttackDamage += 3;
+                    break;
+                case "Transmutation":
+                    MagicNumber++;
+                    break;
+                case "Trip":
+                    Targetable = false;
+                    break;
+                case "Impatience":
+                    CardsDrawn++;
+                    break;
+                case "Panic Button":
+                    BlockAmount += 10;
+                    break;
+                case "Chrysalis":
+                    MagicNumber += 2;
+                    break;
+                case "Hand of Greed":
+                    AttackDamage += 5;
+                    MagicNumber += 5;
+                    break;
+                case "Mayhem":
+                    EnergyCost--;
+                    break;
+                case "Metamorphosis":
+                    MagicNumber += 2;
+                    break;
+                case "The Bomb":
+                    BuffAmount += 10;
+                    break;
+                case "Violence":
+                    MagicNumber++;
+                    break;
+                case "Ritual Dagger":
+                    MagicNumber += 2;
+                    break;
+                case "Beta":
+                    EnergyCost--;
+                    break;
+                case "Insight":
+                    CardsDrawn++;
+                    break;
+                case "Miracle":
+                    EnergyGained++;
+                    break;
+                case "Omega":
+                    BuffAmount += 10;
+                    break;
+                case "Safety":
+                    BlockAmount += 4;
+                    break;
+                case "Smite":
+                    AttackDamage += 4;
+                    break;
+                case "Through Violence":
+                    AttackDamage += 10;
+                    break;
+                case "Burn":
+                    AttackDamage += 2;
+                    break;
+                case "Expunger":
+                    AttackDamage += 6;
+                    break;
+                case "Become Almighty":
+                    BuffAmount++;
+                    break;
+                case "Fame and Fortune":
+                    MagicNumber += 5;
+                    break;
+                case "Live Forever":
+                    BuffAmount += 2;
+                    break;
+            }
+            Upgraded = true;
         }
     }
 }

@@ -98,6 +98,16 @@
         }
 
         // Hero exclusive methods
+
+        public void setMaxHP(int change)
+        {
+            MaxHP += change;
+            if (Hp > MaxHP)
+                Hp = MaxHP;
+            else if (change > 0)
+                Hp += change;
+        }
+
         public int DetermineTarget(List<Enemy> encounter)
         {
             int x = 0;
@@ -196,33 +206,33 @@
             Actions.Add($"Channel {channeledOrb.Name} Orb");
         }
 
-        public void Evoke(List<Enemy> encounter)
+        public void Evoke(List<Enemy> encounter, int position = 0)
         {
             if (Hp <= 0) return;
             Random random = new();
-            if (Orbs[0] == null) return;
-            else if (Orbs[0].Name == "Lightning")
+            if (Orbs[position] == null) return;
+            switch (Orbs[position].Name)
             {
-                int target = random.Next(0, encounter.Count);
-                NonAttackDamage(encounter[target], 8);
-                Console.WriteLine($"The {encounter[target].Name} took 8 damage from the Evoked Lightning Orb!");
-            }
-            else if (Orbs[0].Name == "Frost")
-            {
-                GainBlock(5);
-                Console.WriteLine($"The {Name} gained 2 Block from the Evoked Frost Orb!");
-            }
-            else if (Orbs[0].Name == "Dark")
-            {
-                Actor lowestHP = encounter[0];
-                foreach (var enemy in encounter)
-                    if (enemy.Hp < lowestHP.Hp) lowestHP = enemy;
-                NonAttackDamage(lowestHP, Orbs[0].Effect);
-                Console.WriteLine($"The Evoked Dark Orb exploded on the {lowestHP.Name} for {Orbs[0].Effect} damage!");
-            }
-            else
-            {
-                GainTurnEnergy(2);
+                default:
+                    GainTurnEnergy(2);
+                    Console.WriteLine($"The Evoked Plasma Orb gave the {Name} 2 Energy!");
+                    break;
+                case "Lightning":
+                    int target = random.Next(0, encounter.Count);
+                    NonAttackDamage(encounter[target], 8);
+                    Console.WriteLine($"The {encounter[target].Name} took 8 damage from the Evoked Lightning Orb!");
+                    break;
+                case "Frost":
+                    GainBlock(5);
+                    Console.WriteLine($"The {Name} gained 5 Block from the Evoked Frost Orb!");
+                    break;
+                case "Dark":
+                    Actor lowestHP = encounter[0];
+                    foreach (var enemy in encounter)
+                        if (enemy.Hp < lowestHP.Hp) lowestHP = enemy;
+                    NonAttackDamage(lowestHP, Orbs[position].Effect);
+                    Console.WriteLine($"The Evoked Dark Orb exploded on the {lowestHP.Name} for {Orbs[0].Effect} damage!");
+                    break;
             }
         }
 
@@ -233,12 +243,6 @@
             Console.WriteLine($"The {Name} gained {energy} Energy!");
         }
 
-        //  Method for adding to current max amount of energy that lasts for the battle.
-        public void GainBattleEnergy(int energy)
-        {
-            this.MaxEnergy += energy;
-        }
-
         public void GoldChange(int amount) //For when rewards are set
         {
             Gold += amount;
@@ -246,7 +250,6 @@
                 Console.WriteLine($"The {Name} gained {amount} Gold!");
             else Console.WriteLine($"The {Name} lost {amount * -1} Gold!");
         }
-
 
         public void CombatRewards(List<Card> deck, Random rng)
         {

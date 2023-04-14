@@ -11,7 +11,6 @@ namespace STV
         public static void Main()
         {
             Console.Title = "Slay The Spire";
-            Pause();
             // Menu init
             int menuChoice = 1;
             List<String> mainMenu = new List<string> { "1: Enter The Spire", "2: Card Library", "3: Exit" };
@@ -56,11 +55,10 @@ namespace STV
                         }
                         hero.Relics.Add(Dict.relicL[heroChoice - 1]);
                         ScreenWipe();
-                        hero.StartingDeck();
+                        hero.StartingDeck();                 
                         Console.WriteLine($"You have chosen the {hero.Name}! Here is the {hero.Name} Deck.\n");                    
                         ConsoleTableExt.ConsoleTableBuilder.From(hero.Deck).ExportAndWriteLine(TableAligntment.Center);
-                        Pause();
-                        
+                        Pause();                       
                         for (int act = 1; act <= 3; act++)
                         {
                             Console.WriteLine($"You have entered Act {act}!");
@@ -175,7 +173,7 @@ namespace STV
                     EventDecider(hero, actModifier);
                     break;
                 case "Rest Site":
-                    //Eventually add in Upgrade and Recall
+                    //Add in Upgrade and Menu to choose between them, eventually add in options granted by Relics
                     hero.HealHP(hero.MaxHP / 3);
                     break;
                 case "Merchant":
@@ -308,7 +306,9 @@ namespace STV
             Console.WriteLine("Next encounter:");
             foreach (Actor actor in encounter) 
                 Console.WriteLine(actor.Name);
-            List<Card> drawPile = new(Card.Shuffle(hero.Deck, cardRNG));
+            List<Card> drawPile = new();
+            foreach (Card c in hero.Deck)
+                drawPile.Add(new Card(c));
             List<Card> hand = new();
             List<Card> discardPile = new();
             List<Card> exhaustPile = new();
@@ -414,34 +414,34 @@ namespace STV
                     switch (i)
                     {
                         case 1:
-                            Console.WriteLine($"(R)ead Card's Effects {(hand.Count >= i ? Tab(9) + i + ":" + hand[i - 1].Name : "")}\n");
+                            Console.WriteLine($"(R)ead Card's Effects {(hand.Count >= i ? Tab(9) + i + ":" + hand[i - 1].getName() : "")}\n");
                             break;
                         case 2:
-                            Console.WriteLine($"(V)iew Your Buffs/Debuffs {(hand.Count >= i ? Tab(8) + i + ":" + hand[i - 1].Name : "")}\n");
+                            Console.WriteLine($"(V)iew Your Buffs/Debuffs {(hand.Count >= i ? Tab(8) + i + ":" + hand[i - 1].getName() : "")}\n");
                             break;
                         case 3:
-                            Console.WriteLine($"Use (P)otion {(hand.Count >= i ? Tab(10) + i + ":" + hand[i - 1].Name : "")}\n");
+                            Console.WriteLine($"Use (P)otion {(hand.Count >= i ? Tab(10) + i + ":" + hand[i - 1].getName() : "")}\n");
                             break;
                         case 4:
-                            Console.WriteLine($"View Enemy (I)nformation {(hand.Count >= i ? Tab(8) + i + ":" + hand[i - 1].Name : "")}\n");
+                            Console.WriteLine($"View Enemy (I)nformation {(hand.Count >= i ? Tab(8) + i + ":" + hand[i - 1].getName() : "")}\n");
                             break;
                         case 5:
-                            Console.WriteLine($"(E)nd Turn {(hand.Count >= i ? Tab(10) + i + ":" + hand[i - 1].Name : "")}\n");
+                            Console.WriteLine($"(E)nd Turn {(hand.Count >= i ? Tab(10) + i + ":" + hand[i - 1].getName() : "")}\n");
                             break;
                         case 6:
-                            Console.WriteLine($"******************** {(hand.Count >= i ? Tab(9) + i + ":" + hand[i - 1].Name : "")}\n");
+                            Console.WriteLine($"******************** {(hand.Count >= i ? Tab(9) + i + ":" + hand[i - 1].getName() : "")}\n");
                             break;
                         case 7:
-                            Console.WriteLine($"{hero.Name} Information: {(hand.Count >= i ? Tab(9) + i + ":" + hand[i - 1].Name : "")}\n");
+                            Console.WriteLine($"{hero.Name} Information: {(hand.Count >= i ? Tab(9) + i + ":" + hand[i - 1].getName() : "")}\n");
                             break;
                         case 8:
-                            Console.WriteLine($"Draw Pile:{drawPile.Count}\tDiscard Pile:{discardPile.Count}{Tab(2)}Exhausted:{exhaustPile.Count} {(hand.Count >= i ? Tab(5) + i + ":" + hand[i - 1].Name : "")}\n");
+                            Console.WriteLine($"Draw Pile:{drawPile.Count}\tDiscard Pile:{discardPile.Count}{Tab(2)}Exhausted:{exhaustPile.Count} {(hand.Count >= i ? Tab(5) + i + ":" + hand[i - 1].getName() : "")}\n");
                             break;
                         case 9:
-                            Console.WriteLine($"HP:{hero.Hp}/{hero.MaxHP} + {hero.Block} Block\tEnergy:{hero.Energy}/{hero.MaxEnergy} {(hand.Count >= i ? Tab(7) + i + ":" + hand[i - 1].Name : "")}\n");
+                            Console.WriteLine($"HP:{hero.Hp}/{hero.MaxHP} + {hero.Block} Block\tEnergy:{hero.Energy}/{hero.MaxEnergy} {(hand.Count >= i ? Tab(7) + i + ":" + hand[i - 1].getName() : "")}\n");
                             break;
                         case 10:
-                            Console.WriteLine($"{(hand.Count >= i ? Tab(11) + i + ":" + hand[i - 1].Name : "")}\n");
+                            Console.WriteLine($"{(hand.Count >= i ? Tab(11) + i + ":" + hand[i - 1].getName() : "")}\n");
                             break;
                     }
                 }               
@@ -476,7 +476,9 @@ namespace STV
                         Console.WriteLine("Invalid input, enter again:"); 
                         break;
                     case "R":
-                        ConsoleTableBuilder.From(hand).ExportAndWriteLine(TableAligntment.Center);
+                        //ConsoleTableBuilder.From(hand).ExportAndWriteLine(TableAligntment.Center);
+                        foreach(Card c in hand)
+                                Console.WriteLine(c.ToString());
                         Pause();
                         break;
                     case "B":
@@ -530,8 +532,8 @@ namespace STV
             {
                 if (hand[i].getDescription().Contains("Retain."))
                 {
-                    if (hand[i].Name == "Sands of Time" && hand[i].EnergyCost != "0")
-                        hand[i].EnergyCost = $"{Int32.Parse(hand[i].EnergyCost) - 1}";
+                    if (hand[i].Name == "Sands of Time" && hand[i].EnergyCost != 0)
+                        hand[i].EnergyCost = hand[i].EnergyCost - 1;
                     if (hand[i].Name == "Windmill Strike")
                         hand[i].setAttackDamage(hand[i].getMagicNumber());
                     if (hand[i].Name == "Perserverance")
