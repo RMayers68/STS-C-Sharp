@@ -123,6 +123,12 @@
                 case "Sadistic Nature": return $"Whenever you apply a Debuff to an enemy, they take {Intensity} damage.";
                 case "Mayhem": return $"At the start of your turn, play the {Intensity} top card(s) of your draw pile.";
                 case "Da Bomb": return $"At the end of {Duration} turn(s), deal 40 damage to ALL enemies.";
+                case "Flame Barrier": return $"When attacked this turn, deals {Intensity} damage back.";
+                case "Free Attack": return $"The next {Counter} Attacks you play costs 0.";
+                case "Fire Breathing": return $"Whenever you draw a Status or Curse card, deal {Intensity} damage to ALL enemies.";
+                case "Panache": return $"If you play {Counter} more cards this turn, deal {Intensity} damage to all enemies.";
+                case "Omega": return $"At the end of your turn, deal {Intensity} damage to ALL enemies.";
+                case "Plated Armor": return $"At the end of your turn, gain {Intensity} Block. Receiving unblocked attack damage reduces Plated Armor by 1.";
             }
         }
 

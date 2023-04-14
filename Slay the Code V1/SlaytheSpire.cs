@@ -10,8 +10,8 @@ namespace STV
     {
         public static void Main()
         {
-            Console.Title = "Slay The Spire";  
-
+            Console.Title = "Slay The Spire";
+            Pause();
             // Menu init
             int menuChoice = 1;
             List<String> mainMenu = new List<string> { "1: Enter The Spire", "2: Card Library", "3: Exit" };
@@ -22,7 +22,6 @@ namespace STV
                 Console.BackgroundColor = ConsoleColor.Black;
                 ScreenWipe();
                 Console.BackgroundColor = ConsoleColor.Black;
-                Console.Write(result);
                 ConsoleTableExt.ConsoleTableBuilder.From(mainMenu).ExportAndWriteLine(TableAligntment.Center);
                 while (!Int32.TryParse(Console.ReadLine(), out menuChoice) || menuChoice < 1 || menuChoice > 4)
                     Console.WriteLine("Invalid input, enter again:");
@@ -398,8 +397,8 @@ namespace STV
             if (turnNumber == 1 && hero.Relics[0].Name == "Cracked Core")
                 hero.Orbs.Add(new Orb(Dict.orbL[0]));
             if (turnNumber == 1 && hero.Relics[0].Name == "Ring of the Snake")
-                Card.DrawCards(drawPile, hand, discardPile, rng, 2);
-            Card.DrawCards(drawPile, hand, discardPile, rng, 5);
+                Card.DrawCards(drawPile, hand, discardPile, rng, exhaustPile, hero, 2);
+            Card.DrawCards(drawPile, hand, discardPile, rng, exhaustPile, hero, 5);
             hero.Energy = hero.MaxEnergy;
             if (hero.Orbs.FindAll(x => x.Name == "Plasma").Count() > 0)
                 hero.Energy += hero.Orbs.FindAll(x => x.Name == "Plasma").Count();
@@ -529,15 +528,20 @@ namespace STV
             }
             for(int i = hand.Count-1; i > 0; i--)                   //Discard at end of turn (Comment to find easy for disabling)
             {
-                if (hand[i].Description.Contains("Retain."))
+                if (hand[i].getDescription().Contains("Retain."))
                 {
-                    hero.Actions.Add($"{hand[i].Name} Retained");
+                    if (hand[i].Name == "Sands of Time" && hand[i].EnergyCost != "0")
+                        hand[i].EnergyCost = $"{Int32.Parse(hand[i].EnergyCost) - 1}";
+                    if (hand[i].Name == "Windmill Strike")
+                        hand[i].setAttackDamage(hand[i].getMagicNumber());
+                    if (hand[i].Name == "Perserverance")
+                        hand[i].setBlockAmount(hand[i].getMagicNumber());
                     continue;
                 }                   
                 else
                 {
-                    if (hand[i].Description.Contains("Ethereal"))
-                        hand[i].Exhaust(exhaustPile, hand);
+                    if (hand[i].getDescription().Contains("Ethereal"))
+                        hand[i].Exhaust(exhaustPile, hand, hero);
                     else hand[i].MoveCard(hand, discardPile);
                 }
             }

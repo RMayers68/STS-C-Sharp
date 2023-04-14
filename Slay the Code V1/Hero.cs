@@ -224,7 +224,6 @@
             {
                 GainTurnEnergy(2);
             }
-            Actions.Add($"Evoked {Orbs[0].Name} Orb");
         }
 
         // Method for adding to current energy amount for the turn
