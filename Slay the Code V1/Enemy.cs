@@ -441,7 +441,7 @@
                     {
                         int i when i == 0 => "Goop Spray",
                         int i when i == 1 => "Charging",
-                        int i when i == 3 => "Slam",
+                        int i when i == 2 => "Slam",
                     };
                     break;
                 case 21:                                                            // Large Acid Slime

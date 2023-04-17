@@ -9,6 +9,10 @@
         public int PotionSlots { get; set; }
         public int PotionChance { get; set; }
         public List<Card> Deck { get; set; }
+        public List<Card> DrawPile { get; set; }
+        public List<Card> Hand { get; set; }
+        public List<Card> DiscardPile { get; set; }
+        public List<Card> ExhaustPile { get; set; }
         public List<Relic> Relics { get; set; }
         public List<Orb> Orbs { get; set; }
         public List<Potion> Potions { get; set; }
@@ -18,20 +22,6 @@
             Name = name;
             MaxHP = maxHP;
             Hp = maxHP;
-            this.MaxEnergy = 3;
-            this.Energy = 3;
-            this.Block = 0;
-            this.Deck = new();
-            this.Buffs = new();
-            this.Relics = new();;
-            this.Potions = new();
-            this.Actions = new();
-            this.Orbs = new();
-            this.OrbSlots = 1;
-            this.Gold = 99;
-            this.EasyFights = 0;
-            this.PotionSlots = 3;
-            this.PotionChance = 1;
         }
 
         public Hero(Hero hero)
@@ -44,6 +34,10 @@
                 this.Energy = 3;
                 this.Block = 0;
                 this.Deck = new();
+                this.DrawPile = new();
+                this.Hand = new();
+                this.DiscardPile = new();
+                this.ExhaustPile = new();
                 this.Buffs = new();
                 this.Relics = new();
                 this.Potions = new();
@@ -108,6 +102,29 @@
                 Hp += change;
         }
 
+        public void CombatHeal(int heal)
+        {
+            if (Relics.Find(x => x.Name == "Magic Flower") != null)
+                heal = Convert.ToInt32(heal * 1.5);
+            HealHP(heal);
+        }
+
+        public void HealHP(int heal)
+        {
+            if (Relics.Find(x => x.Name == "Mark of the Bloom") != null)
+                Console.WriteLine("Your attempt at healing failed due to the Mark of the Bloom.");
+            else
+            {
+                Hp += heal;
+                if (Hp > MaxHP)
+                {
+                    heal = Hp + heal - MaxHP;
+                    Hp = MaxHP;
+                }                   
+                Console.WriteLine($"You have healed {heal} HP and are now at {Hp}/{MaxHP}!");
+            }
+        }
+
         public int DetermineTarget(List<Enemy> encounter)
         {
             int x = 0;
@@ -165,7 +182,7 @@
             Console.WriteLine($"{Name} hurt themselves for {damage} damage!");
         }
 
-        public void SwitchStance(string newStance, List<Card> discardPile, List<Card> hand)
+        public void SwitchStance(string newStance)
         {
             string oldStance = Stance;
             Stance = newStance;
@@ -189,13 +206,12 @@
             else if (oldStance != Stance && Stance == "Divinity")
                 Energy += 3;
             // Flurry of Blows Check
-            if (Card.FindCard("Flurry of Blows", discardPile) is Card flurryOfBlows && flurryOfBlows != null && hand.Count < 10) 
-                flurryOfBlows.MoveCard(discardPile, hand);               
+            if (Card.FindCard("Flurry of Blows", DiscardPile) is Card flurryOfBlows && flurryOfBlows != null && Hand.Count < 10) 
+                flurryOfBlows.MoveCard(DiscardPile, Hand);               
         }
 
         public void ChannelOrb(List<Enemy> encounter, int orbID)
         {
-            if (Hp <= 0) return;
             Orb channeledOrb = new Orb(Dict.orbL[orbID]);
             if (Orbs.Count == OrbSlots)
             {

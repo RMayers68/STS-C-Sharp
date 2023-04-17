@@ -137,11 +137,6 @@
 			Hp -= damage;
 			FindBuff("Poison",Buffs).Duration -= 1;
 		}
-
-		public void HealHP(int heal)
-		{
-			Hp += heal;
-			Console.WriteLine($"You have healed {heal} HP and are now at {Hp}/{MaxHP}!");
-		}	
+		
 	}
 }

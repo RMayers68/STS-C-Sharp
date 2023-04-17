@@ -10,9 +10,9 @@
 
 
         //constructor
-        public Room(int RoomNumber, int Floor)
+        public Room(int RoomNumber, int Floor, string Location = "Undecided")
         {
-            this.Location = "Undecided";
+            this.Location = Location;
             this.RoomNumber = RoomNumber;
             this.Floor = Floor;
             Connections = new List<Room>();

@@ -129,6 +129,9 @@
                 case "Panache": return $"If you play {Counter} more cards this turn, deal {Intensity} damage to all enemies.";
                 case "Omega": return $"At the end of your turn, deal {Intensity} damage to ALL enemies.";
                 case "Plated Armor": return $"At the end of your turn, gain {Intensity} Block. Receiving unblocked attack damage reduces Plated Armor by 1.";
+                case "Dexterity Down": return $"Lose {Intensity} Dexterity at the end of the turn.";
+                case "Regeneration": return $"At the end of your turn, heal {Intensity} HP and reduce Regen by 1.";
+                case "Duplication": return $"Your next {Counter} cards are played twice.";
             }
         }
 
@@ -149,23 +152,23 @@
         public bool DurationEnded()
         {
             if (this.Duration == 0)
-            {
                 return true;
-            }
             else return false;
         }
 
         //Counter methods
         public void CounterSet(int counter)
         {
-            if (this.Counter == null) this.Counter = counter;
+            if (this.Counter == null) 
+                this.Counter = counter;
             else this.Counter += counter;
         }
 
         // Intensity related methods
         public void IntensitySet(int intensity)
         {
-            if (this.Intensity == null) this.Intensity = intensity;
+            if (this.Intensity == null) 
+                this.Intensity = intensity;
             else this.Intensity += intensity;
         }
     }

@@ -92,6 +92,8 @@ namespace STV
             this.Type = card.Type;
             this.Rarity = card.Rarity;
             this.EnergyCost = card.EnergyCost;
+            if (this.EnergyCost >= 0)
+                TmpEnergyCost = EnergyCost;
             this.GoldCost = Rarity == "Rare" ? rng.Next(135, 166) : Rarity == "Uncommon" ? rng.Next(68, 83) : rng.Next(45, 56);
             this.Upgraded = card.Upgraded;
             this.AttackDamage = card.AttackDamage;
@@ -120,6 +122,14 @@ namespace STV
 
         public void setBlockAmount(int addedDamage)
         { this.BlockAmount += addedDamage; }
+
+        public void setEnergyCost(int energyCost)
+        {
+            EnergyCost = energyCost;
+            TmpEnergyCost = energyCost;
+        }
+        public void setTmpEnergyCost(int tmpEnergyCost)
+        { TmpEnergyCost = tmpEnergyCost; }
 
         public int getGoldCost()
         { return GoldCost; }
@@ -162,7 +172,7 @@ namespace STV
         {
             if (EnergyCost == -2)
                 return $"Name: {Name}{(Upgraded ? "+" : "")}\nType: {Type}\nEffect: {getDescription()}";
-            return $"Name: {Name}{(Upgraded ? "+" : "")}\nEnergy Cost: {EnergyCost}\tType: {Type}\nEffect: {getDescription()}\n";
+            return $"Name: {Name}{(Upgraded ? "+" : "")}\nEnergy Cost: {(EnergyCost > TmpEnergyCost ? $"{TmpEnergyCost}" : $"{EnergyCost}" )} \tType: {Type}\nEffect: {getDescription()}\n";
         }
 
         
@@ -195,46 +205,56 @@ namespace STV
             to.Add(this);
         }
        
-        public void Exhaust(List<Card> exhaustPile, List<Card> leaveThisList, Hero hero)
+        public void Exhaust(Hero hero, List<Card> leaveThisList)
         {
-            MoveCard(leaveThisList, exhaustPile);
+            MoveCard(leaveThisList, hero.ExhaustPile);
             if (Name == "Sentinel")
                 hero.GainTurnEnergy(EnergyGained);
             Console.WriteLine($"{Name} has been exhausted.");
         }
 
-        public static void Discard(Hero hero, List<Card> hand, List<Card> discardPile, Card card, List<Card> drawPile,List<Card> exhaustPile, Random rng)
+        public void Discard(Hero hero, Random rng)
         {
-            if (hand.Count < 1)
+            if (hero.Hand.Count < 1)
                 return;
-            if (card.Name == "Tactician")
-                hero.GainTurnEnergy(card.EnergyGained);
-            else if (card.Name == "Reflex")
-                DrawCards(drawPile, hand, discardPile, rng,exhaustPile,hero, card.getMagicNumber());
-            card.MoveCard(hand, discardPile);
+            if (Name == "Tactician")
+                hero.GainTurnEnergy(EnergyGained);
+            else if (Name == "Reflex")
+                DrawCards(rng,hero,MagicNumber);
+            MoveCard(hero.Hand, hero.DiscardPile);
             hero.Actions.Add("Discard");
         }
 
-        public static void Scry(List<Card> drawPile, List<Card> discardPile, List<Card> hand, int amount)
+        public static void Scry(Hero hero, int amount)
         {
             int scryChoice = -1;
             while (scryChoice != 0 && amount > 0)
             {
                 Console.WriteLine($"\nEnter the number of the card you would like to scry into your discard pile or hit 0 to move on.");
                 for (int i = 1; i <= amount; i++)
-                    Console.WriteLine($"{i}:{drawPile[drawPile.Count - i].Name}");
+                    Console.WriteLine($"{i}:{hero.DrawPile[hero.DrawPile.Count - i].Name}");
                 while (!Int32.TryParse(Console.ReadLine(), out scryChoice) || scryChoice < 0 || scryChoice > amount)
                     Console.WriteLine("Invalid input, enter again:");
                 if (scryChoice > 0)
                 {
-                    Card scryedCard = drawPile[drawPile.Count - scryChoice];
-                    scryedCard.MoveCard(drawPile, discardPile);
+                    Card scryedCard = hero.DrawPile[hero.DrawPile.Count - scryChoice];
+                    scryedCard.MoveCard(hero.DrawPile, hero.DiscardPile);
                     amount--;
                 }
             }
             // Weave Check
-            if (Card.FindCard("Weave", discardPile) is Card weave && weave != null && hand.Count < 10)
-                weave.MoveCard(discardPile, hand);
+            if (Card.FindCard("Weave", hero.DiscardPile) is Card weave && weave != null && hero.Hand.Count < 10)
+                weave.MoveCard(hero.DiscardPile, hero.Hand);
+        }
+
+        public static void AddShivs(Hero hero, int amount)
+        {
+            for (int i = 0; i < amount; i++)
+            {
+                if (hero.Hand.Count < 10)
+                    hero.Hand.Add(new Card(Dict.cardL[296]));
+                else hero.DiscardPile.Add(new Card(Dict.cardL[296]));
+            }
         }
 
         public static List<Card> RandomCards(string type, int count, Random rng, string exclusion = null)
@@ -274,24 +294,24 @@ namespace STV
             }
         }
 
-        public static void DrawCards(List<Card> drawPile, List<Card> hand, List<Card> discardPile, Random rng, List<Card> exhaustPile, Hero hero, int cards)
+        public static void DrawCards(Random rng,Hero hero, int cards)
         {
-            while (hand.Count < 10)
+            while (hero.Hand.Count < 10)
             {
-                if (drawPile.Count == 0)
-                    Discard2Draw(drawPile, discardPile, rng);
-                if (drawPile.Count == 0)
+                if (hero.DrawPile.Count == 0)
+                    Discard2Draw(hero, rng);
+                if (hero.DrawPile.Count == 0)
                     break;
-                drawPile[drawPile.Count - 1].MoveCard(drawPile, hand);
-                if (hand.Last().Name == "Deus Ex Machina")
+                hero.DrawPile.Last().MoveCard(hero.DrawPile, hero.Hand);
+                if (hero.Hand.Last().Name == "Deus Ex Machina")
                 {
-                    for (int i = 0; i < hand.Last().MagicNumber; i++)
+                    for (int i = 0; i < hero.Hand.Last().MagicNumber; i++)
                     {
-                        if (hand.Count < 10)
-                            hand.Add(new Card(Dict.cardL[336]));
-                        else discardPile.Add(new Card(Dict.cardL[336]));
+                        if (hero.Hand.Count < 10)
+                            hero.Hand.Add(new Card(Dict.cardL[336]));
+                        else hero.DiscardPile.Add(new Card(Dict.cardL[336]));
                     }
-                    hand.Last().Exhaust(exhaustPile, hand, hero);
+                    hero.Hand.Last().Exhaust(hero, hero.Hand);
                 }                                  
                 cards--;
                 if (cards == 0)
@@ -314,11 +334,11 @@ namespace STV
         }
 
         // Takes all cards in discard, moves them to drawpile, and then shuffles the drawpile
-        public static void Discard2Draw(List<Card> drawPile, List<Card> discardPile, Random rng)
+        public static void Discard2Draw(Hero hero, Random rng)
         {
-            for (int i = discardPile.Count; i > 0; i--)
-                discardPile[i - 1].MoveCard(discardPile, drawPile);
-            Shuffle(drawPile, rng);
+            for (int i = hero.DiscardPile.Count; i > 0; i--)
+                hero.DiscardPile.Last().MoveCard(hero.DiscardPile, hero.DrawPile);
+            Shuffle(hero.DrawPile, rng);
         }
 
         // Description String
@@ -695,66 +715,55 @@ namespace STV
         }
 
 
-        public void CardAction(Hero hero, List<Enemy> encounter, List<Card> drawPile, List<Card> discardPile, List<Card> hand, List<Card> exhaustPile, Random rng)
+        public void CardAction(Hero hero, List<Enemy> encounter, Random rng)
         {
             // Check to see if the Card is Playable, if not leave function early
-            if (Name == "Eviscerate" || Name == "Force Field")
+            if (Name == "Force Field")
             {
-                switch (Name)
-                {
-                    default:
-                        foreach (string s in hero.Actions)
-                            if (s.Contains("Discard") && EnergyCost != 0)
-                                EnergyCost--;
-                        break;
-
-                    case "Force Field":
-                        foreach (string s in hero.Actions)
-                            if (s.Contains("Power") && EnergyCost != 0)
-                                EnergyCost--;
-                        break;
-                }
+                foreach (string s in hero.Actions)
+                    if (s.Contains("Power") && EnergyCost != 0)
+                        EnergyCost--;
             }
-            if (EnergyCost > hero.Energy)
+            if (TmpEnergyCost > hero.Energy)
             {
                 Console.WriteLine($"You failed to play {Name}. You need {EnergyCost} Energy to play {Name}.");
                 return;
             }
-            if (Name == "Clash" && !hand.All(x => x.Type == "Attack"))
+            if (Name == "Clash" && !hero.Hand.All(x => x.Type == "Attack"))
             {
                 Console.WriteLine("You can't play Clash as you have something that isn't an Attack in your hand.");
                 return;
             }
-            if (Name == "Signature Move" && hand.Any(x => x.Type == "Attack"))
+            if (Name == "Signature Move" && hero.Hand.Any(x => x.Type == "Attack"))
             {
                 Console.WriteLine("You can't play Signature Move as you have a different Attack in your hand.");
                 return;
             }
-            if (Name == "Grand Finale" && drawPile.Count != 0)
+            if (Name == "Grand Finale" && hero.DrawPile.Count != 0)
             {
                 Console.WriteLine("You can't play Grand Finale because you have cards in your draw pile.");
                 return;
             }
             if (getDescription().Contains("Unplay"))
             {
-                Console.WriteLine("You can't play this card, read it's effects to learn more.");
+                Console.WriteLine("This card is unplayable, read it's effects to learn more.");
                 return;
             }
 
             // Moves the Card Played from Hand to Designated Location
-            if (FindCard(Name, hand) != null)
+            if (FindCard(Name, hero.Hand) != null)
             {
                 if (getDescription().Contains("Exhaust") || Type == "Status" || Type == "Curse")
-                    Exhaust(exhaustPile, hand, hero);
+                    Exhaust(hero , hero.Hand);
                 else if (Type == "Power")
-                    hand.Remove(this);
+                    hero.Hand.Remove(this);
                 else if (Name == "Tantrum")
                 {
-                    MoveCard(hand, drawPile);
-                    Shuffle(drawPile, rng);
+                    MoveCard(hero.Hand, hero.DrawPile);
+                    Shuffle(hero.DrawPile, rng);
                 }
                 else
-                    MoveCard(hand, discardPile);
+                    MoveCard(hero.Hand, hero.DiscardPile);
             }
 
             // Card Effects begin here
@@ -763,7 +772,8 @@ namespace STV
             string lastCardPlayed = "";
             if (EnergyCost == -1)
                 hero.Energy = 0;
-            else hero.Energy -= EnergyCost;
+            else
+                hero.Energy -= TmpEnergyCost;
 
 
             // Setup Phase (if target needs to be selected or something happens prior to regular action/action numbers need to be determined
@@ -786,14 +796,14 @@ namespace STV
                     AttackDamage = hero.Block;
                     break;
                 case "Burning Pact":
-                    Card burningPact = ChooseCard(hand, "exhaust");
-                    burningPact.Exhaust(exhaustPile, hand, hero);
+                    Card burningPact = ChooseCard(hero.Hand, "exhaust");
+                    burningPact.Exhaust(hero, hero.Hand);
                     break;
                 case "Fiend Fire":
                     int fiendFire = 0;
-                    for (int i = hand.Count; i >= 1; i--)
+                    for (int i = hero.Hand.Count; i >= 1; i--)
                     {
-                        hand[i - 1].Exhaust(exhaustPile, hand, hero);
+                        hero.Hand[i - 1].Exhaust(hero, hero.Hand);
                         fiendFire++;
                     }
                     AttackLoops = fiendFire;
@@ -804,17 +814,17 @@ namespace STV
                         AttackDamage += 14 + (heavyBlade.Intensity.GetValueOrDefault() * MagicNumber);
                     break;
                 case "Perfected Strike":
-                    foreach (Card c in hand)
+                    foreach (Card c in hero.Hand)
                     {
                         if (c.Name.Contains("Strike"))
                             AttackDamage += 2;
                     }
-                    foreach (Card c in drawPile)
+                    foreach (Card c in hero.DrawPile)
                     {
                         if (c.Name.Contains("Strike"))
                             AttackDamage += 2;
                     }
-                    foreach (Card c in discardPile)
+                    foreach (Card c in hero.DiscardPile)
                     {
                         if (c.Name.Contains("Strike"))
                             AttackDamage += 2;
@@ -829,11 +839,11 @@ namespace STV
                     break;
                 case "Second Wind":
                     BlockLoops = 0;
-                    foreach (Card c in hand)
+                    foreach (Card c in hero.Hand)
                     {
                         if (c.Type != "Attack")
                         {
-                            c.Exhaust(exhaustPile, hand, hero);
+                            c.Exhaust(hero, hero.Hand);
                             BlockLoops++;
                         }
                     }
@@ -849,20 +859,20 @@ namespace STV
                     break;
                 case "Flechettes":
                     AttackLoops = 0;
-                    for (int i = 0; i < hand.Count; i++)
+                    for (int i = 0; i < hero.Hand.Count; i++)
                     {
-                        if (hand[i].Type == "Skill")
+                        if (hero.Hand[i].Type == "Skill")
                             AttackLoops++;
                     }
                     break;
                 case "Nightmare":
-                    Card nightmare = ChooseCard(hand, "copy");
+                    Card nightmare = ChooseCard(hero.Hand, "copy");
                     break;
                 case "Skewer":
                     AttackLoops = xEnergy;
                     break;
                 case "Aggregate":
-                    EnergyGained = (drawPile.Count / MagicNumber);
+                    EnergyGained = (hero.DrawPile.Count / MagicNumber);
                     break;
                 case "Barrage":
                     AttackLoops = hero.Orbs.Count;
@@ -890,22 +900,22 @@ namespace STV
                     encounter[target].Block = 0;
                     break;
                 case "Reboot":
-                    foreach (Card c in discardPile)
-                        c.MoveCard(discardPile, drawPile);
-                    foreach (Card c in hand)
-                        c.MoveCard(hand, drawPile);
-                    Shuffle(drawPile, rng);
+                    foreach (Card c in hero.DiscardPile)
+                        c.MoveCard(hero.DiscardPile, hero.DrawPile);
+                    foreach (Card c in hero.Hand)
+                        c.MoveCard(hero.Hand, hero.DrawPile);
+                    Shuffle(hero.DrawPile, rng);
                     break;
                 case "Recycle":
-                    Card recycle = ChooseCard(hand, "exhaust");
-                    recycle.Exhaust(exhaustPile, hand, hero);
+                    Card recycle = ChooseCard(hero.Hand, "exhaust");
+                    recycle.Exhaust(hero, hero.Hand);
                     EnergyGained += recycle.EnergyCost;
                     break;
                 case "Reinforced Body":
                     BlockLoops = xEnergy;
                     break;
                 case "Stack":
-                    BlockAmount = discardPile.Count + MagicNumber;
+                    BlockAmount = hero.DiscardPile.Count + MagicNumber;
                     break;
                 case "Tempest":
                     BlockLoops += xEnergy;
@@ -922,14 +932,14 @@ namespace STV
                     BuffAmount += xEnergy;
                     break;
                 case "Spirit Shield":
-                    BlockAmount = hand.Count * MagicNumber;
+                    BlockAmount = hero.Hand.Count * MagicNumber;
                     break;
             }
 
             //Scry Check
             if (Scrys)
             {
-                Scry(drawPile, discardPile, hand, MagicNumber);
+                Scry(hero, MagicNumber);
             }
 
             // Self Damage Phase
@@ -941,7 +951,7 @@ namespace STV
             // Block Phase (with exception for Wallop below)
             if (BlockAmount > 0)
             {
-                if ((Name == "Auto-Shields" && hero.Block != 0) || (Name == "Escape Plan" && hand[hand.Count - 1].Type != "Skill"))
+                if ((Name == "Auto-Shields" && hero.Block != 0) || (Name == "Escape Plan" && hero.Hand.Last().Type != "Skill"))
                     hero.CardBlock(0);
                 else for (int i = 0; i < BlockLoops; i++)
                         hero.CardBlock(BlockAmount);
@@ -1061,7 +1071,7 @@ namespace STV
                         for (int i = 0; i < MagicNumber; i++)
                             encounter[rng.Next(0, encounter.Count)].AddBuff(BuffID, BuffAmount);
                     else if (Name == "Indignation" && hero.Stance != "Wrath")
-                        hero.SwitchStance("Wrath", discardPile, hand);
+                        hero.SwitchStance("Wrath");
                     else foreach (Enemy e in encounter)
                         e.AddBuff(BuffID, BuffAmount);
                     if (Name == "Shockwave")
@@ -1080,33 +1090,33 @@ namespace STV
             while (CardsDrawn > 0)
             {
                 if (Name == "Scrawl")
-                    CardsDrawn = 10 - hand.Count;
+                    CardsDrawn = 10 - hero.Hand.Count;
                 else if (Name == "Expertise")
-                    CardsDrawn -= hand.Count;
+                    CardsDrawn -= hero.Hand.Count;
                 else if (Name == "Compile Driver")
                     CardsDrawn = hero.Orbs.Distinct().Count();
                 else if (Name == "Deep Breath")
-                    Discard2Draw(drawPile, discardPile, rng);
-                if ((Name == "Impatience" && hand.Any(x => x.Type == "Attack")) || (Name == "FTL" && hero.Actions.Count > MagicNumber) || (Name == "Sanctity" && lastCardPlayed != "Skill"))
+                    Discard2Draw(hero, rng);
+                if ((Name == "Impatience" && hero.Hand.Any(x => x.Type == "Attack")) || (Name == "FTL" && hero.Actions.Count > MagicNumber) || (Name == "Sanctity" && lastCardPlayed != "Skill"))
                     break;
                 else if (Name == "Inner Peace" && hero.Stance != "Calm")
                 {
-                    hero.SwitchStance("Calm", discardPile, hand);
+                    hero.SwitchStance("Calm");
                     break;
                 }
                 else if (Name == "Scrape")
                 {
                     for (int i = 0; i < CardsDrawn; i++)
                     {
-                        if (hand.Count == 10) break;
-                        DrawCards(drawPile, hand, discardPile, rng, exhaustPile, hero, 1);
-                        if (hand[hand.Count - 1].EnergyCost != 0)
-                            Discard(hero, hand, discardPile, hand[hand.Count - 1], drawPile, exhaustPile, rng);
+                        if (hero.Hand.Count == 10) break;
+                        DrawCards(rng,hero, 1);
+                        if (hero.Hand.Last().EnergyCost != 0)
+                            hero.Hand.Last().Discard(hero, rng);
                     }
                     break;
                 }                    
-                else DrawCards(drawPile, hand, discardPile, rng, exhaustPile, hero, CardsDrawn);
-                if (Name == "Escape Plan" && hand.Last().Type == "Skill" && Actor.FindBuff("No Draw", hero.Buffs) != null)
+                else DrawCards(rng, hero, CardsDrawn);
+                if (Name == "Escape Plan" && hero.Hand.Last().Type == "Skill" && Actor.FindBuff("No Draw", hero.Buffs) != null)
                     hero.CardBlock(BlockAmount);
                 break;
             }
@@ -1120,7 +1130,7 @@ namespace STV
                 else if (Name == "Sunder" && encounter[target].Hp > 0) ;
                 else hero.GainTurnEnergy(EnergyGained);
                 if ((Name == "Dropkick" && Actor.FindBuff("Vulnerable", encounter[target].Buffs) != null) || (Name == "Heel Hook" && Actor.FindBuff("Vulnerable", encounter[target].Buffs) != null))
-                    DrawCards(drawPile, hand, discardPile, rng, exhaustPile, hero, CardsDrawn);
+                    DrawCards(rng, hero, CardsDrawn);
             }
 
             // Post-Damage Effects
@@ -1128,14 +1138,14 @@ namespace STV
             {
                 // IRONCLAD CARDS (0 - 72)																					
                 case "Anger":
-                    discardPile.Add(new Card(this));
+                    hero.DiscardPile.Add(new Card(this));
                     break;
                 case "Armaments":
-                    if (hand.All(x => x.Upgraded))
+                    if (hero.Hand.All(x => x.Upgraded))
                         break;
-                    Card armaments = hand[rng.Next(hand.Count)];
+                    Card armaments = hero.Hand[rng.Next(hero.Hand.Count)];
                     while (armaments.Upgraded)
-                        armaments = hand[rng.Next(hand.Count)];
+                        armaments = hero.Hand[rng.Next(hero.Hand.Count)];
                     armaments.UpgradeCard();
                     break;
                 case "Berserk":
@@ -1146,41 +1156,40 @@ namespace STV
                     for (int i = 0;i < MagicNumber; i++)
                     {
                         do
-                            dualWield = ChooseCard(hand, "copy");
+                            dualWield = ChooseCard(hero.Hand, "copy");
                         while (dualWield.Type == "Skill");
-                        hand.Add(dualWield);
+                        hero.Hand.Add(dualWield);
                     }                   
                     break;
                 case "Entrench":
                     hero.Block *= MagicNumber;
                     break;
                 case "Exhume":
-                    Card exhume = ChooseCard(exhaustPile, "bring back");
-                    exhaustPile.Remove(exhume);
-                    hand.Add(exhume);
+                    Card exhume = ChooseCard(hero.ExhaustPile, "bring back");
+                    hero.ExhaustPile.Remove(exhume);
+                    hero.Hand.Add(exhume);
                     break;
                 case "Feed":                                                //minion buff add
                     if (encounter[target].Hp <= 0)
                         hero.setMaxHP(MagicNumber);
                     break;
                 case "Havoc":
-                    Card havoc = drawPile.Last();
-                    havoc.CardAction(hero, encounter, drawPile, discardPile, hand, exhaustPile, rng);
-                    havoc.Exhaust(exhaustPile, drawPile, hero);
+                    Card havoc = hero.DrawPile.Last();
+                    havoc.CardAction(hero, encounter, rng);
+                    havoc.Exhaust(hero, hero.DrawPile);
                     break;
                 case "Headbutt":
-                    Card headbutt = ChooseCard(discardPile, "send to the top of your drawpile");
-                    discardPile.Remove(headbutt);
-                    drawPile.Add(headbutt);
+                    Card headbutt = ChooseCard(hero.DiscardPile, "send to the top of your drawpile");
+                    headbutt.MoveCard(hero.DiscardPile, hero.DrawPile);
                     break;
                 case "Immolate":
-                    discardPile.Add(new Card(Dict.cardL[358]));
+                    hero.DiscardPile.Add(new Card(Dict.cardL[358]));
                     break;
                 case "Infernal Blade":
-                    Card infernalBlade = new Card();
+                    Card infernalBlade = new();
                     while (infernalBlade.Type != "Attack")
-                        infernalBlade = Dict.cardL[rng.Next(0, 73)];
-                    hand.Add(infernalBlade);
+                        infernalBlade = new Card(Dict.cardL[rng.Next(0, 73)]);
+                    hero.Hand.Add(infernalBlade);
                     infernalBlade.TmpEnergyCost = 0;
                     break;
                 case "Limit Break":
@@ -1191,9 +1200,9 @@ namespace STV
                 case "Power Through":
                     for (int i = 0; i < MagicNumber; i++)
                     {
-                        if (hand.Count < 10)
-                            hand.Add(new Card(Dict.cardL[357]));
-                        else discardPile.Add(new Card(Dict.cardL[357]));
+                        if (hero.Hand.Count < 10)
+                            hero.Hand.Add(new Card(Dict.cardL[357]));
+                        else hero.DiscardPile.Add(new Card(Dict.cardL[357]));
                     }
                     break;
                 case "Rampage":
@@ -1205,37 +1214,32 @@ namespace STV
                     {
                         enemyHPAfter += e.Hp;
                     }
-                    hero.HealHP(wallop - enemyHPAfter);
+                    hero.CombatHeal(wallop - enemyHPAfter);
                     break;
                 case "Reckless Charge":
-                    discardPile.Add(new Card(Dict.cardL[356]));
+                    hero.DiscardPile.Add(new Card(Dict.cardL[356]));
                     break;
                 case "Sever Soul":
-                    foreach (Card c in hand)
+                    foreach (Card c in hero.Hand)
                         if (c.Type != "Attack")
-                            c.Exhaust(exhaustPile, hand, hero);
+                            c.Exhaust(hero, hero.Hand);
                     break;
                 case "Warcry":
-                    Card warcry = ChooseCard(hand, "add to the top of your drawpile");
-                    warcry.MoveCard(hand, drawPile);
+                    Card warcry = ChooseCard(hero.Hand, "add to the top of your drawpile");
+                    warcry.MoveCard(hero.Hand, hero.DrawPile);
                     break;
                 case "Wild Strike":
-                    drawPile.Add(new Card(Dict.cardL[357]));
-                    Shuffle(drawPile, rng);
+                    hero.DrawPile.Add(new Card(Dict.cardL[357]));
+                    Shuffle(hero.DrawPile, rng);
                     break;
                 case "Alchemize":
                     hero.Potions.Add(Dict.potionL[rng.Next(0, Dict.potionL.Count)]);
                     break;
                 case "Blade Dance":
-                    for (int i = 0; i < MagicNumber; i++)
-                    {
-                        if (hand.Count < 10)
-                            hand.Add(new Card(Dict.cardL[296]));
-                        else discardPile.Add(new Card(Dict.cardL[296]));
-                    }
+                    AddShivs(hero, MagicNumber);
                     break;
                 case "Bullet Time":
-                    foreach (Card c in hand)
+                    foreach (Card c in hero.Hand)
                         c.TmpEnergyCost = 0;
                     break;
                 case "Catalyst":
@@ -1244,44 +1248,39 @@ namespace STV
                         catalyst.Intensity *= MagicNumber;
                     break;
                 case "Cloak and Dagger":
-                    if (hand.Count < 10)
-                        hand.Add(new Card(Dict.cardL[296]));
-                    else discardPile.Add(new Card(Dict.cardL[296]));
+                    AddShivs(hero, MagicNumber);
                     break;
                 case "Distraction":
                     Card distraction = new Card();
                     while (distraction.Type != "Skill")
                         distraction = Dict.cardL[rng.Next(73, 146)];
                     distraction.TmpEnergyCost = 0;
-                    hand.Add(distraction);
+                    hero.Hand.Add(distraction);
                     break;
                 case "Glass Knife":
                     AttackDamage -= MagicNumber;
                     break;
                 case "Setup":
-                    Card setup = ChooseCard(hand, "add to the top of your drawpile");
-                    setup.MoveCard(hand, drawPile);
+                    Card setup = ChooseCard(hero.Hand, "add to the top of your drawpile");
+                    setup.MoveCard(hero.Hand, hero.DrawPile);
                     setup.TmpEnergyCost = 0;
                     break;
                 case "All For One":
-                    foreach (Card zeroCost in discardPile)
+                    foreach (Card zeroCost in hero.DiscardPile)
                     {
-                        if (zeroCost.EnergyCost == 0 && hand.Count < 10)
-                        {
-                            hand.Add(zeroCost);
-                            discardPile.Remove(zeroCost);
-                        }
+                        if (zeroCost.EnergyCost == 0 && hero.Hand.Count < 10)
+                            zeroCost.MoveCard(hero.Hand, hero.DiscardPile);
                     }
                     break;
                 case "Capacitor":
                     hero.OrbSlots += MagicNumber;
                     break;
                 case "Claw":
-                    foreach (Card claw in hand.FindAll(x => x.Name == "Claw"))
+                    foreach (Card claw in hero.Hand.FindAll(x => x.Name == "Claw"))
                         AttackDamage += 2;
-                    foreach (Card claw in discardPile.FindAll(x => x.Name == "Claw"))
+                    foreach (Card claw in hero.DiscardPile.FindAll(x => x.Name == "Claw"))
                         AttackDamage += 2;
-                    foreach (Card claw in drawPile.FindAll(x => x.Name == "Claw"))
+                    foreach (Card claw in hero.DrawPile.FindAll(x => x.Name == "Claw"))
                         AttackDamage += 2;
                     AttackDamage += 2;
                     break;
@@ -1311,9 +1310,9 @@ namespace STV
                     BlockAmount += MagicNumber;
                     break;
                 case "Hologram":
-                    Card hologram = ChooseCard(discardPile, "add into your hand");
-                    hand.Add(hologram);
-                    discardPile.Remove(hologram);
+                    Card hologram = ChooseCard(hero.DiscardPile, "add into your hand");
+                    hero.Hand.Add(hologram);
+                    hero.DiscardPile.Remove(hologram);
                     break;
                 case "Multi-Cast":
                     for (int i = 0; i < xEnergy+MagicNumber; i++)
@@ -1321,7 +1320,7 @@ namespace STV
                     hero.Orbs.RemoveAt(0);
                     break;
                 case "Overclock":
-                    discardPile.Add(new Card(Dict.cardL[355]));
+                    hero.DiscardPile.Add(new Card(Dict.cardL[355]));
                     break;
                 case "Recursion":
                     Orb recursion = hero.Orbs[0];
@@ -1331,8 +1330,8 @@ namespace STV
                     break;
                 case "Seek":
                     for (int i = 0; i < MagicNumber;i++)
-                        if (hand.Count < 10)
-                            hand.Add(ChooseCard(drawPile, "add to your hand"));
+                        if (hero.Hand.Count < 10)
+                            hero.Hand.Add(ChooseCard(hero.DrawPile, "add to your hand"));
                     break;
                 case "Steam Barrier":
                     BlockAmount--;
@@ -1342,57 +1341,58 @@ namespace STV
                         EnergyCost--;
                     break;
                 case "TURBO":
-                    discardPile.Add(Dict.cardL[359]);
+                    hero.DiscardPile.Add(Dict.cardL[359]);
                     break;
                 case "White Noise":
                     Card whiteNoise = new Card();
                     while (whiteNoise.Type != "Power")
                         whiteNoise = Dict.cardL[rng.Next(146, 219)];
                     whiteNoise.TmpEnergyCost = 0;
-                    hand.Add(whiteNoise);
+                    hero.Hand.Add(whiteNoise);
                     break;
                 case "Alpha":
-                    drawPile.Add(new Card(Dict.cardL[334]));
-                    Shuffle(drawPile, rng);
+                    hero.DrawPile.Add(new Card(Dict.cardL[334]));
+                    Shuffle(hero.DrawPile, rng);
                     break;
                 case "Blasphemy":
-                    hero.SwitchStance("Divinity", discardPile, hand);
+                    hero.SwitchStance("Divinity");
                     break;
                 case "Carve Reality":
-                    hand.Add(new Card(Dict.cardL[339]));
+                    hero.Hand.Add(new Card(Dict.cardL[339]));
                     break;
                 case "Conclude":
                     //End Turn
                     break;
                 case "Conjure Blade":
-                    drawPile.Add(new Card(Dict.cardL[360]));
-                    drawPile[drawPile.Count - 1].AttackLoops = xEnergy + MagicNumber;
+                    hero.DrawPile.Add(new Card(Dict.cardL[360]));
+                    hero.DrawPile.Last().AttackLoops = xEnergy + MagicNumber;
+                    Card.Shuffle(hero.DrawPile, rng);
                     break;
                 case "Crescendo":
-                    hero.SwitchStance("Wrath", discardPile, hand);
+                    hero.SwitchStance("Wrath");
                     break;
                 case "Deceive Reality":
-                    hand.Add(new Card(Dict.cardL[338]));
+                    hero.Hand.Add(new Card(Dict.cardL[338]));
                     break;
                 case "Empty Body":
-                    hero.SwitchStance("None", discardPile, hand);
+                    hero.SwitchStance("None");
                     break;
                 case "Empty Fist":
-                    hero.SwitchStance("None", discardPile, hand);
+                    hero.SwitchStance("None");
                     break;
                 case "Empty Mind":
-                    hero.SwitchStance("None", discardPile, hand);
+                    hero.SwitchStance("None");
                     break;
                 case "Eruption":
-                    hero.SwitchStance("Wrath", discardPile, hand);
+                    hero.SwitchStance("Wrath");
                     break;
                 case "Evaluate":
-                    drawPile.Add(new Card(Dict.cardL[335]));
-                    Shuffle(drawPile, rng);
+                    hero.DrawPile.Add(new Card(Dict.cardL[335]));
+                    Shuffle(hero.DrawPile, rng);
                     break;
                 case "Fear No Evil":
                     if (Enemy.AttackIntents().Contains(encounter[target].Intent))
-                        hero.SwitchStance("Calm", discardPile, hand);
+                        hero.SwitchStance("Calm");
                     break;
                 case "Follow-Up":
                     if (lastCardPlayed.Contains("Attack"))
@@ -1402,7 +1402,7 @@ namespace STV
                     Card foreignInfluence = new(ChooseCard(RandomCards("All Heroes",MagicNumber,rng,"Attack"), "add to your hand"));
                     if (Upgraded)
                         foreignInfluence.TmpEnergyCost = 0;
-                    hand.Add(foreignInfluence);
+                    hero.Hand.Add(foreignInfluence);
                     break;
                 case "Halt":
                     if (hero.Stance == "Wrath")
@@ -1424,24 +1424,24 @@ namespace STV
                 case "Meditate":
                     for (int i = 0 ; i < MagicNumber; i++)
                     {
-                        if (hand.Count == 10) break;
-                        Card meditate = ChooseCard(discardPile, "add to your hand");
-                        meditate.MoveCard(discardPile, hand);
+                        if (hero.Hand.Count == 10) break;
+                        Card meditate = ChooseCard(hero.DiscardPile, "add to your hand");
+                        meditate.MoveCard(hero.DiscardPile, hero.Hand);
                     }                   
-                    hero.SwitchStance("Calm", discardPile, hand);
+                    hero.SwitchStance("Calm");
                     break;
                 case "Omniscience":
                     Card omni = new();
                     do
-                        omni = ChooseCard(drawPile, "play twice");
+                        omni = ChooseCard(hero.DrawPile, "play twice");
                     while (omni.getDescription().Contains("Unplayable"));
-                    omni.CardAction(hero, encounter, drawPile, discardPile, hand, exhaustPile, rng);
-                    omni.CardAction(hero, encounter, drawPile, discardPile, hand, exhaustPile, rng);
-                    omni.Exhaust(exhaustPile, drawPile, hero);
+                    omni.CardAction(hero, encounter,rng);
+                    omni.CardAction(hero, encounter,rng);
+                    omni.Exhaust(hero, hero.DrawPile);
                     break;
                 case "Pray":
-                    drawPile.Add(new Card(Dict.cardL[335]));
-                    Shuffle(drawPile, rng);
+                    hero.DrawPile.Add(new Card(Dict.cardL[335]));
+                    Shuffle(hero.DrawPile, rng);
                     break;
                 case "Pressure Points":
                     for (int i = 0; i < encounter.Count; i++)
@@ -1449,17 +1449,17 @@ namespace STV
                             hero.NonAttackDamage(encounter[i], Actor.FindBuff("Mark", encounter[i].Buffs).Intensity.GetValueOrDefault());
                     break;
                 case "Reach Heaven":
-                    drawPile.Add(new Card(Dict.cardL[340]));
-                    Shuffle(drawPile, rng);
+                    hero.DrawPile.Add(new Card(Dict.cardL[340]));
+                    Shuffle(hero.DrawPile, rng);
                     break;
                 case "Tranquility":
-                    hero.SwitchStance("Calm", discardPile, hand);
+                    hero.SwitchStance("Calm");
                     break;
                 case "Vault":
                     // Have to code how to end turn early
                     break;
                 case "Vigilance":
-                    hero.SwitchStance("Calm", discardPile, hand);
+                    hero.SwitchStance("Calm");
                     break;
                 case "Wallop":
                     wallop -= encounter[target].Hp;
@@ -1474,23 +1474,23 @@ namespace STV
                         wish.UpgradeCard();
                     if (wish.Name == "Fame and Fortune")
                         hero.GoldChange(wish.MagicNumber);
-                    else wish.CardAction(hero, encounter, drawPile, discardPile, hand, exhaustPile, rng);
+                    else wish.CardAction(hero, encounter, rng);
                     break;
                 // COLORLESS CARDS (294 - 340)
                 case "Apotheosis":
-                    foreach (Card c in hand)
+                    foreach (Card c in hero.Hand)
                         c.UpgradeCard();
-                    foreach (Card c in discardPile)
+                    foreach (Card c in hero.DiscardPile)
                         c.UpgradeCard();
-                    foreach (Card c in drawPile)
+                    foreach (Card c in hero.DrawPile)
                         c.UpgradeCard();
                     break;
                 case "Bandage Up":
                     hero.HealHP(4);
                     break;
                 case "Beta":
-                    drawPile.Add(new Card(Dict.cardL[337]));
-                    Shuffle(drawPile, rng);
+                    hero.DrawPile.Add(new Card(Dict.cardL[337]));
+                    Shuffle(hero.DrawPile, rng);
                     break;
                 case "Bite":
                     hero.HealHP(2);
@@ -1499,16 +1499,16 @@ namespace STV
                     List<Card> chrysalis = new List<Card>(RandomCards(hero.Name, 3, rng));
                     foreach (Card c in chrysalis)
                         c.EnergyCost = 0;
-                    drawPile.AddRange(chrysalis);
-                    Shuffle(drawPile, rng);
+                    hero.DrawPile.AddRange(chrysalis);
+                    Shuffle(hero.DrawPile, rng);
                     break;
                 case "Discovery":
                     Card discovery = new(ChooseCard(RandomCards(hero.Name, MagicNumber, rng), "add to your hand"));
                     discovery.TmpEnergyCost = 0;
-                    hand.Add(discovery);
+                    hero.Hand.Add(discovery);
                     break;
                 case "Enlightment":
-                    foreach (Card c in hand)
+                    foreach (Card c in hero.Hand)
                         if (EnergyCost > MagicNumber)
                         {
                             if (Upgraded)
@@ -1518,18 +1518,18 @@ namespace STV
                     break;
                 case "Forethought":
                     //add upgraded method that runs until you quit it
-                    Card forethought = ChooseCard(hand, "add to the bottom of your drawpile");
+                    Card forethought = ChooseCard(hero.Hand, "add to the bottom of your drawpile");
                     forethought.TmpEnergyCost = 0;
-                    hand.Remove(forethought);
-                    drawPile.Prepend(forethought);
+                    hero.Hand.Remove(forethought);
+                    hero.DrawPile.Prepend(forethought);
                     break;
                 case "Jack of All Trades":
                     for (int i = 0; i < MagicNumber; i++)
                     {
-                        if (hand.Count == 10)
+                        if (hero.Hand.Count == 10)
                             break;
                         Card jackOfAllTrades = new Card(ChooseCard(RandomCards("Colorless", 3, rng), "add to your hand"));
-                        hand.Add(jackOfAllTrades);
+                        hero.Hand.Add(jackOfAllTrades);
                     }                    
                     break;
                 case "Hand of Greed":
@@ -1537,19 +1537,19 @@ namespace STV
                         hero.GoldChange(MagicNumber);
                     break;
                 case "Madness":
-                    if (hand.Count > 0)
-                        hand[rng.Next(hand.Count)].EnergyCost = 0;
+                    if (hero.Hand.Count > 0)
+                        hero.Hand[rng.Next(hero.Hand.Count)].EnergyCost = 0;
                     break;
                 case "Metamorphosis":
                     List<Card> metamorphosis = new List<Card>(RandomCards(hero.Name, 3, rng));
                     foreach (Card c in metamorphosis)
                         c.EnergyCost = 0;
-                    drawPile.AddRange(metamorphosis);
-                    Shuffle(drawPile, rng);
+                    hero.DrawPile.AddRange(metamorphosis);
+                    Shuffle(hero.DrawPile, rng);
                     break;
                 case "Purity":
                     for (int i = 0; i < 3; i++)
-                        ChooseCard(hand, "exhaust").Exhaust(exhaustPile, hand, hero);
+                        ChooseCard(hero.Hand, "exhaust").Exhaust(hero, hero.Hand);
                     break;
                 case "Ritual Dagger":                                                       // This card requires updates to combat Deck vs perma Deck to function properly
                     if (encounter[target].Hp <= 0)
@@ -1557,52 +1557,49 @@ namespace STV
                     break;
                 case "Secret Technique":
                     List<Card> secretSkill = new();
-                    foreach (Card c in drawPile)
+                    foreach (Card c in hero.DrawPile)
                         if (c.Type == "Skill")
                             secretSkill.Add(c);
                     Card secretSkillChoice = ChooseCard(secretSkill, "add to your hand");
-                    hand.Add(secretSkillChoice);
-                    drawPile.Remove(secretSkillChoice);
+                    hero.Hand.Add(secretSkillChoice);
+                    hero.DrawPile.Remove(secretSkillChoice);
                     break;
                 case "Secret Weapon":
                     List<Card> secretAttack = new();
-                    foreach (Card c in drawPile)
+                    foreach (Card c in hero.DrawPile)
                         if (c.Type == "Attack")
                             secretAttack.Add(c);
                     Card secretAttackChoice = ChooseCard(secretAttack, "add to your hand");
-                    hand.Add(secretAttackChoice);
-                    drawPile.Remove(secretAttackChoice);
+                    hero.Hand.Add(secretAttackChoice);
+                    hero.DrawPile.Remove(secretAttackChoice);
                     break;
                 case "Thinking Ahead":
-                    Card thinkingAhead = new(ChooseCard(hand, "add to the top of your drawpile"));
-                    drawPile.Add(thinkingAhead);
-                    hand.Remove(thinkingAhead);
+                    Card thinkingAhead = new(ChooseCard(hero.Hand, "add to the top of your drawpile"));
+                    thinkingAhead.MoveCard(hero.Hand, hero.DrawPile);
                     break;
                 case "Transmutation":
                     for (int i = 0; i < xEnergy+MagicNumber; i++)
                     {
-                        if (hand.Count < 10)
-                        {
-                            hand.Add(new Card(RandomCards("Colorless", 1, rng)[0]));
-                        }
-                        else discardPile.Add(new Card(RandomCards("Colorless", 1, rng)[0]));
+                        if (hero.Hand.Count < 10)
+                            hero.Hand.Add(new Card(RandomCards("Colorless", 1, rng)[0]));
+                        else hero.DiscardPile.Add(new Card(RandomCards("Colorless", 1, rng)[0]));
                     }
                     break;
                 case "Violence":
                     for (int i = 0; i < MagicNumber; i++)
                     {
                         Card violence = new();
-                        while (violence.Type != "Attack" && drawPile.Any(x => x.Type == "Attack"))
-                            violence = drawPile[rng.Next(0, drawPile.Count)];
+                        while (violence.Type != "Attack" && hero.DrawPile.Any(x => x.Type == "Attack"))
+                            violence = hero.DrawPile[rng.Next(0, hero.DrawPile.Count)];
                         if (violence == null)
                             break;
-                        if (hand.Count < 10)
-                            violence.MoveCard(drawPile, hand);
-                        else violence.MoveCard(drawPile, discardPile);
+                        if (hero.Hand.Count < 10)
+                            violence.MoveCard(hero.DrawPile, hero.Hand);
+                        else violence.MoveCard(hero.DrawPile, hero.DiscardPile);
                     }
                     break;
                 case "Necronomicurse":
-                    hand.Add(new Card(Dict.cardL[346]));
+                    hero.Hand.Add(new Card(Dict.cardL[346]));
                     break;
                 default:
                     break;
@@ -1629,41 +1626,39 @@ namespace STV
             if (Discards)
             {
                 if (Name == "All-Out Attack")
-                    Discard(hero, hand, discardPile, hand[rng.Next(0, hand.Count)], drawPile, exhaustPile, rng);
+                    Discard(hero, rng);
                 else if (Name == "Unload")
-                    for (int i = hand.Count; i > 0; i--)
+                    for (int i = hero.Hand.Count-1; i >= 0; i--)
                     {
-                        if (hand[i - 1].Type == "Attack")
-                            Discard(hero, hand, discardPile, hand[i - 1], drawPile, exhaustPile, rng);
+                        if (hero.Hand[i].Type == "Attack")
+                            hero.Hand[i].Discard(hero, rng);
                     }
                 else if (Name == "Storm of Steel")
                 {
                     MagicNumber = 0;
-                    for (int i = hand.Count - 1; i > 0; i--)
+                    for (int i = hero.Hand.Count - 1; i >= 0; i--)
                     {
-                        Discard(hero, hand, discardPile, hand[i], drawPile, exhaustPile, rng);
+                        hero.Hand[i].Discard(hero, rng);
                         MagicNumber++;
                     }
-                    for (int i = MagicNumber; i > 0; i--)
-                    {
-                        hand.Add(new Card(Dict.cardL[296]));
-                        if (Upgraded)
-                            hand.Last().UpgradeCard();
-                    }
+                    AddShivs(hero, MagicNumber);
+                    if (Upgraded)
+                        foreach (Card c in hero.Hand)
+                            c.UpgradeCard();
                 }
                 else if (Name == "Calculated Gamble")
                 {
                     MagicNumber = 0;
-                    for (int i = hand.Count - 1; i > 0; i--)
+                    for (int i = hero.Hand.Count - 1; i >= 0; i--)
                     {
-                        Discard(hero, hand, discardPile, hand[i], drawPile, exhaustPile, rng);
+                        hero.Hand[i].Discard(hero,rng);
                         MagicNumber++;
                     }
-                    DrawCards(drawPile, hand, discardPile, rng, exhaustPile, hero, MagicNumber);
+                    DrawCards( rng, hero, MagicNumber);
                 }
                 else for (int i = 0; i < MagicNumber; i++)
-                    Discard(hero, hand, discardPile, ChooseCard(hand, "discard"), drawPile, exhaustPile, rng);
-                if (FindCards("Eviscerate", hand) is List<Card> evisCheck && evisCheck != null)
+                        ChooseCard(hero.Hand, "discard").Discard(hero, rng);
+                if (FindCards("Eviscerate", hero.Hand) is List<Card> evisCheck && evisCheck != null)
                     foreach (Card eviscerate in evisCheck)
                         if (eviscerate.EnergyCost != 0)
                             eviscerate.EnergyCost--;
