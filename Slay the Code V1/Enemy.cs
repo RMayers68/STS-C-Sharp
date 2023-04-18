@@ -291,8 +291,8 @@
                     Intent = enemyrng.Next(0, 20) switch
                     {
                         int i when i >= 0 && i <= 4 => "Chomp",
-                        int i when i >= 5 && i <= 10 => "Thrash",
-                        int i when i >= 11 && i <= 19 => "Bellow",
+                        int i when i >= 5 && i <= 10 => "Thrash", 
+                        _ => "Bellow",
                     };
                     Repeat3Prevent("Chomp", "Bellow", "Thrash");
                     break;
@@ -305,7 +305,7 @@
                     Intent = enemyrng.Next(0, 20) switch
                     {
                         int i when i >= 0 && i <= 4 => "Grow",
-                        int i when i >= 5 && i <= 19 => "Bite",
+                        _ => "Bite",
                     };
                     Repeat3Prevent("Bite", "Grow");
                     break;
@@ -314,7 +314,7 @@
                     {
                         int i when i >= 0 && i <= 7 => "Corrosive Spit",
                         int i when i >= 8 && i <= 15 => "Tackle",
-                        int i when i >= 16 && i <= 19 => "Lick",
+                        _ => "Lick",
                     };
                     Repeat3Prevent("Corrosive Spit", "Tackle", "Lick");
                     break;
@@ -322,7 +322,7 @@
                     Intent = enemyrng.Next(0, 20) switch
                     {
                         int i when i >= 0 && i <= 5 => "Flame Tackle",
-                        int i when i >= 6 && i <= 19 => "Lick",
+                        _ => "Lick",
                     };
                     Repeat3Prevent("Flame Tackle", "Lick");
                     break;
@@ -331,7 +331,7 @@
                     Intent = enemyrng.Next(0, 20) switch
                     {
                         int i when i >= 0 && i <= 9 => "Tackle",
-                        int i when i >= 10 && i <= 19 => "Lick",
+                        _ => "Lick",
                     };
                     Repeat3Prevent("Tackle", "Lick");
                     break;
@@ -339,7 +339,7 @@
                     Intent = enemyrng.Next(0, 20) switch
                     {
                         int i when i >= 0 && i <= 4 => "Web Spit",
-                        int i when i >= 5 && i <= 19 => "Bite",
+                        _ => "Bite",
                     };
                     Repeat3Prevent("Bite", "Web Spit");
                     break;
@@ -347,7 +347,7 @@
                     Intent = enemyrng.Next(0, 20) switch
                     {
                         int i when i >= 0 && i <= 7 => "Rake",
-                        int i when i >= 8 && i <= 19 => "Stab",
+                        _ => "Stab",
                     };
                     Repeat3Prevent("Stab", "Rake");
                     break;
@@ -358,12 +358,12 @@
                         Intent = enemyrng.Next(0, 20) switch
                         {
                             int i when i >= 0 && i <= 4 => "Entangle",
-                            int i when i >= 5 && i <= 19 => "Determine",
+                            _ => "Determine",
                         };
                     else Intent = enemyrng.Next(0, 20) switch
                     {
                         int i when i >= 0 && i <= 10 => "Scrape",
-                        int i when i >= 11 && i <= 19 => "Stab",
+                        _ => "Stab",
                     };
                     if (Intent == "Determine")
                     {
@@ -378,7 +378,7 @@
                     Intent = enemyrng.Next(0, 20) switch
                     {
                         int i when i >= 0 && i <= 7 => "Grow",
-                        int i when i >= 8 && i <= 19 => "Bite",
+                        _ => "Bite",
                     };
                     Repeat3Prevent("Bite", "Grow");
                     break;
@@ -389,7 +389,7 @@
                         Intent = enemyrng.Next(0, 20) switch
                         {
                             int i when i >= 0 && i <= 7 => "Lunge",
-                            int i when i >= 8 && i <= 19 => "Smoke Bomb",
+                            _ => "Smoke Bomb",
                         };
                     if (Actions != null && Actions.Count >= 3)
                         if (Actions[^1] == "Lunge")
@@ -416,7 +416,7 @@
                     Intent = enemyrng.Next(0, 21) switch
                     {
                         int i when i >= 0 && i <= 6 => "Skull Bash",
-                        int i when i >= 7 && i <= 20 => "Rush",
+                        _ => "Rush",
                     };
                     Repeat3Prevent("Skull Bash", "Rush");
                     break;
@@ -442,7 +442,7 @@
                     {
                         int i when i == 0 => "Goop Spray",
                         int i when i == 1 => "Charging",
-                        int i when i == 2 => "Slam",
+                        _ => "Slam",
                     };
                     break;
                 case 21:                                                            // Large Acid Slime
@@ -450,7 +450,7 @@
                     {
                         int i when i >= 0 && i <= 7 => "Corrosive Spit",
                         int i when i >= 8 && i <= 15 => "Tackle",
-                        int i when i >= 16 && i <= 19 => "Lick",
+                        _ => "Lick",
                     };
                     Repeat3Prevent("Corrosive Spit", "Tackle", "Lick");
                     break;
@@ -458,7 +458,7 @@
                     Intent = enemyrng.Next(0, 20) switch
                     {
                         int i when i >= 0 && i <= 5 => "Flame Tackle",
-                        int i when i >= 6 && i <= 19 => "Lick",
+                        _ => "Lick",
                     };
                     Repeat3Prevent("Flame Tackle", "Lick");
                     break;
@@ -470,7 +470,7 @@
                             int i when i == 0 => "Charging Up",
                             int i when i == 1 => "Fierce Bash",
                             int i when i == 2 => "Vent Steam",
-                            int i when i == 3 => "Whirlwind",
+                            _ => "Whirlwind",
                         };
                     }
                     else if (Actions != null)
@@ -495,7 +495,7 @@
                         int i when i == 0 || i == 2 || i == 5 => "Sear",
                         int i when i == 1 || i == 4 => "Slice",
                         int i when i == 3 => "Inflame",
-                        int i when i == 6 => "Inferno",
+                        _ => "Inferno",
                     };
                     break;
             }

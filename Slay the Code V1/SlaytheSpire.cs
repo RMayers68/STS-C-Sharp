@@ -86,7 +86,7 @@ namespace STV
                                 {
                                     Console.WriteLine("I hope you're ready to face the boss...");
                                     Pause();
-                                    activeRoom = new Room(FindRoom(floor, 3, activeRoom.Connections));
+                                    activeRoom = FindRoom(floor, 3, activeRoom.Connections);
                                 }
                                 else
                                 {
@@ -1011,9 +1011,6 @@ namespace STV
         }
 
         public static Room FindRoom(int floor, int roomNumber, List<Room> list)
-        {
-            Room room = list.Find(x => x.RoomNumber == roomNumber && x.Floor == floor);
-            return room;
-        }
+        {  return list.Find(x => x.RoomNumber == roomNumber && x.Floor == floor); }
     }
 }

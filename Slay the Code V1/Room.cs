@@ -88,7 +88,6 @@
             {
                 return true;
             }
-
             // Return true if the fields match.
             // Note that the base class is not invoked because it is
             // System.Object, which defines Equals as reference equality.
@@ -111,6 +110,11 @@
 
             else
                 return this.Floor.CompareTo(r.Floor);
+        }
+
+        public override int GetHashCode()
+        {
+            return Floor + RoomNumber + ShortHand;
         }
     }
 
@@ -140,8 +144,8 @@
             //Check whether the object is null
             if (room is null) return 0;
 
-            //Get hash code for the Name field if it is not null.
-            int hashFloor = room.Floor == null ? 0 : room.Floor.GetHashCode();
+            //Get hash code for the FFloor field if it is not null.
+            int hashFloor = room.Floor == 0 ? 0 : room.Floor.GetHashCode();
 
             //Get hash code for the Code field.
             int hashRoomNumber = room.RoomNumber.GetHashCode();

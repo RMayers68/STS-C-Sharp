@@ -56,7 +56,7 @@
 			{
 				byte i when i == 1 =>  1,
 				byte i when i >= 2 && i <= 3 => 2,
-				byte i when i == 4 => 3,
+				_ => 3,
 			};
 			switch (b)
 			{

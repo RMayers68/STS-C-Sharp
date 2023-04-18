@@ -9,7 +9,6 @@ namespace STV
 {
     public class Card : IEquatable<Card>, IComparable<Card>
     {
-
         // attributes
         public string Name { get; set; }
         public string Type { get; set; } // Attack, Skill, Power, Status or Curse
@@ -37,9 +36,7 @@ namespace STV
         private int GoldCost { get; set; }
         private int TmpEnergyCost { get; set; }
 
-
-
-        //constructors
+        // constructors
         public Card()
         {
             this.Name = "Purchased";
@@ -156,6 +153,10 @@ namespace STV
             if (other == null) return false;
             return (this.Name.Equals(other.Name));
         }
+        public override int GetHashCode()
+        {
+            return GoldCost + BlockAmount + MagicNumber;
+        }
 
         public int CompareTo(Card other)
         {
@@ -269,7 +270,7 @@ namespace STV
             }
         }
 
-        public static List<Card> RandomCards(string type, int count, Random rng, string exclusion = null)
+        public static List<Card> RandomCards(string type, int count, Random rng, string? exclusion = null)
         {
             List<Card> cards = new();
             for (int i = 0; i < count; i++)

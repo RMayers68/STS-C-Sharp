@@ -264,7 +264,7 @@
         }
 
 
-        public string GetDescription(Hero hero = null)
+        public string GetDescription(Hero? hero = null)
         {
             int sacredBark = 1;
             if (hero != null && hero.Relics.Find(x => x.Name == "Sacred Bark") != null)

@@ -31,108 +31,108 @@
         //string method
         public string Description()
         {
-            switch (Name)
+            return Name switch
             {
-                default: return "";
-                case "Vulnerable": return $"Takes 50% more damage from attacks for {Duration} turns.";
-                case "Weak": return $"Deal 25% less damage with attacks for {Duration} turns.";
-                case "Ritual": return $"Gains {Intensity} Strength at the end of its turn.";
-                case "Strength": return $"Increases attack damage by {Intensity}.";
-                case "Curl Up": return $"Gains {Intensity} Block upon receiving first attack.";
-                case "Frail": return $"Gain 25% less Block from cards for {Duration} turns.";
-                case "Focus": return $"Increases effectiveness of Orbs by {Intensity}.";
-                case "Artifact": return $"Prevents the next {Counter} debuffs from being applied.";
-                case "Dexterity": return $"Increases Block gained from Cards by {Intensity}.";
-                case "Mantra": return $"When you obtain 10 Mantra, enter Divinity. (current Mantra:{Counter})";
-                case "Mental Fortress": return $"Whenever you switch stances, gain {Intensity} Block.";
-                case "Mark": return $"Whenever you play Pressure Points, this enemy loses {Intensity} HP.";
-                case "No Block": return $"You may not gain Block from cards for the next {Duration} turns.";
-                case "Entangled": return $"You may not play any Attacks this turn.";
-                case "Sleeping": return $"This enemy is sleeping and damaging it will awaken it.";
-                case "Mode Shift": return $"After receiving {Intensity} damage, changes to defensive mode.";
-                case "Nightmare": return $"At the start of your next turn, Copy the selected card {Intensity} time(s).";
-                case "Thievery": return $"Steals {Intensity} Gold whenever it attacks.";
-                case "Enrage": return $"Whenever you play a skill, gains {Intensity} Strength.";
-                case "Barricade": return $"Block is not removed at the start of turn.";
-                case "No Draw": return $"You may not draw any more cards this turn.";
-                case "Energized": return $"Gain {Intensity} additional Energy next turn.";
-                case "Brutality": return $"At the start of your turn, lose {Intensity} HP and draw {Intensity} cards.";
-                case "Combust": return $"At the end of your turn, lose {Intensity} HP and deal {Intensity * 5} damage to ALL enemies.";
-                case "Corruption": return $"Skills cost 0. Whenever you play a Skill, Exhaust it.";
-                case "Dark Embrace": return $"Whenever a card is Exhausted, draw {Intensity} card.";
-                case "Double Tap": return $"This turn, your next {Counter} Attack is played twice.";
-                case "Evolve": return $"Whenever you draw a Status, draw {Intensity} card.";
-                case "Feel No Pain": return $"Whenever a card is Exhausted, gain {Intensity} Block.";
-                case "Strength Down": return $"Lose {Intensity} Strength at the end of the turn.";
-                case "Juggernaut": return $"Whenever you gain Block, deal {Intensity} damage to a random enemy.";
-                case "Metallicize": return $"At the end of your turn, gain {Intensity} Block.";
-                case "Rage": return $"Whenever you play an attack this turn, gain {Intensity} Block.";
-                case "Rupture": return $"Whenever you lose HP from a card, gain {Intensity} Strength.";
-                case "A Thousand Cuts": return $"Whenever you play a card, deal {Intensity} damage to ALL enemies.";
-                case "Accuracy": return $"Shivs deal {Intensity} additional damage.";
-                case "After Image": return $"Whenever you play a card, gain {Intensity} Block.";
-                case "Blur": return $"Block is not removed at the start of your next {Duration} turns.";
-                case "Poison": return $"At the beginning of its turn, the target loses {Intensity} HP and 1 stack of Poison.";
-                case "Burst": return $"This turn, your next {Counter} Skill is played twice.";
-                case "Thorns": return $"Whenever you are attacked, deal {Intensity} damage to the attacker.";
-                case "Choked": return $"Whenever you play a card, this enemy loses {Intensity} HP.";
-                case "Corpse Explosion": return $"When this enemy dies, deal damage equal to its MAX HP * {Intensity} to ALL enemies.";
-                case "Dodge and Roll": return $"Next turn, gain {Intensity} Block.";
-                case "Draw Card": return $"Next turn, draw {Intensity} additional card(s).";
-                case "Envenom": return $"Whenever an attack deals unblocked damage, apply {Intensity} Poison.";
-                case "Infinite Blades": return $"At the start of your turn, add {Intensity} Shiv to your hand.";
-                case "Noxious Fumes": return $"At the start of your turn, apply {Intensity} Poison to ALL enemies.";
-                case "Phantasmal Killer": return $"On your next {Counter} turn(s), your Attack damage is doubled.";
-                case "Tools of the Trade": return $"Next turn, discard {Intensity} card(s).";
-                case "Well-Laid Plans": return $"At the end of your turn, Retain up to {Intensity} card(s).";
-                case "Intangible": return $"Reduce any damage dealt to 1.";
-                case "Wraith Form": return $"Lose {Intensity} Dexterity at the end of your turn.";
-                case "Amplify": return $"This turn, your next {Counter} Power is played twice.";
-                case "Bias": return $"Lose {Intensity} Focus at the end of your turn.";
-                case "Buffer": return $"Prevent the next {Counter} time(s) you would lose HP.";
-                case "Lock-On": return $"Orbs deal 50% more damage to the this enemy for {Duration} turn(s).";
-                case "Creative AI": return $"At the start of each turn, add {Intensity} random Power card(s) to your hand.";
-                case "Echo Form": return $"The first {Counter} cards you play each turn are played twice.";
-                case "Heatsinks": return $"Whenever you play a Power card, draw {Intensity} card(s).";
-                case "Hello": return $"At the start of your turn, add {Intensity} random Common card(s) into your hand.";
-                case "Loop": return $"At the start of your turn, use the passive ability of your first Orb {Intensity} time(s).";
-                case "Machine Learning": return $"Draw {Intensity} additional card(s) at the start of each turn.";
-                case "Rebound": return $"Place the next {Intensity} card(s) you play this turn on top of your draw pile.";
-                case "Self Repair": return $"At the end of combat, heal {Intensity} HP.";
-                case "Static Discharge": return $"Whenever you take attack damage, Channel {Intensity} Lightning.";
-                case "Storm": return $"Whenever you play a Power, Channel {Intensity} Lightning.";
-                case "Electrodynamics": return $"Lightning now hits ALL enemies.";
-                case "Retain Hand": return $"Retain your hand this turn.";
-                case "Battle Hymn": return $"At the start of each turn, add {Intensity} Smite(s) into your hand.";
-                case "Blasphemy": return $"Die next turn.";
-                case "Collect": return $"Put Miracle+ into your hand at the start of your next {Duration} turns.";
-                case "Deva Form": return $"At the start of your turn, gain {Intensity} Energy and increase this gain by 1.";
-                case "Devotion": return $"At the start of your turn, gain {Intensity} Mantra.";
-                case "Establishment": return $"Whenever a card is Retained, reduce its cost by {Intensity} this combat.";
-                case "Foresight": return $"At the start of your turn, Scry {Intensity}.";
-                case "Like Water": return $"At the end of your turn, if you are in Calm, gain {Intensity} Block.";
-                case "Master Reality": return $"Whenever a card is created during combat, Upgrade it.";
-                case "Nirvana": return $"Whenever you Scry, gain {Intensity} Block.";
-                case "Rushdown": return $"Whenever you enter Wrath, draw {Intensity} cards.";
-                case "Simmering Fury": return $"At the start of your next turn, enter Wrath and draw {Intensity} cards.";
-                case "Study": return $"At the end of your turn, shuffle {Intensity} Insight(s) into your draw pile.";
-                case "Talk to the Hand": return $"Whenever you attack this enemy, gain {Intensity} Block.";
-                case "Wave of the Hand": return $"Whenever you gain Block this turn, apply {Intensity} Weak to ALL enemies.";
-                case "Wreath of Flame": return $"Your next Attack deals {Intensity} additional damage.";
-                case "Magnetism": return $"t the start of each turn, add {Intensity} random Colorless card(s) to your hand.";
-                case "Sadistic Nature": return $"Whenever you apply a Debuff to an enemy, they take {Intensity} damage.";
-                case "Mayhem": return $"At the start of your turn, play the {Intensity} top card(s) of your draw pile.";
-                case "Da Bomb": return $"At the end of {Duration} turn(s), deal 40 damage to ALL enemies.";
-                case "Flame Barrier": return $"When attacked this turn, deals {Intensity} damage back.";
-                case "Free Attack": return $"The next {Counter} Attacks you play costs 0.";
-                case "Fire Breathing": return $"Whenever you draw a Status or Curse card, deal {Intensity} damage to ALL enemies.";
-                case "Panache": return $"If you play {Counter} more cards this turn, deal {Intensity} damage to all enemies.";
-                case "Omega": return $"At the end of your turn, deal {Intensity} damage to ALL enemies.";
-                case "Plated Armor": return $"At the end of your turn, gain {Intensity} Block. Receiving unblocked attack damage reduces Plated Armor by 1.";
-                case "Dexterity Down": return $"Lose {Intensity} Dexterity at the end of the turn.";
-                case "Regeneration": return $"At the end of your turn, heal {Intensity} HP and reduce Regen by 1.";
-                case "Duplication": return $"Your next {Counter} cards are played twice.";
-            }
+                "Vulnerable" => $"Takes 50% more damage from attacks for {Duration} turns.",
+                "Weak" => $"Deal 25% less damage with attacks for {Duration} turns.",
+                "Ritual" => $"Gains {Intensity} Strength at the end of its turn.",
+                "Strength" => $"Increases attack damage by {Intensity}.",
+                "Curl Up" => $"Gains {Intensity} Block upon receiving first attack.",
+                "Frail" => $"Gain 25% less Block from cards for {Duration} turns.",
+                "Focus" => $"Increases effectiveness of Orbs by {Intensity}.",
+                "Artifact" => $"Prevents the next {Counter} debuffs from being applied.",
+                "Dexterity" => $"Increases Block gained from Cards by {Intensity}.",
+                "Mantra" => $"When you obtain 10 Mantra, enter Divinity. (current Mantra:{Counter})",
+                "Mental Fortress" => $"Whenever you switch stances, gain {Intensity} Block.",
+                "Mark" => $"Whenever you play Pressure Points, this enemy loses {Intensity} HP.",
+                "No Block" => $"You may not gain Block from cards for the next {Duration} turns.",
+                "Entangled" => $"You may not play any Attacks this turn.",
+                "Sleeping" => $"This enemy is sleeping and damaging it will awaken it.",
+                "Mode Shift" => $"After receiving {Intensity} damage, changes to defensive mode.",
+                "Nightmare" => $"At the start of your next turn, Copy the selected card {Intensity} time(s).",
+                "Thievery" => $"Steals {Intensity} Gold whenever it attacks.",
+                "Enrage" => $"Whenever you play a skill, gains {Intensity} Strength.",
+                "Barricade" => $"Block is not removed at the start of turn.",
+                "No Draw" => $"You may not draw any more cards this turn.",
+                "Energized" => $"Gain {Intensity} additional Energy next turn.",
+                "Brutality" => $"At the start of your turn, lose {Intensity} HP and draw {Intensity} cards.",
+                "Combust" => $"At the end of your turn, lose {Intensity} HP and deal {Intensity * 5} damage to ALL enemies.",
+                "Corruption" => $"Skills cost 0. Whenever you play a Skill, Exhaust it.",
+                "Dark Embrace" => $"Whenever a card is Exhausted, draw {Intensity} card.",
+                "Double Tap" => $"This turn, your next {Counter} Attack is played twice.",
+                "Evolve" => $"Whenever you draw a Status, draw {Intensity} card.",
+                "Feel No Pain" => $"Whenever a card is Exhausted, gain {Intensity} Block.",
+                "Strength Down" => $"Lose {Intensity} Strength at the end of the turn.",
+                "Juggernaut" => $"Whenever you gain Block, deal {Intensity} damage to a random enemy.",
+                "Metallicize" => $"At the end of your turn, gain {Intensity} Block.",
+                "Rage" => $"Whenever you play an attack this turn, gain {Intensity} Block.",
+                "Rupture" => $"Whenever you lose HP from a card, gain {Intensity} Strength.",
+                "A Thousand Cuts" => $"Whenever you play a card, deal {Intensity} damage to ALL enemies.",
+                "Accuracy" => $"Shivs deal {Intensity} additional damage.",
+                "After Image" => $"Whenever you play a card, gain {Intensity} Block.",
+                "Blur" => $"Block is not removed at the start of your next {Duration} turns.",
+                "Poison" => $"At the beginning of its turn, the target loses {Intensity} HP and 1 stack of Poison.",
+                "Burst" => $"This turn, your next {Counter} Skill is played twice.",
+                "Thorns" => $"Whenever you are attacked, deal {Intensity} damage to the attacker.",
+                "Choked" => $"Whenever you play a card, this enemy loses {Intensity} HP.",
+                "Corpse Explosion" => $"When this enemy dies, deal damage equal to its MAX HP * {Intensity} to ALL enemies.",
+                "Dodge and Roll" => $"Next turn, gain {Intensity} Block.",
+                "Draw Card" => $"Next turn, draw {Intensity} additional card(s).",
+                "Envenom" => $"Whenever an attack deals unblocked damage, apply {Intensity} Poison.",
+                "Infinite Blades" => $"At the start of your turn, add {Intensity} Shiv to your hand.",
+                "Noxious Fumes" => $"At the start of your turn, apply {Intensity} Poison to ALL enemies.",
+                "Phantasmal Killer" => $"On your next {Counter} turn(s), your Attack damage is doubled.",
+                "Tools of the Trade" => $"Next turn, discard {Intensity} card(s).",
+                "Well-Laid Plans" => $"At the end of your turn, Retain up to {Intensity} card(s).",
+                "Intangible" => $"Reduce any damage dealt to 1.",
+                "Wraith Form" => $"Lose {Intensity} Dexterity at the end of your turn.",
+                "Amplify" => $"This turn, your next {Counter} Power is played twice.",
+                "Bias" => $"Lose {Intensity} Focus at the end of your turn.",
+                "Buffer" => $"Prevent the next {Counter} time(s) you would lose HP.",
+                "Lock-On" => $"Orbs deal 50% more damage to the this enemy for {Duration} turn(s).",
+                "Creative AI" => $"At the start of each turn, add {Intensity} random Power card(s) to your hand.",
+                "Echo Form" => $"The first {Counter} cards you play each turn are played twice.",
+                "Heatsinks" => $"Whenever you play a Power card, draw {Intensity} card(s).",
+                "Hello" => $"At the start of your turn, add {Intensity} random Common card(s) into your hand.",
+                "Loop" => $"At the start of your turn, use the passive ability of your first Orb {Intensity} time(s).",
+                "Machine Learning" => $"Draw {Intensity} additional card(s) at the start of each turn.",
+                "Rebound" => $"Place the next {Intensity} card(s) you play this turn on top of your draw pile.",
+                "Self Repair" => $"At the end of combat, heal {Intensity} HP.",
+                "Static Discharge" => $"Whenever you take attack damage, Channel {Intensity} Lightning.",
+                "Storm" => $"Whenever you play a Power, Channel {Intensity} Lightning.",
+                "Electrodynamics" => $"Lightning now hits ALL enemies.",
+                "Retain Hand" => $"Retain your hand this turn.",
+                "Battle Hymn" => $"At the start of each turn, add {Intensity} Smite(s) into your hand.",
+                "Blasphemy" => $"Die next turn.",
+                "Collect" => $"Put Miracle+ into your hand at the start of your next {Duration} turns.",
+                "Deva Form" => $"At the start of your turn, gain {Intensity} Energy and increase this gain by 1.",
+                "Devotion" => $"At the start of your turn, gain {Intensity} Mantra.",
+                "Establishment" => $"Whenever a card is Retained, reduce its cost by {Intensity} this combat.",
+                "Foresight" => $"At the start of your turn, Scry {Intensity}.",
+                "Like Water" => $"At the end of your turn, if you are in Calm, gain {Intensity} Block.",
+                "Master Reality" => $"Whenever a card is created during combat, Upgrade it.",
+                "Nirvana" => $"Whenever you Scry, gain {Intensity} Block.",
+                "Rushdown" => $"Whenever you enter Wrath, draw {Intensity} cards.",
+                "Simmering Fury" => $"At the start of your next turn, enter Wrath and draw {Intensity} cards.",
+                "Study" => $"At the end of your turn, shuffle {Intensity} Insight(s) into your draw pile.",
+                "Talk to the Hand" => $"Whenever you attack this enemy, gain {Intensity} Block.",
+                "Wave of the Hand" => $"Whenever you gain Block this turn, apply {Intensity} Weak to ALL enemies.",
+                "Wreath of Flame" => $"Your next Attack deals {Intensity} additional damage.",
+                "Magnetism" => $"t the start of each turn, add {Intensity} random Colorless card(s) to your hand.",
+                "Sadistic Nature" => $"Whenever you apply a Debuff to an enemy, they take {Intensity} damage.",
+                "Mayhem" => $"At the start of your turn, play the {Intensity} top card(s) of your draw pile.",
+                "Da Bomb" => $"At the end of {Duration} turn(s), deal 40 damage to ALL enemies.",
+                "Flame Barrier" => $"When attacked this turn, deals {Intensity} damage back.",
+                "Free Attack" => $"The next {Counter} Attacks you play costs 0.",
+                "Fire Breathing" => $"Whenever you draw a Status or Curse card, deal {Intensity} damage to ALL enemies.",
+                "Panache" => $"If you play {Counter} more cards this turn, deal {Intensity} damage to all enemies.",
+                "Omega" => $"At the end of your turn, deal {Intensity} damage to ALL enemies.",
+                "Plated Armor" => $"At the end of your turn, gain {Intensity} Block. Receiving unblocked attack damage reduces Plated Armor by 1.",
+                "Dexterity Down" => $"Lose {Intensity} Dexterity at the end of the turn.",
+                "Regeneration" => $"At the end of your turn, heal {Intensity} HP and reduce Regen by 1.",
+                "Duplication" => $"Your next {Counter} cards are played twice.",
+                _ => "",
+            };
         }
 
 
