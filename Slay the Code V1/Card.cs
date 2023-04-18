@@ -1343,7 +1343,7 @@ namespace STV
                 case "Conjure Blade":
                     hero.DrawPile.Add(new Card(Dict.cardL[360]));
                     hero.DrawPile.Last().AttackLoops = xEnergy + MagicNumber;
-                    Card.Shuffle(hero.DrawPile, rng);
+                    hero.ShuffleDrawPile(rng);
                     break;
                 case "Crescendo":
                     hero.SwitchStance("Wrath");
@@ -1485,20 +1485,39 @@ namespace STV
                         }                           
                     break;
                 case "Forethought":
-                    //add upgraded method that runs until you quit it
-                    Card forethought = ChooseCard(hero.Hand, "add to the bottom of your drawpile");
-                    forethought.TmpEnergyCost = 0;
-                    hero.Hand.Remove(forethought);
-                    hero.DrawPile.Prepend(forethought);
+                    Card forethought;
+                    if (Upgraded)
+                    {
+                        int forethoughtChoice = -1;
+                        int forethoughtAmount = hero.Hand.Count;
+                        while (forethoughtChoice != 0 && forethoughtAmount > 0)
+                        {
+                            Console.WriteLine($"\nEnter the number of the card you would like to move to your drawpile or hit 0 to move on.");
+                            for (int i = 1; i <= forethoughtAmount; i++)
+                                Console.WriteLine($"{i}:{hero.DrawPile[hero.Hand.Count - i].Name}");
+                            while (!Int32.TryParse(Console.ReadLine(), out forethoughtChoice) || forethoughtChoice < 0 || forethoughtChoice > forethoughtAmount)
+                                Console.WriteLine("Invalid input, enter again:");
+                            if (forethoughtChoice > 0)
+                            {
+                                forethought = hero.Hand[^forethoughtChoice];
+                                forethought.TmpEnergyCost = 0;
+                                hero.Hand.Remove(forethought);
+                                hero.DrawPile = hero.DrawPile.Prepend(forethought).ToList();
+                                forethoughtAmount--;
+                            }
+                        }
+                    }
+                    else
+                    {
+                        forethought = ChooseCard(hero.Hand,"move to your drawpile");
+                        forethought.TmpEnergyCost = 0;
+                        hero.Hand.Remove(forethought);
+                        hero.DrawPile = hero.DrawPile.Prepend(forethought).ToList();
+                    }
                     break;
                 case "Jack of All Trades":
                     for (int i = 0; i < MagicNumber; i++)
-                    {
-                        if (hero.Hand.Count == 10)
-                            break;
-                        Card jackOfAllTrades = new Card(ChooseCard(RandomCards("Colorless", 3, rng), "add to your hand"));
-                        hero.Hand.Add(jackOfAllTrades);
-                    }                    
+                        hero.AddToHand(new(ChooseCard(RandomCards("Colorless", 3, rng), "add to your hand")));              
                     break;
                 case "Hand of Greed":
                     if (encounter[target].Hp <= 0)

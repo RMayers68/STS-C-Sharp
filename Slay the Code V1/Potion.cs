@@ -27,7 +27,7 @@
             this.Name = potion.Name;
             this.Rarity = potion.Rarity;
             this.EffectAmount = potion.EffectAmount;
-            Random rng = new Random();
+            Random rng = new();
             this.GoldCost = Rarity == "Rare" ? rng.Next(95, 106) : Rarity == "Uncommon" ? rng.Next(72, 79) : rng.Next(48, 53);
         }
         //string method
@@ -74,28 +74,20 @@
                     hero.AddBuff(3, EffectAmount);
                     break;
                 case "Attack Potion":
-                    Card attackPotion = new Card(Card.ChooseCard(Card.RandomCards(hero.Name, 3, rng, "Attack"),"add to your hand"));
+                    Card attackPotion = new(Card.ChooseCard(Card.RandomCards(hero.Name, 3, rng, "Attack"),"add to your hand"));
                     attackPotion.SetTmpEnergyCost(0);
                     for (int i = 0; i < EffectAmount; i++)
-                    {
-                        if (hero.Hand.Count < 10)
-                            hero.Hand.Add(new Card(attackPotion));
-                        else hero.DiscardPile.Add(new Card(attackPotion));                       
-                    }
+                        hero.AddToHand(attackPotion);                   
                     break;
                 case "Blessing of the Forge":
                     foreach (Card c in hero.Hand)
                         c.UpgradeCard();
                     break;
                 case "Colorless Potion":
-                    Card colorlessPotion = new Card(Card.ChooseCard(Card.RandomCards("Colorless", 3, rng), "add to your hand"));
+                    Card colorlessPotion = new(Card.ChooseCard(Card.RandomCards("Colorless", 3, rng), "add to your hand"));
                     colorlessPotion.SetTmpEnergyCost(0);
                     for (int i = 0; i < EffectAmount; i++)
-                    {
-                        if (hero.Hand.Count < 10)
-                            hero.Hand.Add(new Card(colorlessPotion));
-                        else hero.DiscardPile.Add(new Card(colorlessPotion));
-                    }
+                        hero.AddToHand(colorlessPotion);
                     break;
                 case "Dexterity Potion":
                     hero.AddBuff(9, EffectAmount);
@@ -109,24 +101,16 @@
                     hero.AddBuff(30, EffectAmount);
                     break;
                 case "Power Potion":
-                    Card powerPotion = new Card(Card.ChooseCard(Card.RandomCards(hero.Name, 3, rng, "Power"), "add to your hand"));
+                    Card powerPotion = new(Card.ChooseCard(Card.RandomCards(hero.Name, 3, rng, "Power"), "add to your hand"));
                     powerPotion.SetTmpEnergyCost(0);
                     for (int i = 0; i < EffectAmount; i++)
-                    {
-                        if (hero.Hand.Count < 10)
-                            hero.Hand.Add(new Card(powerPotion));
-                        else hero.DiscardPile.Add(new Card(powerPotion));
-                    }
+                        hero.AddToHand(powerPotion);
                     break;
                 case "Skill Potion":
-                    Card skillPotion = new Card(Card.ChooseCard(Card.RandomCards(hero.Name, 3, rng, "Skill"), "add to your hand"));
+                    Card skillPotion = new(Card.ChooseCard(Card.RandomCards(hero.Name, 3, rng, "Skill"), "add to your hand"));
                     skillPotion.SetTmpEnergyCost(0);
                     for (int i = 0; i < EffectAmount; i++)
-                    {
-                        if (hero.Hand.Count < 10)
-                            hero.Hand.Add(new Card(skillPotion));
-                        else hero.DiscardPile.Add(new Card(skillPotion));
-                    }
+                        hero.AddToHand(skillPotion);
                     break;
                 case "Speed Potion":
                     hero.AddBuff(4, EffectAmount);
@@ -163,7 +147,7 @@
                         else if (distilledChaos.Type == "Power")
                             hero.DrawPile.Remove(distilledChaos);
                         else if (Name == "Tantrum")
-                            Card.Shuffle(hero.DrawPile, rng);
+                            hero.ShuffleDrawPile(rng);
                         else
                             distilledChaos.MoveCard(hero.DrawPile, hero.DiscardPile);
                     }
@@ -187,7 +171,7 @@
                             Console.WriteLine("Invalid input, enter again:");
                         if (gambleChoice > 0)
                         {
-                            Card gambledCard = hero.Hand[hero.Hand.Count - gambleChoice];
+                            Card gambledCard = hero.Hand[^gambleChoice];
                             gambledCard.MoveCard(hero.Hand, hero.DiscardPile);
                             gambleAmount--;
                             gamble++;
@@ -224,7 +208,7 @@
                             Console.WriteLine("Invalid input, enter again:");
                         if (exhaustChoice > 0)
                         {
-                            Card exhaustedCard = hero.Hand[hero.Hand.Count - exhaustChoice];
+                            Card exhaustedCard = hero.Hand[^exhaustChoice];
                             exhaustedCard.MoveCard(hero.Hand, hero.DiscardPile);
                             exhaustAmount--;
                         }
@@ -285,52 +269,52 @@
             int sacredBark = 1;
             if (hero != null && hero.Relics.Find(x => x.Name == "Sacred Bark") != null)
                 sacredBark++;
-            switch(Name) 
+            return Name switch
             {
-                default:  return "";
-                case "Fire Potion": return $"Deal {EffectAmount * sacredBark} damage.";
-                case "Energy Potion": return $"Gain {EffectAmount * sacredBark} Energy.";
-                case "Strength Potion": return $"Gain {EffectAmount * sacredBark} Strength.";
-                case "Block Potion": return $"Gain {EffectAmount * sacredBark} Block.";
-                case "Fear Potion": return $"Apply {EffectAmount * sacredBark} Vulnerable.";
-                case "Swift Potion": return $"Draw {EffectAmount * sacredBark} cards.";
-                case "Weak Potion": return $"Apply {EffectAmount * sacredBark} Weak.";
-                case "Focus Potion": return $"Gain {EffectAmount * sacredBark} Focus.";
-                case "Liquid Bronze": return $"Gain {EffectAmount * sacredBark} Thorns.";
-                case "Attack Potion": return $"Add {(sacredBark == 2 ? "2 copies" : "")} of 1 of 3 random Attack cards to your hand, {(sacredBark == 2 ? "they" : "it")} costs 0 this turn.";
-                case "Blessing of the Forge": return $"Upgrade all cards in your hand for the rest of combat.";
-                case "Colorless Potion": return $"Add {(sacredBark == 2 ? "2 copies" : "")} of 1 of 3 random Colorless cards to your hand, {(sacredBark == 2 ? "they" : "it")} costs 0 this turn.";
-                case "Dexterity Potion": return $"Gain {EffectAmount * sacredBark} Dexterity.";
-                case "Explosive Potion": return $"Deal {EffectAmount * sacredBark} damage to ALL enemies.";
-                case "Flex Potion": return $"Gain {EffectAmount * sacredBark} Strength. At the end of your turn, lose {EffectAmount * sacredBark} Strength.";
-                case "Power Potion": return $"Add {(sacredBark == 2 ? "2 copies" : "")} of 1 of 3 random Power cards to your hand, {(sacredBark == 2 ? "they" : "it")} costs 0 this turn.";
-                case "Skill Potion": return $"Add {(sacredBark == 2 ? "2 copies" : "")} of 1 of 3 random Skill cards to your hand, {(sacredBark == 2 ? "they" : "it")} costs 0 this turn.";
-                case "Speed Potion": return $"Gain {EffectAmount * sacredBark} Dexterity. At the end of your turn, lose {EffectAmount * sacredBark} Dexterity.";
-                case "Blood Potion": return $"Heal for {EffectAmount * sacredBark}% of your Max HP.";
-                case "Poison Potion": return $"Apply {EffectAmount * sacredBark} Poison.";
-                case "Bottled Miracle": return $"Add {EffectAmount * sacredBark} Miracles to your hand.";
-                case "Ancient Potion": return $"Gain {EffectAmount * sacredBark} Artifact.";
-                case "Distilled Chaos": return $"Play the top {EffectAmount * sacredBark} cards of your draw pile.";
-                case "Duplication Potion": return $"This turn, your {(sacredBark == 2 ? "next 2 cards are" : "next card is")} played twice.";
-                case "Essence of Steel": return $"Gain {EffectAmount * sacredBark} Plated Armor.";
-                case "Gambler's Brew": return $"Discard any number of cards, then draw that many.";
-                case "Liquid Memories": return $"Choose {(sacredBark == 2 ? "2 cards" : "a card")} in your discard pile and return {(sacredBark == 2 ? "them" : "it")} to your hand. {(sacredBark == 2 ? "They cost" : "It costs")} 0 this turn.";
-                case "Regen Potion": return $"Gain {EffectAmount * sacredBark} Regeneration.";
-                case "Potion of Capcity": return $"Gain {EffectAmount * sacredBark} Orb slots.";
-                case "Elixir": return $"Exhaust any number of cards in your hand.";
-                case "Cunning Potion": return $"Add {EffectAmount * sacredBark} Upgraded Shivs to your hand.";
-                case "Stance Potion": return $"Enter Calm or Wrath.";
-                case "Cultist Potion": return $"Gain {EffectAmount * sacredBark} Ritual.";
-                case "Entropic Brew": return $"Fill all your empty potion slots with random potions.";
-                case "Fairy in a Bottle": return $"When you would die, heal to {EffectAmount * sacredBark} of your Max HP instead and discard this potion.";
-                case "Fruit Juice": return $"Gain {EffectAmount * sacredBark} Max HP.";
-                case "Smoke Bomb": return $"Escape from a non-boss combat. Receive no rewards.";
-                case "Snecko Oil": return $"Draw {EffectAmount * sacredBark} cards. Randomize the costs of all cards in your hand for the rest of the combat.";
-                case "Essence of Darkness": return $"Channel {EffectAmount * sacredBark} Dark for each orb slot.";
-                case "Heart of Iron": return $"Gain {EffectAmount * sacredBark} Metallicize.";
-                case "Ghost in a Jar": return $"Gain {EffectAmount * sacredBark} Intangible.";
-                case "Ambrosia": return $"Enter Divinity Stance.";
-            }
+                "Fire Potion" => $"Deal {EffectAmount * sacredBark} damage.",
+                "Energy Potion" => $"Gain {EffectAmount * sacredBark} Energy.",
+                "Strength Potion" => $"Gain {EffectAmount * sacredBark} Strength.",
+                "Block Potion" => $"Gain {EffectAmount * sacredBark} Block.",
+                "Fear Potion" => $"Apply {EffectAmount * sacredBark} Vulnerable.",
+                "Swift Potion" => $"Draw {EffectAmount * sacredBark} cards.",
+                "Weak Potion" => $"Apply {EffectAmount * sacredBark} Weak.",
+                "Focus Potion" => $"Gain {EffectAmount * sacredBark} Focus.",
+                "Liquid Bronze" => $"Gain {EffectAmount * sacredBark} Thorns.",
+                "Attack Potion" => $"Add {(sacredBark == 2 ? "2 copies" : "")} of 1 of 3 random Attack cards to your hand, {(sacredBark == 2 ? "they" : "it")} costs 0 this turn.",
+                "Blessing of the Forge" => $"Upgrade all cards in your hand for the rest of combat.",
+                "Colorless Potion" => $"Add {(sacredBark == 2 ? "2 copies" : "")} of 1 of 3 random Colorless cards to your hand, {(sacredBark == 2 ? "they" : "it")} costs 0 this turn.",
+                "Dexterity Potion" => $"Gain {EffectAmount * sacredBark} Dexterity.",
+                "Explosive Potion" => $"Deal {EffectAmount * sacredBark} damage to ALL enemies.",
+                "Flex Potion" => $"Gain {EffectAmount * sacredBark} Strength. At the end of your turn, lose {EffectAmount * sacredBark} Strength.",
+                "Power Potion" => $"Add {(sacredBark == 2 ? "2 copies" : "")} of 1 of 3 random Power cards to your hand, {(sacredBark == 2 ? "they" : "it")} costs 0 this turn.",
+                "Skill Potion" => $"Add {(sacredBark == 2 ? "2 copies" : "")} of 1 of 3 random Skill cards to your hand, {(sacredBark == 2 ? "they" : "it")} costs 0 this turn.",
+                "Speed Potion" => $"Gain {EffectAmount * sacredBark} Dexterity. At the end of your turn, lose {EffectAmount * sacredBark} Dexterity.",
+                "Blood Potion" => $"Heal for {EffectAmount * sacredBark}% of your Max HP.",
+                "Poison Potion" => $"Apply {EffectAmount * sacredBark} Poison.",
+                "Bottled Miracle" => $"Add {EffectAmount * sacredBark} Miracles to your hand.",
+                "Ancient Potion" => $"Gain {EffectAmount * sacredBark} Artifact.",
+                "Distilled Chaos" => $"Play the top {EffectAmount * sacredBark} cards of your draw pile.",
+                "Duplication Potion" => $"This turn, your {(sacredBark == 2 ? "next 2 cards are" : "next card is")} played twice.",
+                "Essence of Steel" => $"Gain {EffectAmount * sacredBark} Plated Armor.",
+                "Gambler's Brew" => $"Discard any number of cards, then draw that many.",
+                "Liquid Memories" => $"Choose {(sacredBark == 2 ? "2 cards" : "a card")} in your discard pile and return {(sacredBark == 2 ? "them" : "it")} to your hand. {(sacredBark == 2 ? "They cost" : "It costs")} 0 this turn.",
+                "Regen Potion" => $"Gain {EffectAmount * sacredBark} Regeneration.",
+                "Potion of Capcity" => $"Gain {EffectAmount * sacredBark} Orb slots.",
+                "Elixir" => $"Exhaust any number of cards in your hand.",
+                "Cunning Potion" => $"Add {EffectAmount * sacredBark} Upgraded Shivs to your hand.",
+                "Stance Potion" => $"Enter Calm or Wrath.",
+                "Cultist Potion" => $"Gain {EffectAmount * sacredBark} Ritual.",
+                "Entropic Brew" => $"Fill all your empty potion slots with random potions.",
+                "Fairy in a Bottle" => $"When you would die, heal to {EffectAmount * sacredBark} of your Max HP instead and discard this potion.",
+                "Fruit Juice" => $"Gain {EffectAmount * sacredBark} Max HP.",
+                "Smoke Bomb" => $"Escape from a non-boss combat. Receive no rewards.",
+                "Snecko Oil" => $"Draw {EffectAmount * sacredBark} cards. Randomize the costs of all cards in your hand for the rest of the combat.",
+                "Essence of Darkness" => $"Channel {EffectAmount * sacredBark} Dark for each orb slot.",
+                "Heart of Iron" => $"Gain {EffectAmount * sacredBark} Metallicize.",
+                "Ghost in a Jar" => $"Gain {EffectAmount * sacredBark} Intangible.",
+                "Ambrosia" => $"Enter Divinity Stance.",
+                _ => "",
+            };
         }
     }
 }

@@ -212,7 +212,7 @@
 
         public void ChannelOrb(List<Enemy> encounter, int orbID)
         {
-            Orb channeledOrb = new Orb(Dict.orbL[orbID]);
+            Orb channeledOrb = new(Dict.orbL[orbID]);
             if (Orbs.Count == OrbSlots)
             {
                 Evoke(encounter);

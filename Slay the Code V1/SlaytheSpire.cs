@@ -14,7 +14,7 @@ namespace STV
             Console.Title = "Slay The Spire";
             // Menu init
             int menuChoice = 1;
-            List<String> mainMenu = new List<string> { "1: Enter The Spire", "2: Card Library", "3: Exit" };
+            List<string> mainMenu = new() { "1: Enter The Spire", "2: Card Library", "3: Exit" };
 
             //MAIN MENU
             while (menuChoice != 3)                                                     
@@ -36,7 +36,7 @@ namespace STV
                         ConsoleTableExt.ConsoleTableBuilder.From(characterList).ExportAndWriteLine(TableAligntment.Center);
                         while (!Int32.TryParse(Console.ReadLine(), out heroChoice) || heroChoice < 1 || heroChoice > 4)
                             Console.WriteLine("Invalid input, enter again:");
-                        Hero hero = new Hero(Dict.heroL[heroChoice]);
+                        Hero hero = new(Dict.heroL[heroChoice]);
                         switch (hero.Name)
                         {
                             case "Ironclad":
@@ -64,7 +64,7 @@ namespace STV
                         {
                             Console.WriteLine($"You have entered Act {act}!");
                             List<Room> map = MapGeneration();
-                            List<Room> choices = new List<Room>();                            
+                            List<Room> choices = new();                            
                             Room activeRoom = null;
                             for (int floor = 1; floor <= 16; floor++)
                             {
@@ -219,7 +219,7 @@ namespace STV
         private static void Shop(Hero hero)
         {
             int shopChoice = -1;        
-            Random shopRNG = new Random();
+            Random shopRNG = new();
             List<Card> shopCards = new();
             List<Potion> shopPotions = new();
             for (int i = 0; i < 7; i++)
@@ -239,7 +239,7 @@ namespace STV
             }
             for (int i = 0; i < 3; i++)
             {
-                Potion shopPotion = new Potion(Dict.potionL[shopRNG.Next(Dict.potionL.Count)]);
+                Potion shopPotion = new(Dict.potionL[shopRNG.Next(Dict.potionL.Count)]);
                 shopPotions.Add(shopPotion);
             }
             string removeCard = "Remove Card";            
@@ -256,7 +256,7 @@ namespace STV
                 Console.WriteLine($"*************************************\n11: {removeCard} {(removeCard == "Remove Card" ? "- 75" : "")}");                  
                 while (!Int32.TryParse(Console.ReadLine(), out shopChoice) || shopChoice < 0 || shopChoice > 11)
                     Console.WriteLine("Invalid input, enter again:");
-                int newHeroGold = 0;
+                int newHeroGold;
                 if (shopChoice > 0 && shopChoice < 8)
                 {
                     Card shopCard = shopCards[shopChoice - 1];
@@ -317,7 +317,7 @@ namespace STV
 
         public static void EventDecider(Hero hero, int actModifier) 
         {
-            Random eventRNG = new Random();
+            Random eventRNG;
             return;
         }
 
@@ -329,10 +329,9 @@ namespace STV
             Console.WriteLine("Next encounter:");
             foreach (Actor actor in encounter) 
                 Console.WriteLine(actor.Name);
-            List<Card> drawPile = new();
             foreach (Card c in hero.Deck)
                 hero.DrawPile.Add(new Card(c));
-            Card.Shuffle(drawPile, rng);
+            hero.ShuffleDrawPile(rng);
             int turnNumber = 0;
 
             //Check HP values to end encounter when one group is reduced to 0
@@ -381,8 +380,8 @@ namespace STV
                     Card.DrawCards(rng, hero, 2);
                 Card.DrawCards(rng, hero, 5);
                 hero.Energy = hero.MaxEnergy;
-                if (hero.Orbs.FindAll(x => x.Name == "Plasma").Count() > 0)
-                    hero.Energy += hero.Orbs.FindAll(x => x.Name == "Plasma").Count();
+                if (hero.Orbs.FindAll(x => x.Name == "Plasma").Count is int plasmaCount && plasmaCount > 0)
+                    hero.Energy += plasmaCount;
                 string playerChoice = "";
                 while (playerChoice != "E" && (!encounter.All(x => x.Hp == 0)) && hero.Hp != 0)
                 {
@@ -532,7 +531,7 @@ namespace STV
 
                 // END OF PLAYER AND START OF ENEMY TURN
 
-                Random random = new Random();
+                Random random = new();
                 foreach (var orb in hero.Orbs)
                 {
                     if(orb is null) continue;
@@ -559,7 +558,7 @@ namespace STV
                     if ((encounter[i].Hp != 0))
                     {
                         encounter[i].Actions.Add(encounter[i].Intent);
-                        encounter[i].EnemyAction(hero, drawPile, hero.DiscardPile, encounter);
+                        encounter[i].EnemyAction(hero, encounter);
                         HealthUnderZero(hero, encounter);
                     }
                 }
@@ -614,9 +613,9 @@ namespace STV
  
         public static List<Enemy> CreateEncounter(int list)
         {
-            Random enemyRNG = new Random();
+            Random enemyRNG = new();
             List<Enemy> encounter = new();
-            int encounterChoice = 0;
+            int encounterChoice;
             /* Looks at specific list (Encounter Type plus Act Modifier )
              * Encounter Types:
              * 1. Debut (first 3 normal combats each floor)
@@ -795,7 +794,7 @@ namespace STV
                     default:
                         break;
                     case 2 or 7:
-                        Random random = new Random();
+                        Random random = new();
                         encounter[i].AddBuff(5,random.Next(3, 8));
                         break;
                     case 11:
@@ -809,7 +808,7 @@ namespace STV
 
         public static bool Debug()
         {
-            int debugChoice = 0;
+            int debugChoice;
             while (!Int32.TryParse(Console.ReadLine(), out debugChoice))
                 break;
             if (debugChoice == 2968)
@@ -820,9 +819,9 @@ namespace STV
         public static List<Room> MapGeneration()
         {
             // Variable Init
-            Random mapRng = new Random();
+            Random mapRng = new();
             Dictionary<int, List<Room>> MapTemplate = new();
-            List<Room> paths = new List<Room>();
+            List<Room> paths = new();
 
             // Fills Map Template with 7*15 grid of Rooms
             for (int i = 1; i < 16; i++)
@@ -840,7 +839,7 @@ namespace STV
                     {
                         try     // Prevents -1 or 7 index which would be out of range
                         {
-                            Room tmp = new Room(MapTemplate[j + 1][mapRng.Next(paths.Last().RoomNumber - 1, paths.Last().RoomNumber + 2)]);
+                            Room tmp = new(MapTemplate[j + 1][mapRng.Next(paths.Last().RoomNumber - 1, paths.Last().RoomNumber + 2)]);
                             tmp.Connections.Add(paths.Last());
                             paths.Last().Connections.Add(tmp);
                             paths.Add(tmp);
@@ -852,7 +851,7 @@ namespace STV
             }
 
             // Remove duplicate Rooms selected during the process and merge connections so no path is lost.
-            List<Room> distinct = new List<Room>();
+            List<Room> distinct = new();
             foreach (Room room in paths)
             {
                 if (!distinct.Contains(room))
@@ -887,7 +886,7 @@ namespace STV
                 }
                 else if (i == 15)
                 {
-                    Room bossRoom = new Room(3, 16, "Boss");
+                    Room bossRoom = new(3, 16, "Boss");
                     foreach (Room r in distinct.Where(x => x.Floor == i))
                     {
                         r.ChangeName("Rest Site");

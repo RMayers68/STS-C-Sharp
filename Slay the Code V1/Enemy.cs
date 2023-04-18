@@ -34,11 +34,12 @@
             this.Buffs = new();
             this.Actions = new();
         }
-        public void EnemyAction(Hero hero, List<Card> drawPile, List<Card> discardPile, List<Enemy> encounter)
+
+        public void EnemyAction(Hero hero, List<Enemy> encounter)
         {
             int damage = 0;
             int target = 0;
-            Random rng = new Random();
+            Random rng = new();
             switch (Intent)
             {
                 case "Attack":
@@ -63,7 +64,7 @@
                     break;
                 case "Bolt":
                     for (int i = 0; i < 2; i++)
-                        discardPile.Add(new Card(Dict.cardL[356]));
+                        hero.DiscardPile.Add(new Card(Dict.cardL[356]));
                     Console.WriteLine($"{Name} has added 2 Dazed cards to your deck!");
                     break;
                 case "Charging":
@@ -77,9 +78,9 @@
                     break;
                 case "Corrosive Spit":
                     SingleAttack(hero, 7);
-                    discardPile.Add(Dict.cardL[358]);
+                    hero.DiscardPile.Add(Dict.cardL[358]);
                     if (EnemyID == 21)
-                        discardPile.Add(Dict.cardL[358]);
+                        hero.DiscardPile.Add(Dict.cardL[358]);
                     break;
                 case "Dark Strike":
                     SingleAttack(hero, 6);
@@ -108,13 +109,13 @@
                         damage = 16;
                     else damage = 8;
                     SingleAttack(hero, damage);
-                    discardPile.Add(Dict.cardL[358]);
+                    hero.DiscardPile.Add(Dict.cardL[358]);
                     if (EnemyID == 22)
-                        discardPile.Add(Dict.cardL[358]);
+                        hero.DiscardPile.Add(Dict.cardL[358]);
                     break;
                 case "Goop Spray":
                     for (int i = 0; i < 3; i++)
-                        discardPile.Add(new Card(Dict.cardL[358]));
+                        hero.DiscardPile.Add(new Card(Dict.cardL[358]));
                     Console.WriteLine($"{Name} has added 3 Slimed cards into your Deck! Ewww!");
                     break;
                 case "Grow":
@@ -128,7 +129,7 @@
                     {
                         SingleAttack(hero, 2);
                         if (i % 2 == 0)
-                            discardPile.Add(new Card(Dict.cardL[355]));
+                            hero.DiscardPile.Add(new Card(Dict.cardL[355]));
                     }
                     Console.WriteLine($"{Name} has added 3 Burns to your Deck!");
                     break;
@@ -189,7 +190,7 @@
                     break;
                 case "Sear":
                     SingleAttack(hero, 6);
-                    discardPile.Add(new Card(Dict.cardL[355]));
+                    hero.DiscardPile.Add(new Card(Dict.cardL[355]));
                     Console.WriteLine($"{Name} has added a Burn to your Deck!");
                     break;
                 case "Siphon Soul":
@@ -391,7 +392,7 @@
                             int i when i >= 8 && i <= 19 => "Smoke Bomb",
                         };
                     if (Actions != null && Actions.Count >= 3)
-                        if (Actions[Actions.Count - 1] == "Lunge")
+                        if (Actions[^1] == "Lunge")
                             Intent = "Smoke Bomb";
                         else Intent = "Escape";
                     break;
@@ -422,7 +423,7 @@
                 case 18:                                                            // Lagavulin
                     if (FindBuff("Asleep") != null)
                         break;
-                    else if (Actions.Count >= 3 && Actions[Actions.Count - 1] == "Attack" && Actions[Actions.Count - 2] == "Attack")
+                    else if (Actions.Count >= 3 && Actions[^1] == "Attack" && Actions[^2] == "Attack")
                         Intent = "Siphon Soul";
                     else Intent = "Attack";
                     break;
@@ -474,9 +475,9 @@
                     }
                     else if (Actions != null)
                     {
-                        if (Actions[Actions.Count - 1] == "Roll Attack")
+                        if (Actions[^1] == "Roll Attack")
                             Intent = "Twin Slam";
-                        else if (Actions[Actions.Count - 1] == "Defensive Mode")
+                        else if (Actions[^1] == "Defensive Mode")
                             Intent = "Roll Attack";
                     }
                     else Intent = "Defensive Mode";
@@ -504,7 +505,7 @@
         public void Repeat3Prevent(string one, string two)
         {
             if (Actions != null && Actions.Count >= 2)
-                while (Actions[Actions.Count - 1] == Actions[Actions.Count - 2] && Intent == Actions[Actions.Count - 1])
+                while (Actions[^1] == Actions[^2] && Intent == Actions[^1])
                 {
                     if (Intent == one)
                         Intent = two;
@@ -514,7 +515,7 @@
         public void Repeat3Prevent(string one, string two, string three)
         {
             if (Actions != null && Actions.Count >= 2)
-                while (Actions[Actions.Count - 1] == Actions[Actions.Count - 2] && Intent == Actions[Actions.Count - 1])
+                while (Actions[^1] == Actions[^2] && Intent == Actions[^1])
                 {
                     if (Intent == one)
                         Intent = two;
@@ -527,7 +528,7 @@
         // Randomizes Enemy Health based on a range at start of encounter
         public int EnemyHealthSet()
         {
-            Random r = new Random();
+            Random r = new();
             int maxHP = r.Next(BottomHP, TopHP);
             return maxHP;
         }
@@ -535,15 +536,17 @@
         //enemy attack intents list
         public static List<string> AttackIntents()
         {
-            List<string> list = new List<string>();
-            list.Add("Bite");
-            list.Add("Chomp");
-            list.Add("Corrosive Spit");
-            list.Add("Bite");
-            list.Add("Dark Strike");
-            list.Add("Flame Tackle");
-            list.Add("Tackle");
-            list.Add("Thrash");
+            List<string> list = new()
+            {
+                "Bite",
+                "Chomp",
+                "Corrosive Spit",
+                "Bite",
+                "Dark Strike",
+                "Flame Tackle",
+                "Tackle",
+                "Thrash"
+            };
             return list;
         }
     }
