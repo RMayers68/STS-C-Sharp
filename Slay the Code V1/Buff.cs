@@ -6,9 +6,9 @@
         public string Name { get; set; }
         public bool BuffDebuff { get; set; }
         public byte Type { get; set; }
-        public int? Intensity { get; set; }
-        public int? Duration { get; set; }
-        public int? Counter { get; set; }
+        public int Intensity { get; set; }
+        public int Duration { get; set; }
+        public int Counter { get; set; }
 
 
         //constructor
@@ -138,38 +138,27 @@
 
         // Duration-related methods
         public void DurationSet(int turnDuration)
-        {
-            if (this.Duration == null) this.Duration = turnDuration;
-            else this.Duration += turnDuration;
-        }
+        { Duration += turnDuration; }
 
         public void DurationDecrease()
         {
-            if (this.Type == 1)
-                this.Duration -= 1;
+            if (Type == 1)
+                Duration -= 1;
         }
 
         public bool DurationEnded()
         {
-            if (this.Duration == 0)
+            if (Duration == 0 && Type == 1)
                 return true;
             else return false;
         }
 
         //Counter methods
         public void CounterSet(int counter)
-        {
-            if (this.Counter == null) 
-                this.Counter = counter;
-            else this.Counter += counter;
-        }
+        { Counter += counter; }
 
         // Intensity related methods
         public void IntensitySet(int intensity)
-        {
-            if (this.Intensity == null) 
-                this.Intensity = intensity;
-            else this.Intensity += intensity;
-        }
+        { Intensity += intensity; }
     }
 }

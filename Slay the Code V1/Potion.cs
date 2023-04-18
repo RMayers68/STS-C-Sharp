@@ -33,7 +33,7 @@
         //string method
         public override string ToString()
         {
-            return $"{Name} - {getDescription()}";
+            return $"{Name} - {GetDescription()}";
         }
 
         public void UsePotion(Hero hero,List<Enemy> encounter, Random rng)                              // potion methods (correlating to PotionID)
@@ -75,7 +75,7 @@
                     break;
                 case "Attack Potion":
                     Card attackPotion = new Card(Card.ChooseCard(Card.RandomCards(hero.Name, 3, rng, "Attack"),"add to your hand"));
-                    attackPotion.setTmpEnergyCost(0);
+                    attackPotion.SetTmpEnergyCost(0);
                     for (int i = 0; i < EffectAmount; i++)
                     {
                         if (hero.Hand.Count < 10)
@@ -89,7 +89,7 @@
                     break;
                 case "Colorless Potion":
                     Card colorlessPotion = new Card(Card.ChooseCard(Card.RandomCards("Colorless", 3, rng), "add to your hand"));
-                    colorlessPotion.setTmpEnergyCost(0);
+                    colorlessPotion.SetTmpEnergyCost(0);
                     for (int i = 0; i < EffectAmount; i++)
                     {
                         if (hero.Hand.Count < 10)
@@ -110,7 +110,7 @@
                     break;
                 case "Power Potion":
                     Card powerPotion = new Card(Card.ChooseCard(Card.RandomCards(hero.Name, 3, rng, "Power"), "add to your hand"));
-                    powerPotion.setTmpEnergyCost(0);
+                    powerPotion.SetTmpEnergyCost(0);
                     for (int i = 0; i < EffectAmount; i++)
                     {
                         if (hero.Hand.Count < 10)
@@ -120,7 +120,7 @@
                     break;
                 case "Skill Potion":
                     Card skillPotion = new Card(Card.ChooseCard(Card.RandomCards(hero.Name, 3, rng, "Skill"), "add to your hand"));
-                    skillPotion.setTmpEnergyCost(0);
+                    skillPotion.SetTmpEnergyCost(0);
                     for (int i = 0; i < EffectAmount; i++)
                     {
                         if (hero.Hand.Count < 10)
@@ -158,7 +158,7 @@
                     {
                         Card distilledChaos = hero.DrawPile.Last();
                         distilledChaos.CardAction(hero,encounter,rng);
-                        if (distilledChaos.getDescription().Contains("Exhaust") || distilledChaos.Type == "Status" || distilledChaos.Type == "Curse")
+                        if (distilledChaos.GetDescription().Contains("Exhaust") || distilledChaos.Type == "Status" || distilledChaos.Type == "Curse")
                             distilledChaos.Exhaust(hero, hero.DrawPile);
                         else if (distilledChaos.Type == "Power")
                             hero.DrawPile.Remove(distilledChaos);
@@ -202,7 +202,7 @@
                         if (hero.Hand.Count < 10)
                         {
                             liquidMemories.MoveCard(hero.DiscardPile, hero.Hand);
-                            liquidMemories.setTmpEnergyCost(0);
+                            liquidMemories.SetTmpEnergyCost(0);
                         }                      
                     }
                     break;
@@ -250,7 +250,7 @@
                     hero.HealHP(Convert.ToInt32(hero.MaxHP * (EffectAmount / 100.0)));
                     break;
                 case "Fruit Juice":
-                    hero.setMaxHP(EffectAmount);
+                    hero.SetMaxHP(EffectAmount);
                     break;
                 case "Smoke Bomb":
                     // Code combat to end
@@ -258,7 +258,7 @@
                 case "Snecko Oil":
                     Card.DrawCards(rng, hero, EffectAmount);
                     foreach (Card c in hero.Hand)
-                        c.setEnergyCost(rng.Next(4));
+                        c.SetEnergyCost(rng.Next(4));
                     break;
                 case "Essence of Darkness":
                     for (int i = 0; i < hero.OrbSlots * EffectAmount; i++)
@@ -280,7 +280,7 @@
         }
 
 
-        public string getDescription(Hero hero = null)
+        public string GetDescription(Hero hero = null)
         {
             int sacredBark = 1;
             if (hero != null && hero.Relics.Find(x => x.Name == "Sacred Bark") != null)

@@ -22,15 +22,15 @@
 		// Inclusive methods
 		public void CardBlock(int block)
 		{
-			if (FindBuff("No Block",Buffs) != null || block == 0)
+			if (FindBuff("No Block") != null || block == 0)
 				return;
 			GainBlock(block);
 		}
 		public void GainBlock(int block)
 		{
 			if (Hp <= 0) return;
-			if (FindBuff("Dexterity", Buffs) != null)
-				block += FindBuff("Dexterity",Buffs).Intensity.GetValueOrDefault();
+			if (FindBuff("Dexterity") != null)
+				block += FindBuff("Dexterity").Intensity;
 			if (Buffs.Find(x => x.Name == "Frail") != null)
 				block = Convert.ToInt32(block * 0.75);
 			Block += block;
@@ -39,18 +39,18 @@
 
 		public void AddBuff(int ID, int effect)
 		{
-			Buff buff = new Buff(Dict.buffL[ID]);
+			if (effect == 0) return;
             // Artifact stopping debuffs
-            if ((!Dict.buffL[ID].BuffDebuff || effect < 0) && FindBuff("Artifact", Buffs) != null)
+            if ((!Dict.buffL[ID].BuffDebuff) && FindBuff("Artifact") != null)
 			{
-                FindBuff("Artifact", Buffs).Counter--;
+                FindBuff("Artifact").Counter--;
 				return;
 			}
 
 			// If buff is not there, add it to target's list
-			if (FindBuff(buff.Name,Buffs) == null)
-				Buffs.Add(buff);
-
+			if (FindBuff(Dict.buffL[ID].Name) == null)
+				Buffs.Add(new Buff(Dict.buffL[ID]));
+			Buff buff = FindBuff(Dict.buffL[ID].Name); 
 			// Add attributes based on type of Buff
 			byte b = Dict.buffL[ID].Type switch
 			{
@@ -60,9 +60,11 @@
 			};
 			switch (b)
 			{
-				case 1: //Duration
+                default:
+                    return;
+                case 1: //Duration
 					buff.DurationSet(effect);
-					Console.WriteLine($"{Name} is now {Dict.buffL[ID].Name} for {buff.Duration} turns!");
+					Console.WriteLine($"{Name} is now {buff.Name} for {buff.Duration} turns!");
 					break;
 				case 2: //Intensity
 					buff.IntensitySet(effect);
@@ -74,27 +76,25 @@
 					if (buff.Name == "Mantra")
 						Actions.Add($"Mantra Gained: {effect}");
 					break;
-				default:
-					return;
 			}
 		}
 
-        public static Buff FindBuff(string name, List<Buff> list)
+        public Buff FindBuff(string name)
         {
-            return list.Find(x => x.Name == name);
+            return Buffs.Find(x => x.Name == name);
         }
 
         //HP Altering Methods
         public void SingleAttack(Actor target, int damage)
 		{
 			if (Hp <= 0) return;
-			if (FindBuff("Strength", Buffs) != null)
-				damage += FindBuff("Strength",Buffs).Intensity.GetValueOrDefault(0);
+			if (FindBuff("Strength") != null)
+				damage += FindBuff("Strength").Intensity;
             if (Stance == "Wrath" || target.Stance == "Wrath")
                 damage *= 2;
-			if (FindBuff("Weak", Buffs) != null)
+			if (FindBuff("Weak") != null)
 				damage = Convert.ToInt32(damage * 0.75);
-			if (FindBuff("Vulnerable",target.Buffs) != null)
+			if (FindBuff("Vulnerable") != null)
 				damage = Convert.ToInt32(damage * 1.5);
 			if (target.Block > 0)
 			{
@@ -108,13 +108,13 @@
 			else
 				target.Hp -= damage;
 			Console.WriteLine($"{Name} attacked for {damage} damage!");
-			if (FindBuff("Curl Up", target.Buffs) != null)      // Louse Curl Up Effect
-			{
-				Console.WriteLine($"The Louse has curled up and gained {target.Buffs[0].Intensity} Block!");
-				target.Block += target.Buffs[0].Intensity.GetValueOrDefault();
-				target.Buffs.RemoveAt(0);
-			}
-		}
+            if (target.FindBuff("Curl Up") is Buff curlUp && curlUp != null)      // Louse Curl Up Effect
+            {
+                Console.WriteLine($"The Louse has curled up and gained {curlUp.Intensity} Block!");
+                target.Block += curlUp.Intensity;
+                target.Buffs.Remove(curlUp);
+            }
+        }
 
 		public void NonAttackDamage(Actor target, int damage)
 		{
@@ -135,7 +135,7 @@
 		public void PoisonDamage(int damage)
 		{
 			Hp -= damage;
-			FindBuff("Poison",Buffs).Duration -= 1;
+			FindBuff("Poison").Duration -= 1;
 		}
 		
 	}

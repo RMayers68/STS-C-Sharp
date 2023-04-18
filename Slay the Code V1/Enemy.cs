@@ -3,7 +3,7 @@
     public class Enemy : Actor
     {
         public int EnemyID { get; set; } // ID correlates to method ran (Name without spaces)
-        public string? Intent { get; set; }
+        public string Intent { get; set; }
         
 
 
@@ -148,14 +148,14 @@
                     break;
                 case "Lunge":
                     SingleAttack(hero, 12);
-                    hero.Gold -= FindBuff("Thievery", Buffs).Intensity.GetValueOrDefault(15);
-                    Gold += FindBuff("Thievery", Buffs).Intensity.GetValueOrDefault(15);
+                    hero.Gold -= FindBuff("Thievery").Intensity;
+                    Gold += FindBuff("Thievery").Intensity;
                     Console.WriteLine($"The {Name} stole 15 Gold!");
                     break;
                 case "Mug":
                     SingleAttack(hero, 10);
-                    hero.Gold -= FindBuff("Thievery", Buffs).Intensity.GetValueOrDefault(15);
-                    Gold += FindBuff("Thievery", Buffs).Intensity.GetValueOrDefault(15);
+                    hero.Gold -= FindBuff("Thievery").Intensity;
+                    Gold += FindBuff("Thievery").Intensity;
                     Console.WriteLine($"The {Name} stole 15 Gold!");
                     break;
                 case "Protect":
@@ -254,7 +254,7 @@
                 case "Twin Slam":
                     for (int i = 0; i < 2; i++)
                         SingleAttack(hero, 8);
-                    Buffs.Remove(FindBuff("Thorns",Buffs));
+                    Buffs.Remove(FindBuff("Thorns"));
                     AddBuff(16, 30);
                     Actions.Clear();
                     break;
@@ -420,7 +420,7 @@
                     Repeat3Prevent("Skull Bash", "Rush");
                     break;
                 case 18:                                                            // Lagavulin
-                    if (FindBuff("Asleep",Buffs) != null)
+                    if (FindBuff("Asleep") != null)
                         break;
                     else if (Actions.Count >= 3 && Actions[Actions.Count - 1] == "Attack" && Actions[Actions.Count - 2] == "Attack")
                         Intent = "Siphon Soul";
@@ -462,7 +462,7 @@
                     Repeat3Prevent("Flame Tackle", "Lick");
                     break;
                 case 23:                                                            // The Guardian
-                    if (FindBuff("Mode Shift", Buffs) != null)
+                    if (FindBuff("Mode Shift") != null)
                     {
                         Intent = (Actions.Count % 4) switch
                         {

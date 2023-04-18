@@ -187,7 +187,7 @@ namespace STV
                         Console.WriteLine($"Hello {hero.Name}! You have arrived at a campfire. What would you like to do? Enter your option.\n");
                         while (!Int32.TryParse(Console.ReadLine(), out restChoice) || restChoice < 0 || restChoice > 11)
                             Console.WriteLine("Invalid input, enter again:");
-                        if (restChoice == 1 && !hero.Deck.All(x => x.isUpgraded())) // Upgrade
+                        if (restChoice == 1 && !hero.Deck.All(x => x.IsUpgraded())) // Upgrade
                         {
                           
                         }
@@ -211,7 +211,7 @@ namespace STV
                     break;
                 case "Boss":
                     encounter = CreateEncounter(4 + actModifier);
-                    Combat(hero, encounter,activeRoom);
+                    Combat(hero,encounter,activeRoom);
                     break;
             }
         }
@@ -249,7 +249,7 @@ namespace STV
                 Console.WriteLine($"Hello {hero.Name}! You have {hero.Gold} Gold. What would you like to purchase? Enter your option or press 0 to leave.\n");
                 Console.WriteLine("\nCards:\n*************************************");
                 for (int i = 1; i <= 7; i++)
-                    Console.WriteLine($"{i}: {shopCards[i-1].Name} {(shopCards[i-1].Name == "Purchased" ? "" : "- " + shopCards[i-1].getGoldCost())}");
+                    Console.WriteLine($"{i}: {shopCards[i-1].Name} {(shopCards[i-1].Name == "Purchased" ? "" : "- " + shopCards[i-1].GetGoldCost())}");
                 Console.WriteLine("\nPotions:\n*************************************");
                 for (int i = 8; i <= 10; i++)
                     Console.WriteLine($"{i}: {shopPotions[i - 8].Name} {(shopPotions[i - 8].Name == "Purchased" ? "" : "- " + shopPotions[i - 8].GoldCost)}");
@@ -262,7 +262,7 @@ namespace STV
                     Card shopCard = shopCards[shopChoice - 1];
                     if (shopCard.Name != "Purchased")
                     {
-                        newHeroGold = hero.Gold - shopCard.getGoldCost();
+                        newHeroGold = hero.Gold - shopCard.GetGoldCost();
                         if (newHeroGold >= 0)
                         {
                             hero.Gold = newHeroGold;
@@ -352,10 +352,10 @@ namespace STV
                 // Same for enemy
                 for (int i = 0; i < encounter.Count; i++)
                 {
+                    if (encounter[i].FindBuff("Ritual") is Buff ritual && ritual != null)
+                        encounter[i].AddBuff(4, ritual.Intensity); 
                     for (int j = encounter[i].Buffs.Count - 1; j >= 0; j--)
                     {
-                        if (encounter[i].Buffs[j].Name == "Ritual")
-                            encounter[i].AddBuff(4, encounter[i].Buffs[j].Intensity.GetValueOrDefault(3)); // Adds Ritual Intensity to Strength  
                         encounter[i].Buffs[j].DurationDecrease();
                         if (encounter[i].Buffs[j].DurationEnded())
                         {
@@ -395,34 +395,34 @@ namespace STV
                         switch (i)
                         {
                             case 1:
-                                Console.WriteLine($"(R)ead Card's Effects {(hand.Count >= i ? Tab(9) + i + ":" + hand[i - 1].getName() : "")}\n");
+                                Console.WriteLine($"(R)ead Card's Effects {(hand.Count >= i ? Tab(9) + i + ":" + hand[i - 1].GetName() : "")}\n");
                                 break;
                             case 2:
-                                Console.WriteLine($"(V)iew Your Buffs/Debuffs {(hand.Count >= i ? Tab(8) + i + ":" + hand[i - 1].getName() : "")}\n");
+                                Console.WriteLine($"(V)iew Your Buffs/Debuffs {(hand.Count >= i ? Tab(8) + i + ":" + hand[i - 1].GetName() : "")}\n");
                                 break;
                             case 3:
-                                Console.WriteLine($"Use (P)otion {(hand.Count >= i ? Tab(10) + i + ":" + hand[i - 1].getName() : "")}\n");
+                                Console.WriteLine($"Use (P)otion {(hand.Count >= i ? Tab(10) + i + ":" + hand[i - 1].GetName() : "")}\n");
                                 break;
                             case 4:
-                                Console.WriteLine($"View Enemy (I)nformation {(hand.Count >= i ? Tab(8) + i + ":" + hand[i - 1].getName() : "")}\n");
+                                Console.WriteLine($"View Enemy (I)nformation {(hand.Count >= i ? Tab(8) + i + ":" + hand[i - 1].GetName() : "")}\n");
                                 break;
                             case 5:
-                                Console.WriteLine($"(E)nd Turn {(hand.Count >= i ? Tab(10) + i + ":" + hand[i - 1].getName() : "")}\n");
+                                Console.WriteLine($"(E)nd Turn {(hand.Count >= i ? Tab(10) + i + ":" + hand[i - 1].GetName() : "")}\n");
                                 break;
                             case 6:
-                                Console.WriteLine($"******************** {(hand.Count >= i ? Tab(9) + i + ":" + hand[i - 1].getName() : "")}\n");
+                                Console.WriteLine($"******************** {(hand.Count >= i ? Tab(9) + i + ":" + hand[i - 1].GetName() : "")}\n");
                                 break;
                             case 7:
-                                Console.WriteLine($"{hero.Name} Information: {(hand.Count >= i ? Tab(9) + i + ":" + hand[i - 1].getName() : "")}\n");
+                                Console.WriteLine($"{hero.Name} Information: {(hand.Count >= i ? Tab(9) + i + ":" + hand[i - 1].GetName() : "")}\n");
                                 break;
                             case 8:
-                                Console.WriteLine($"Draw Pile:{hero.DrawPile.Count}\tDiscard Pile:{hero.DiscardPile.Count}{Tab(2)}Exhausted:{hero.ExhaustPile.Count} {(hand.Count >= i ? Tab(5) + i + ":" + hand[i - 1].getName() : "")}\n");
+                                Console.WriteLine($"Draw Pile:{hero.DrawPile.Count}\tDiscard Pile:{hero.DiscardPile.Count}{Tab(2)}Exhausted:{hero.ExhaustPile.Count} {(hand.Count >= i ? Tab(5) + i + ":" + hand[i - 1].GetName() : "")}\n");
                                 break;
                             case 9:
-                                Console.WriteLine($"HP:{hero.Hp}/{hero.MaxHP} + {hero.Block} Block\tEnergy:{hero.Energy}/{hero.MaxEnergy} {(hand.Count >= i ? Tab(7) + i + ":" + hand[i - 1].getName() : "")}\n");
+                                Console.WriteLine($"HP:{hero.Hp}/{hero.MaxHP} + {hero.Block} Block\tEnergy:{hero.Energy}/{hero.MaxEnergy} {(hand.Count >= i ? Tab(7) + i + ":" + hand[i - 1].GetName() : "")}\n");
                                 break;
                             case 10:
-                                Console.WriteLine($"{(hand.Count >= i ? Tab(11) + i + ":" + hand[i - 1].getName() : "")}\n");
+                                Console.WriteLine($"{(hand.Count >= i ? Tab(11) + i + ":" + hand[i - 1].GetName() : "")}\n");
                                 break;
                         }
                     }
@@ -472,7 +472,7 @@ namespace STV
                             case "P":
                                 int usePotion = 0;
                                 for (int i = 0; i < hero.Potions.Count; i++)
-                                    Console.WriteLine($"{i + 1}: {hero.Potions[i].ToString()}");
+                                    Console.WriteLine($"{i + 1}: {hero.Potions[i]}");
                                 Console.WriteLine($"\nWhat potion would you like to use? Enter the number or enter 0 to choose another option.");
                                 while (!Int32.TryParse(Console.ReadLine(), out usePotion) || usePotion < 0 || usePotion > hero.Potions.Count)
                                     Console.WriteLine("Invalid input, enter again:");
@@ -511,19 +511,19 @@ namespace STV
                 }
                 for (int i = hand.Count - 1; i >= 0; i--)                   //Discard at end of turn (Comment to find easy for disabling)
                 {
-                    if (hand[i].getDescription().Contains("Retain."))
+                    if (hand[i].GetDescription().Contains("Retain."))
                     {
                         if (hand[i].Name == "Sands of Time" && hand[i].EnergyCost != 0)
                             hand[i].EnergyCost = hand[i].EnergyCost - 1;
                         if (hand[i].Name == "Windmill Strike")
-                            hand[i].setAttackDamage(hand[i].getMagicNumber());
+                            hand[i].SetAttackDamage(hand[i].GetMagicNumber());
                         if (hand[i].Name == "Perserverance")
-                            hand[i].setBlockAmount(hand[i].getMagicNumber());
+                            hand[i].SetBlockAmount(hand[i].GetMagicNumber());
                         continue;
                     }
                     else
                     {
-                        if (hand[i].getDescription().Contains("Ethereal"))
+                        if (hand[i].GetDescription().Contains("Ethereal"))
                             hand[i].Exhaust(hero, hero.Hand);
                         else hand[i].MoveCard(hand, hero.DiscardPile);
                     }
@@ -556,7 +556,7 @@ namespace STV
                 Console.WriteLine("Enemy's Turn!\n");
                 for (int i = 0; i < encounter.Count; i++)
                 {
-                    if (!(encounter[i].Hp == 0))
+                    if ((encounter[i].Hp != 0))
                     {
                         encounter[i].Actions.Add(encounter[i].Intent);
                         encounter[i].EnemyAction(hero, drawPile, hero.DiscardPile, encounter);
@@ -575,7 +575,7 @@ namespace STV
                 Console.WriteLine("\nVictorious, the creature is slain!\n");
                 if (hero.Relics[0].Name == "Burning Blood")
                     hero.HealHP(6);
-                hero.CombatRewards(hero.Deck,rng);
+                hero.CombatRewards(hero.Deck,rng, activeRoom.Location);
             }                
             Pause();
         }
@@ -671,7 +671,6 @@ namespace STV
                             for (int i = 0; i < 4; i++)
                             {
                                 encounter.Add(new Enemy(Dict.enemyL[12+enemyRNG.Next(5)]));
-                                break;
                             }
                             break;
                         case 1:         // Large Slime
@@ -1006,7 +1005,7 @@ namespace STV
                         }
 
                     }
-                    else; //Right check on last room is impossible path, skip
+                    else break; //Right check on last room is impossible path, skip
                 }                   
                 Console.WriteLine();
             }

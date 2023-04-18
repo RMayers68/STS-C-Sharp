@@ -6,7 +6,7 @@
         public string Type { get; set; }
         public int EffectAmount { get; set; }
         public int PersistentCounter { get; set; }
-        public bool isActive { get; set; }
+        public bool IsActive { get; set; }
         public int GoldCost { get; set; }
 
         // constructor
@@ -22,7 +22,7 @@
             this.Type = type;
             this.EffectAmount = EffectAmount;
             this.PersistentCounter = persistentCounter;
-            this.isActive = false;
+            this.IsActive = false;
         }
         //Cloning from dictionary constructor
         public Relic(Relic relic)
@@ -31,12 +31,31 @@
             this.Type = relic.Type;
             this.EffectAmount = relic.EffectAmount;
             this.PersistentCounter = relic.PersistentCounter;
-            this.isActive = true;
+            this.IsActive = true;
             Random rng = new Random();
             this.GoldCost = Type == "Rare" ? rng.Next(285, 316) : Type == "Uncommon" ? rng.Next(238, 263) : rng.Next(143, 158);
         }
 
-        public string getDescription()
+
+        public static Card RandomRelic(string type, Random rng)
+        {
+            switch (type)
+            {
+                default:
+                    return Dict.cardL[rng.Next(73)];
+                case "Silent":
+                    return Dict.cardL[rng.Next(73, 146)];
+                case "Defect":
+                    return Dict.cardL[rng.Next(146, 219)];
+                case "Watcher":
+                    return Dict.cardL[rng.Next(221, 294)];
+                case "Colorless":
+                    return Dict.cardL[rng.Next(297, 332)];
+                case "All Heroes":
+                    return Dict.cardL[rng.Next(294)];
+            }
+        }
+        public string GetDescription()
         {
             switch (Name)
             {
@@ -56,16 +75,16 @@
                 case "Centennial Puzzle": return $"The first time you lose HP each combat, draw 3 cards.";
                 case "Ceramic Fish": return $"Whenever you add a card to your deck, gain 9 gold.";
                 case "Dream Catcher": return $"Whenever you rest, you may add a card to your deck.";
-                case "Happy Flower": return $"Every 3 turns, gain 1 Energy. {(isActive ? $"({PersistentCounter} turns left)" : "")}";
+                case "Happy Flower": return $"Every 3 turns, gain 1 Energy. {(IsActive ? $"({PersistentCounter} turns left)" : "")}";
                 case "Juzu Bracelet": return $"Regular enemy combats are no longer encountered in ? rooms.";
                 case "Lantern": return $"Gain 1 Energy on the first turn of each combat.";
-                case "Maw Bank": return $"Whenever you climb a floor, gain 12 Gold.{(isActive ? "No longer works when you spend any Gold at the shop." : "Inactive.")} ";
+                case "Maw Bank": return $"Whenever you climb a floor, gain 12 Gold.{(IsActive ? "No longer works when you spend any Gold at the shop." : "Inactive.")} ";
                 case "Meal Ticket": return $"Whenever you enter a shop room, heal 15 HP.";
-                case "Nunchaku": return $"Every time you play 10 Attacks, gain 1 Energy. {(isActive ? $"({PersistentCounter} Attacks needed)" : "")}";
+                case "Nunchaku": return $"Every time you play 10 Attacks, gain 1 Energy. {(IsActive ? $"({PersistentCounter} Attacks needed)" : "")}";
                 case "Oddly Smooth Stone": return $"At the start of each combat, gain 1 Dexterity.";
-                case "Omamori": return $"Negate the next {(isActive ? $"{PersistentCounter}" : "0")} Curses you obtain. ";
+                case "Omamori": return $"Negate the next {(IsActive ? $"{PersistentCounter}" : "0")} Curses you obtain. ";
                 case "Orichalchum": return $"If you end your turn without Block, gain 6 Block.";
-                case "Pen Nib": return $"Every 10th Attack you play deals double damage. {(isActive ? $"({PersistentCounter} Attacks needed)" : "")}";
+                case "Pen Nib": return $"Every 10th Attack you play deals double damage. {(IsActive ? $"({PersistentCounter} Attacks needed)" : "")}";
                 case "Potion Slots": return $"Upon pickup, gain 2 Potion slots.";
                 case "Perserved Insect": return $"Enemies in Elite rooms have 25% less HP.";
                 case "Regal Pillow": return $"Heal an additional 15 HP when you Rest.";
@@ -92,15 +111,15 @@
                 case "Molten Egg": return $"Whenever you add an Attack card to your deck, it is Upgraded.";
                 case "Gremlin Horn": return $"Whenever an enemy dies, gain 1 Energy and draw 1 card.";
                 case "Horn Cleat": return $"At the start of your 2nd turn, gain 14 Block.";
-                case "Ink Bottle": return $"Whenever you play 10 cards, draw 1 card. {(isActive ? $"({PersistentCounter} Card plays needed)" : "")}";
-                case "Kunai": return $"Every time you play 3 Attacks in a single turn, gain 1 Dexterity. {(isActive ? $"({PersistentCounter} Attacks needed)" : "")}";
-                case "Shuriken": return $"Every time you play 3 Attacks in a single turn, gain 1 Strength. {(isActive ? $"({PersistentCounter} Attacks needed)" : "")}";
-                case "Letter Opener": return $"Every time you play 3 Skills in a single turn, deal 5 damage to ALL enemies. {(isActive ? $"({PersistentCounter} Skills needed)" : "")}";
-                case "Matryoshka": return $"The next {(isActive ? $"{PersistentCounter}" : "0")} non-boss chests you open contain 2 Relics.";
+                case "Ink Bottle": return $"Whenever you play 10 cards, draw 1 card. {(IsActive ? $"({PersistentCounter} Card plays needed)" : "")}";
+                case "Kunai": return $"Every time you play 3 Attacks in a single turn, gain 1 Dexterity. {(IsActive ? $"({PersistentCounter} Attacks needed)" : "")}";
+                case "Shuriken": return $"Every time you play 3 Attacks in a single turn, gain 1 Strength. {(IsActive ? $"({PersistentCounter} Attacks needed)" : "")}";
+                case "Letter Opener": return $"Every time you play 3 Skills in a single turn, deal 5 damage to ALL enemies. {(IsActive ? $"({PersistentCounter} Skills needed)" : "")}";
+                case "Matryoshka": return $"The next {(IsActive ? $"{PersistentCounter}" : "0")} non-boss chests you open contain 2 Relics.";
                 case "Meat on the Bone": return $"If your HP is at or below 50% at the end of combat, heal 12 HP.";
                 case "Mercury Hourglass": return $"At the start of your turn, deal 3 damage to ALL enemies.";
                 case "Mummified Hand": return $"Whenever you play a Power, a random card in your hand costs 0 for the turn.";
-                case "Ornamental Fan": return $"Every time you play 3 Attacks in a single turn, gain 4 Block. {(isActive ? $"({PersistentCounter} Attacks needed)" : "")}";
+                case "Ornamental Fan": return $"Every time you play 3 Attacks in a single turn, gain 4 Block. {(IsActive ? $"({PersistentCounter} Attacks needed)" : "")}";
                 case "Pantograph": return $"At the start of boss combats, heal 25 HP.";
                 case "Pear": return $"Raise your Max HP by 10.";
                 case "Question Card": return $"On future Card Reward screens you have 1 additional card to choose from.";
@@ -127,8 +146,8 @@
                 case "Ginger": return $"You can no longer become Weakened.";
                 case "Girya": return $"You can now gain Strength at Rest Sites. ({PersistentCounter} times left)";
                 case "Ice Cream": return $"Energy is now conserved between turns.";
-                case "Incense Burner": return $"Every 6 turns, gain 1 Intangible. {(isActive ? $"({PersistentCounter} turns left)" : "")}";
-                case "Lizard Tail": return $"When you would die, heal to 50% of your Max HP instead. ({(isActive ? $"Active" : "Inactive")})";
+                case "Incense Burner": return $"Every 6 turns, gain 1 Intangible. {(IsActive ? $"({PersistentCounter} turns left)" : "")}";
+                case "Lizard Tail": return $"When you would die, heal to 50% of your Max HP instead. ({(IsActive ? $"Active" : "Inactive")})";
                 case "Mango": return $"Raise your Max HP by 14.";
                 case "Old Coin": return $"Gain 300 Gold.";
                 case "Peace Pipe": return $"You can now remove cards from your deck at Rest Sites.";
@@ -197,7 +216,7 @@
                 case "Wrist Blade": return $"Attacks that cost 0 deal 4 additional damage.";
                 case "Hovering Kite": return $"The first time you discard a card each turn, gain 1 Energy.";
                 case "Frozen Core": return $"Replaces Cracked Core. If you end your turn with empty Orb slots, Channel 1 Frost.";
-                case "Inserter": return $"Every 2 turns, gain 1 Orb slot. {(isActive ? $"({PersistentCounter} turns left)" : "")}";
+                case "Inserter": return $"Every 2 turns, gain 1 Orb slot. {(IsActive ? $"({PersistentCounter} turns left)" : "")}";
                 case "Nuclear Battery": return $"At the start of each combat, Channel 1 Plasma.";
                 case "Holy Water": return $"Replaces Pure Water. At the start of each combat, add 3 Miracles to your hand.";
                 case "Violet Lotus": return $"Whenever you exit Calm, gain an additional Energy.";
@@ -210,7 +229,7 @@
                 case "Mark of the Bloom": return $"You can no longer heal.";
                 case "Mutagenic Strength": return $"Start each combat with 3 Strength that is lost at the end of your turn.";
                 case "N'loths Gift": return $"Triples the chance of receiving rare cards as monster rewards.";
-                case "N'loths Hungry Face": return $"The next non-boss chest you open is empty. ({(isActive ? $"Active" : "Inactive")})";
+                case "N'loths Hungry Face": return $"The next non-boss chest you open is empty. ({(IsActive ? $"Active" : "Inactive")})";
                 case "Necronomicon": return $"The first Attack played each turn that costs 2 or more is played twice. When you take this relic, become Cursed.";
                 case "Neow's Lament": return $"Enemies in your first 3 combats will have 1 HP.";
                 case "Nilry's Codex": return $"At the end of each turn, you can choose 1 of 3 random cards to shuffle into your draw pile.";

@@ -95,7 +95,7 @@
             return (RoomNumber == r.RoomNumber) && (Floor == r.Floor);
         }
 
-        public int SortByFloorAscending(int floor1, int floor2)
+        public static int SortByFloorAscending(int floor1, int floor2)
         {
 
             return floor1.CompareTo(floor2);
@@ -125,7 +125,7 @@
             if (Object.ReferenceEquals(x, y)) return true;
 
             //Check whether any of the compared objects is null.
-            if (Object.ReferenceEquals(x, null) || Object.ReferenceEquals(y, null))
+            if (x is null || y is null)
                 return false;
 
             //Check whether the products' properties are equal.
@@ -138,7 +138,7 @@
         public int GetHashCode(Room room)
         {
             //Check whether the object is null
-            if (Object.ReferenceEquals(room, null)) return 0;
+            if (room is null) return 0;
 
             //Get hash code for the Name field if it is not null.
             int hashFloor = room.Floor == null ? 0 : room.Floor.GetHashCode();

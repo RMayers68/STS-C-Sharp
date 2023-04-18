@@ -93,7 +93,7 @@
 
         // Hero exclusive methods
 
-        public void setMaxHP(int change)
+        public void SetMaxHP(int change)
         {
             MaxHP += change;
             if (Hp > MaxHP)
@@ -144,13 +144,13 @@
                 if (Hp <= 0) return;
                 foreach (var target in encounter)
                 {
-                    if (FindBuff("Strength", Buffs) != null)
-                        damage += FindBuff("Strength", Buffs).Intensity.GetValueOrDefault(0);
+                    if (FindBuff("Strength") != null)
+                        damage += FindBuff("Strength").Intensity;
                     if (Stance == "Wrath")
-                        damage = damage * 2;
-                    if (FindBuff("Weak", Buffs) != null)
+                        damage *= 2;
+                    if (FindBuff("Weak") != null)
                         damage = Convert.ToInt32(damage * 0.75);
-                    if (FindBuff("Vulnerable",target.Buffs) != null)
+                    if (target.FindBuff("Vulnerable") != null)
                         damage = Convert.ToInt32(damage * 1.5);
                     if (target.Block > 0)
                     {
@@ -164,11 +164,11 @@
                     else
                         target.Hp -= damage;
                     Console.WriteLine($"{Name} attacked {target.Name} for {damage} damage!");
-                    if (FindBuff("Curl Up", target.Buffs) != null)      // Louse Curl Up Effect
+                    if (target.FindBuff("Curl Up") is Buff curlUp && curlUp != null)      // Louse Curl Up Effect
                     {
-                        Console.WriteLine($"The Louse has curled up and gained {target.Buffs[0].Intensity} Block!");
-                        target.Block += target.Buffs[0].Intensity.GetValueOrDefault();
-                        target.Buffs.RemoveAt(0);
+                        Console.WriteLine($"The Louse has curled up and gained {curlUp.Intensity} Block!");
+                        target.Block += curlUp.Intensity;
+                        target.Buffs.Remove(curlUp);
                     }
                 }
                 
@@ -199,8 +199,8 @@
                         break;
                 }
             // Mental Fortress Check
-            if (FindBuff("Mental Fortress", Buffs) != null)                              
-                GainBlock(FindBuff("Mental Fortress", Buffs).Intensity.GetValueOrDefault());
+            if (FindBuff("Mental Fortress") != null)                              
+                GainBlock(FindBuff("Mental Fortress").Intensity);
             if (oldStance != Stance && oldStance == "Calm")
                 Energy += 2;
             else if (oldStance != Stance && Stance == "Divinity")
@@ -252,6 +252,15 @@
             }
         }
 
+        // Method to look if hand is full and sending card to discard pile if hand is full
+        public void AddToHand(Card card)
+        {
+            if (card == null) return;
+            if (Hand.Count < 10)
+                Hand.Add(card);
+            else DiscardPile.Add(card);
+        }
+
         // Method for adding to current energy amount for the turn
         public void GainTurnEnergy(int energy)
         {
@@ -267,17 +276,34 @@
             else Console.WriteLine($"The {Name} lost {amount * -1} Gold!");
         }
 
-        public void CombatRewards(List<Card> deck, Random rng)
+        public void CombatRewards(List<Card> deck, Random rng, string roomLocation)
         {
-            List<Card> cardReward = Card.RandomCards(Name,3, rng);
-            deck.Add(Card.ChooseCard(cardReward, "add to your Deck."));
-            GoldChange(35);
-            if (rng.Next(10) < PotionChance)
+            deck.Add(Card.ChooseCard(Card.RandomCards(Name, 3, rng), "add to your Deck."));
+            GoldChange(roomLocation == "Boss" ? rng.Next(95,106) : roomLocation == "Elite" ? rng.Next(35,36) : rng.Next(10,21));
+            if (roomLocation == "Boss")
+
+            if (rng.Next(10) < PotionChance || FindRelic("White Beast Statue") != null)
             {
                 Potions.Add(Dict.potionL[rng.Next(10)]);
                 PotionChance--;
             }
             else PotionChance++;
+        }
+
+        public void ShuffleDrawPile(Random rng)
+        {
+            int n = DrawPile.Count;
+            while (n > 1)
+            {
+                n--;
+                int k = rng.Next(n + 1);
+                (DrawPile[n], DrawPile[k]) = (DrawPile[k], DrawPile[n]);
+            }
+        }
+
+        public Relic FindRelic(string name)
+        {
+            return Relics.Find(x => x.Name == name);
         }
     }
 }
