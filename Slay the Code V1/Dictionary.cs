@@ -466,7 +466,7 @@
             { 82, new Buff("Study", true, 3) },
             { 83, new Buff("Talk to the Hand", false, 3) },
             { 84, new Buff("Wave of the Hand", true, 3) },
-            { 85, new Buff("Wreath of Flame", true, 3) },
+            { 85, new Buff("Vigor", true, 3) },
             { 86, new Buff("Magnetism", true, 3) },
             { 87, new Buff("Sadistic Nature", false, 3) },
             { 88, new Buff("Mayhem", true, 3) },
@@ -525,7 +525,7 @@
             // Starter Relics
             { 0, new Relic("Burning Blood","Starter",6) },
             { 1, new Relic("Ring of the Snake", "Starter",2) },
-            { 2, new Relic("Cracked Core", "Starter", 1) },
+            { 2, new Relic("Cracked Core", "Starter", 0) },
             { 3, new Relic("Pure Water", "Starter", 1) },
             // Common Relics
             {4, new Relic("Akebeko", "Common", 8) },
@@ -636,6 +636,7 @@
             {107, new Relic("Emotion Chip", "Rare", 1)},
             {108, new Relic("Cloak Clasp", "Rare", 1)},
             {109, new Relic("Golden Eye", "Rare", 1)},
+            // Shop Relics
             {110, new Relic("Cauldron", "Shop", 5)},
             {111, new Relic("Chemical X", "Shop", 2)},
             {112, new Relic("Clockwork Souvenir", "Shop", 1)},

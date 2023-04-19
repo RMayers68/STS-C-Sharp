@@ -117,7 +117,7 @@
                 "Study" => $"At the end of your turn, shuffle {Intensity} Insight(s) into your draw pile.",
                 "Talk to the Hand" => $"Whenever you attack this enemy, gain {Intensity} Block.",
                 "Wave of the Hand" => $"Whenever you gain Block this turn, apply {Intensity} Weak to ALL enemies.",
-                "Wreath of Flame" => $"Your next Attack deals {Intensity} additional damage.",
+                "Vigor" => $"Your next Attack deals {Intensity} additional damage.",
                 "Magnetism" => $"t the start of each turn, add {Intensity} random Colorless card(s) to your hand.",
                 "Sadistic Nature" => $"Whenever you apply a Debuff to an enemy, they take {Intensity} damage.",
                 "Mayhem" => $"At the start of your turn, play the {Intensity} top card(s) of your draw pile.",

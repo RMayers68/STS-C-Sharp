@@ -12,6 +12,7 @@
         public int Gold { get; set; }
         public string? Stance { get; set; }
         public List<Buff> Buffs { get; set; }
+        public List<Relic> Relics { get; set; }
         public List<string> Actions { get; set; }
 
 
@@ -37,8 +38,10 @@
 			Console.WriteLine($"The {Name} gained {block} Block.");
 		}
 
-		public void AddBuff(int ID, int effect)
+		public void AddBuff(int ID, int effect, Hero hero = null )
 		{
+			if ((ID == 2 && FindRelic("Ginger") != null) || (ID == 6 && FindRelic("Turnip") != null))
+				return;
 			if (effect == 0) return;
             // Artifact stopping debuffs
             if ((!Dict.buffL[ID].BuffDebuff) && FindBuff("Artifact") != null)
@@ -50,7 +53,13 @@
 			// If buff is not there, add it to target's list
 			if (FindBuff(Dict.buffL[ID].Name) == null)
 				Buffs.Add(new Buff(Dict.buffL[ID]));
-			Buff buff = FindBuff(Dict.buffL[ID].Name); 
+			Buff buff = FindBuff(Dict.buffL[ID].Name);
+
+			// Misc checks
+			if (buff.Name == "Poison" && hero.FindRelic("Snecko Skull") != null)
+				effect++;
+			if (buff.Name == "Vulnerable" && hero.FindRelic("Champion") != null)
+				AddBuff(2, 1);
 			// Add attributes based on type of Buff
 			byte b = Dict.buffL[ID].Type switch
 			{
@@ -77,15 +86,17 @@
 						Actions.Add($"Mantra Gained: {effect}");
 					break;
 			}
+			if (hero != null && hero.FindBuff("Sadistic") is Buff sadistic && sadistic != null)
+				NonAttackDamage(this, sadistic.Intensity);
 		}
 
         public Buff FindBuff(string name)
         {
-            return Buffs.Find(x => x.Name == name);
+            return Buffs.Find(x => x.Name.Contains(name));
         }
 
         //HP Altering Methods
-        public void SingleAttack(Actor target, int damage)
+        public void Attack(Actor target, int damage)
 		{
 			if (Hp <= 0) return;
 			if (FindBuff("Strength") != null)
@@ -93,27 +104,44 @@
             if (Stance == "Wrath" || target.Stance == "Wrath")
                 damage *= 2;
 			if (FindBuff("Weak") != null)
-				damage = Convert.ToInt32(damage * 0.75);
+			{
+				if (target.FindRelic("Krane") == null)
+					damage = Convert.ToInt32(damage * 0.75);
+				else damage = Convert.ToInt32(damage * 0.60);
+            }				
 			if (FindBuff("Vulnerable") != null)
-				damage = Convert.ToInt32(damage * 1.5);
+			{
+                if (FindRelic("Phrog") != null)
+                    damage = Convert.ToInt32(damage * 1.75);
+                else if (target.FindRelic("Odd Mushroom") != null) 
+					damage = Convert.ToInt32(damage * 1.25);
+				else damage = Convert.ToInt32(damage * 1.50);
+            }				
+			Console.Write($"\n{Name} attacked the {target.Name}");
 			if (target.Block > 0)
 			{
-				target.Block -= damage;
-				if (target.Block < 0)
-				{
-					target.Hp -= Math.Abs(target.Block);
-					target.Block = 0;
-				}
-			}
-			else
-				target.Hp -= damage;
-			Console.WriteLine($"{Name} attacked for {damage} damage!");
+				int damageCalc = target.Block - damage;
+				damage -= target.Block;
+				target.Block = damageCalc;
+                Console.Write($", reducing {target.Name}'s Block to {target.Block}");
+            }
+			if (damage > 0)
+			{
+				if (FindRelic("Boot") != null && damage < 5)
+					damage = 5;
+				target.HPLoss(damage);
+                Console.Write($", dealing {damage} damage to {target.Name}'s HP!\n");
+            }			
             if (target.FindBuff("Curl Up") is Buff curlUp && curlUp != null)      // Louse Curl Up Effect
             {
                 Console.WriteLine($"The Louse has curled up and gained {curlUp.Intensity} Block!");
                 target.Block += curlUp.Intensity;
                 target.Buffs.Remove(curlUp);
             }
+			if (target.FindBuff("Thorns") is Buff thorns && thorns != null)
+				NonAttackDamage(this, thorns.Intensity);
+            if (target.FindBuff("Flame Barrier") is Buff flameBarrier && flameBarrier != null)
+                NonAttackDamage(this, flameBarrier.Intensity);
         }
 
 		public void NonAttackDamage(Actor target, int damage)
@@ -129,14 +157,31 @@
 				}
 			}
 			else
-				target.Hp -= damage;
-		}
+				target.HPLoss(damage);
+        }
 		
 		public void PoisonDamage(int damage)
 		{
-			Hp -= damage;
-			FindBuff("Poison").Duration -= 1;
+			HPLoss(damage);
+			FindBuff("Poison").Intensity--;
 		}
-		
-	}
+
+		public void HPLoss(int damage)
+		{
+			if (FindBuff("Buffer") is Buff buffer && buffer != null)
+			{
+				buffer.Counter--;
+				return;
+			}
+			if (FindRelic("Tungsten") != null)
+				damage--;
+			Hp -= damage;
+		}
+		// Easy searching for Relic
+        public Relic FindRelic(string name)
+        {
+			if (Relics == null) return null;
+            else return Relics.Find(x => x.Name.Contains(name));
+        }
+    }
 }

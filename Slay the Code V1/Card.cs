@@ -233,7 +233,7 @@ namespace STV
             if (Name == "Tactician")
                 hero.GainTurnEnergy(EnergyGained);
             else if (Name == "Reflex")
-                DrawCards(rng,hero,MagicNumber);
+                hero.DrawCards(rng,MagicNumber);
             MoveCard(hero.Hand, hero.DiscardPile);
             hero.Actions.Add("Discard");
         }
@@ -241,6 +241,8 @@ namespace STV
         public static void Scry(Hero hero, int amount)
         {
             int scryChoice = -1;
+            if (hero.FindRelic("Golden Eye") != null)
+                amount += 2;
             while (scryChoice != 0 && amount > 0)
             {
                 Console.WriteLine($"\nEnter the number of the card you would like to scry into your discard pile or hit 0 to move on.");
@@ -301,38 +303,6 @@ namespace STV
             };
         }
 
-        public static void DrawCards(Random rng,Hero hero, int cards)
-        {
-            while (hero.Hand.Count < 10)
-            {
-                if (hero.DrawPile.Count == 0)
-                    Discard2Draw(hero, rng);
-                if (hero.DrawPile.Count == 0)
-                    break;
-                hero.DrawPile.Last().MoveCard(hero.DrawPile, hero.Hand);
-                if (hero.Hand.Last().Name == "Deus Ex Machina")
-                {
-                    for (int i = 0; i < hero.Hand.Last().MagicNumber; i++)
-                    {
-                        if (hero.Hand.Count < 10)
-                            hero.Hand.Add(new Card(Dict.cardL[336]));
-                        else hero.DiscardPile.Add(new Card(Dict.cardL[336]));
-                    }
-                    hero.Hand.Last().Exhaust(hero, hero.Hand);
-                }                                  
-                cards--;
-                if (cards == 0)
-                    return;
-            }
-        }
-
-        // Takes all cards in discard, moves them to drawpile, and then shuffles the drawpile
-        public static void Discard2Draw(Hero hero, Random rng)
-        {
-            for (int i = hero.DiscardPile.Count; i > 0; i--)
-                hero.DiscardPile.Last().MoveCard(hero.DiscardPile, hero.DrawPile);
-            hero.ShuffleDrawPile(rng);
-        }
 
         // Description String
         public string GetDescription()
@@ -746,6 +716,8 @@ namespace STV
                 {
                     foreach (Card forceField in FindAllCardsInCombat(hero,"Force Field"))
                         forceField.EnergyCost--;
+                    if (hero.FindRelic("Bird") != null)
+                        hero.CombatHeal(2);
                     hero.Hand.Remove(this);
                 }                   
                 else if (Name == "Tantrum")
@@ -759,7 +731,7 @@ namespace STV
 
             // Card Effects begin here
             Console.WriteLine($"You played {Name}.");
-            int target = 0, wallop = encounter[target].Hp, xEnergy = hero.Energy;
+            int target = 0, extraDamage = 0, wallop = encounter[target].Hp, xEnergy = hero.Energy;
             string lastCardPlayed = "";
             if (EnergyCost == -1)
                 hero.Energy = 0;
@@ -934,12 +906,21 @@ namespace STV
                         hero.CardBlock(BlockAmount);
             }
 
-            // Damage Phase
+            // Damage Phase and Damage buff effects
+            if (Type == "Attack" && hero.FindBuff("Vigor") is Buff vigor && vigor != null)
+            {
+                extraDamage += vigor.Intensity;
+                hero.Buffs.Remove(vigor);
+            }
+
+            if (Type == "Attack" && hero.FindRelic("Wrist") != null && TmpEnergyCost == 0)
+                extraDamage += 4;
 
             if (AttackAll)
             {
                 for (int i = 0; i < AttackLoops; i++)
-                    hero.AttackAll(encounter, AttackDamage);
+                    foreach (Enemy e in encounter)
+                        hero.Attack(e, AttackDamage + extraDamage);
             }
 
             if (SingleAttack)
@@ -948,22 +929,22 @@ namespace STV
                 {
                     default:
                         for (int i = 0; i < AttackLoops; i++)
-                            hero.SingleAttack(encounter[target], AttackDamage);
+                            hero.Attack(encounter[target], AttackDamage + extraDamage);
                         if (Name == "Bane" && encounter[target].FindBuff("Poison") != null)
-                            hero.SingleAttack(encounter[target], AttackDamage);
+                            hero.Attack(encounter[target], AttackDamage + extraDamage);
                         break;
                     case "Sword Boomerang":
                         for (int i = 0; i < AttackLoops; i++)
                         {
                             target = rng.Next(0, encounter.Count);
-                            hero.SingleAttack(encounter[target], AttackDamage);
+                            hero.Attack(encounter[target], AttackDamage + extraDamage);
                         }
                         break;
                     case "Rip And Tear":
                         for (int i = 0; i < AttackLoops; i++)
                         {
                             target = rng.Next(0, encounter.Count);
-                            hero.SingleAttack(encounter[target], AttackDamage);
+                            hero.Attack(encounter[target], AttackDamage + extraDamage);
                         }
                         break;
                     case "Thunder Strike":
@@ -974,7 +955,7 @@ namespace STV
                         for (int i = 0; i < AttackLoops; i++)
                         {
                             target = rng.Next(0, encounter.Count);
-                            hero.SingleAttack(encounter[target], AttackDamage);
+                            hero.Attack(encounter[target], AttackDamage + extraDamage);
                         }
                         break;
                 }
@@ -1030,36 +1011,36 @@ namespace STV
                         break;
                     if (Name == "Malaise")
                     {
-                        encounter[target].AddBuff(BuffID, (xEnergy + BuffAmount) * -1);
-                        encounter[target].AddBuff(2, xEnergy + BuffAmount);
+                        encounter[target].AddBuff(BuffID, (xEnergy + BuffAmount) * -1,hero);
+                        encounter[target].AddBuff(2, xEnergy + BuffAmount, hero);
                     }
-                    else encounter[target].AddBuff(BuffID, BuffAmount);
+                    else encounter[target].AddBuff(BuffID, BuffAmount, hero);
                     if (Name == "Uppercut")
-                            encounter[target].AddBuff(2, BuffAmount);                     
+                            encounter[target].AddBuff(2, BuffAmount, hero);                     
                     else if (Name == "Corpse Explosion" )
-                            encounter[target].AddBuff(43, 1);                                       
+                            encounter[target].AddBuff(43, 1, hero);                                       
                     else if (Name == "Dark Shackles")
-                            encounter[target].AddBuff(30, BuffAmount);
+                            encounter[target].AddBuff(30, BuffAmount, hero);
                     break;
                 }
                 if (!Targetable)
                 {
                     if (Name == "Bouncing Flask")
                         for (int i = 0; i < MagicNumber; i++)
-                            encounter[rng.Next(0, encounter.Count)].AddBuff(BuffID, BuffAmount);
+                            encounter[rng.Next(0, encounter.Count)].AddBuff(BuffID, BuffAmount, hero);
                     else if (Name == "Indignation" && hero.Stance != "Wrath")
                         hero.SwitchStance("Wrath");
                     else foreach (Enemy e in encounter)
-                        e.AddBuff(BuffID, BuffAmount);
+                        e.AddBuff(BuffID, BuffAmount, hero);
                     if (Name == "Shockwave")
                         foreach (Enemy e in encounter)
-                            e.AddBuff(1, BuffAmount);
+                            e.AddBuff(1, BuffAmount, hero);
                     else if (Name == "Crippling Cloud")
                         foreach (Enemy e in encounter)
-                            e.AddBuff(2, 2);
+                            e.AddBuff(2, 2, hero);
                     else if (Name == "Piercing Wail")
                         foreach (Enemy e in encounter)
-                            e.AddBuff(30, BuffAmount);
+                            e.AddBuff(30, BuffAmount, hero);
                 }
             }
 
@@ -1073,7 +1054,7 @@ namespace STV
                 else if (Name == "Compile Driver")
                     CardsDrawn = hero.Orbs.Distinct().Count();
                 else if (Name == "Deep Breath")
-                    Discard2Draw(hero, rng);
+                    hero.Discard2Draw(rng);
                 // Conditions that would cause no cards to be drawn
                 if ((Name == "Impatience" && hero.Hand.Any(x => x.Type == "Attack")) || (Name == "FTL" && hero.Actions.Count > MagicNumber) || (Name == "Sanctity" && lastCardPlayed != "Skill") 
                 || (Name == "Dropkick" && encounter[target].FindBuff("Vulnerable") != null) || (Name == "Heel Hook" && encounter[target].FindBuff("Vulnerable") != null))
@@ -1088,13 +1069,13 @@ namespace STV
                     for (int i = 0; i < CardsDrawn; i++)
                     {
                         if (hero.Hand.Count == 10) break;
-                        DrawCards(rng,hero, 1);
+                        hero.DrawCards(rng, 1);
                         if (hero.Hand.Last().EnergyCost != 0)
                             hero.Hand.Last().Discard(hero, rng);
                     }
                     break;
                 }                    
-                else DrawCards(rng, hero, CardsDrawn);
+                else hero.DrawCards(rng, CardsDrawn);
                 if (Name == "Escape Plan" && hero.Hand.Last().Type == "Skill" && hero.FindBuff("No Draw") != null)
                     hero.CardBlock(BlockAmount);
                 break;
@@ -1108,6 +1089,7 @@ namespace STV
                     || (Name == "Sneaky Strike" && !hero.Actions.Contains("Discard")) || (Name == "Sunder" && encounter[target].Hp > 0))
                     break;
                 else hero.GainTurnEnergy(EnergyGained);
+                break;
             }
 
             // Post-Damage Effects
@@ -1642,7 +1624,7 @@ namespace STV
                         hero.Hand[i].Discard(hero,rng);
                         MagicNumber++;
                     }
-                    DrawCards( rng, hero, MagicNumber);
+                    hero.DrawCards(rng, MagicNumber);
                 }
                 else for (int i = 0; i < MagicNumber; i++)
                         ChooseCard(hero.Hand, "discard").Discard(hero, rng);

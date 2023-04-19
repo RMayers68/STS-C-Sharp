@@ -58,14 +58,14 @@
                     break;
                 case "Fear Potion":
                     target = hero.DetermineTarget(encounter);
-                    encounter[target].AddBuff(1, EffectAmount);
+                    encounter[target].AddBuff(1, EffectAmount, hero);
                     break;
                 case "Swift Potion":
-                    Card.DrawCards(rng,hero, EffectAmount);
+                    hero.DrawCards(rng, EffectAmount);
                     break;
                 case "Weak Potion":
                     target = hero.DetermineTarget(encounter);
-                    encounter[target].AddBuff(2, EffectAmount);
+                    encounter[target].AddBuff(2, EffectAmount, hero);
                     break;
                 case "Focus Potion":
                     hero.AddBuff(7, EffectAmount);
@@ -121,7 +121,7 @@
                     break;
                 case "Poison Potion":
                     target = hero.DetermineTarget(encounter);
-                    encounter[target].AddBuff(39, EffectAmount);
+                    encounter[target].AddBuff(39, EffectAmount, hero);
                     break;
                 case "Bottled Miracle":
                     for (int i = 0; i < EffectAmount; i++)
@@ -159,25 +159,7 @@
                     hero.AddBuff(95,EffectAmount);
                     break;
                 case "Gambler's Brew":
-                    int gambleChoice = -1;
-                    int gambleAmount = hero.Hand.Count;
-                    int gamble = 0;
-                    while (gambleChoice != 0 && gambleAmount > 0)
-                    {
-                        Console.WriteLine($"\nEnter the number of the card you would like to discard or hit 0 to move on.");
-                        for (int i = 1; i <= gambleAmount; i++)
-                            Console.WriteLine($"{i}:{hero.DrawPile[hero.Hand.Count - i].Name}");
-                        while (!Int32.TryParse(Console.ReadLine(), out gambleChoice) || gambleChoice < 0 || gambleChoice > gambleAmount)
-                            Console.WriteLine("Invalid input, enter again:");
-                        if (gambleChoice > 0)
-                        {
-                            Card gambledCard = hero.Hand[^gambleChoice];
-                            gambledCard.MoveCard(hero.Hand, hero.DiscardPile);
-                            gambleAmount--;
-                            gamble++;
-                        }
-                    }
-                    Card.DrawCards(rng, hero, gamble);
+                    STS.GamblingIsGood(hero, rng);
                     break;
                 case "Liquid Memories":
                     for (int i = 0; i < EffectAmount; i++)
@@ -240,7 +222,7 @@
                     // Code combat to end
                     break;
                 case "Snecko Oil":
-                    Card.DrawCards(rng, hero, EffectAmount);
+                    hero.DrawCards(rng, EffectAmount);
                     foreach (Card c in hero.Hand)
                         c.SetEnergyCost(rng.Next(4));
                     break;
@@ -261,6 +243,7 @@
             // Toy Ornithopter Relic Check && Effect
             if (hero.Relics.Find(x => x.Name == "Toy Ornithopter") != null)
                 hero.HealHP(5);
+            hero.Potions.Remove(this);
         }
 
 

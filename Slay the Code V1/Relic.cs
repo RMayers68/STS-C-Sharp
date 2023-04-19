@@ -37,16 +37,14 @@
         }
 
 
-        public static Card RandomRelic(string type, Random rng)
+        public static Relic RandomRelic(string type, Random rng)
         {
             return type switch
             {
-                "Silent" => Dict.cardL[rng.Next(73, 146)],
-                "Defect" => Dict.cardL[rng.Next(146, 219)],
-                "Watcher" => Dict.cardL[rng.Next(221, 294)],
-                "Colorless" => Dict.cardL[rng.Next(297, 332)],
-                "All Heroes" => Dict.cardL[rng.Next(294)],
-                _ => Dict.cardL[rng.Next(73)],
+                "Silent" => Dict.relicL[rng.Next(73, 146)],
+                "Defect" => Dict.relicL[rng.Next(146, 219)],
+                "Watcher" => Dict.relicL[rng.Next(221, 294)],
+                _ => Dict.relicL[rng.Next(73)],
             };
         }
         public string GetDescription()
@@ -133,7 +131,7 @@
                 "Calipers" => $"At the start of your turn, lose 15 Block rather than all of your Block.",
                 "Captain's Wheel" => $"At the start of your 3rd turn, gain 18 Block.",
                 "Dead Branch" => $"Whenever you Exhaust a card, add a random card to your hand.",
-                "Du-Vu Doll" => $"For each Curse in your deck, start each combat with 1 additional Strength. (Current Strength: {PersistentCounter})",
+                "Du-Vu Doll" => $"For each Curse in your deck, start each combat with 1 additional Strength. (Current Strength: {EffectAmount})",
                 "Fossilized Helix" => $"Prevent the first time you would lose HP in combat.",
                 "Gambling Chip" => $"At the start of each combat, discard any number of cards then draw that many.",
                 "Ginger" => $"You can no longer become Weakened.",

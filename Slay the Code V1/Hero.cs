@@ -8,12 +8,12 @@
         public int EasyFights { get; set; }
         public int PotionSlots { get; set; }
         public int PotionChance { get; set; }
+        public int RemoveCost { get; set; }
         public List<Card> Deck { get; set; }
         public List<Card> DrawPile { get; set; }
         public List<Card> Hand { get; set; }
         public List<Card> DiscardPile { get; set; }
         public List<Card> ExhaustPile { get; set; }
-        public List<Relic> Relics { get; set; }
         public List<Orb> Orbs { get; set; }
         public List<Potion> Potions { get; set; }
         
@@ -31,7 +31,7 @@
                 this.MaxHP = hero.MaxHP;
                 this.Hp = hero.MaxHP;
                 this.MaxEnergy = 3;
-                this.Energy = 3;
+                this.Energy = 0;
                 this.Block = 0;
                 this.Deck = new();
                 this.DrawPile = new();
@@ -48,6 +48,7 @@
                 this.EasyFights = 0;
                 this.PotionSlots = 3;
                 this.PotionChance = 1;
+                this.RemoveCost = 75;
             }
         }
 
@@ -121,7 +122,7 @@
                     heal = Hp + heal - MaxHP;
                     Hp = MaxHP;
                 }                   
-                Console.WriteLine($"You have healed {heal} HP and are now at {Hp}/{MaxHP}!");
+                Console.WriteLine($"You have healed {heal} HP and are now at {Hp}/{MaxHP} HP!");
             }
         }
 
@@ -138,47 +139,10 @@
             return x - 1;
         }
 
-        public void AttackAll(List<Enemy> encounter, int damage)
-        {
-            {
-                if (Hp <= 0) return;
-                foreach (var target in encounter)
-                {
-                    if (FindBuff("Strength") != null)
-                        damage += FindBuff("Strength").Intensity;
-                    if (Stance == "Wrath")
-                        damage *= 2;
-                    if (FindBuff("Weak") != null)
-                        damage = Convert.ToInt32(damage * 0.75);
-                    if (target.FindBuff("Vulnerable") != null)
-                        damage = Convert.ToInt32(damage * 1.5);
-                    if (target.Block > 0)
-                    {
-                        target.Block -= damage;
-                        if (target.Block < 0)
-                        {
-                            target.Hp -= Math.Abs(target.Block);
-                            target.Block = 0;
-                        }
-                    }
-                    else
-                        target.Hp -= damage;
-                    Console.WriteLine($"{Name} attacked {target.Name} for {damage} damage!");
-                    if (target.FindBuff("Curl Up") is Buff curlUp && curlUp != null)      // Louse Curl Up Effect
-                    {
-                        Console.WriteLine($"The Louse has curled up and gained {curlUp.Intensity} Block!");
-                        target.Block += curlUp.Intensity;
-                        target.Buffs.Remove(curlUp);
-                    }
-                }
-                
-            }
-        }
-
         public void SelfDamage(int damage)
         {
             if (Hp <= 0) return;
-            this.Hp -= damage;
+            HPLoss(damage);
             Console.WriteLine($"{Name} hurt themselves for {damage} damage!");
         }
 
@@ -198,14 +162,16 @@
                         Console.WriteLine($"{Name} has left {oldStance} Stance.");
                         break;
                 }
-            // Mental Fortress Check
             if (FindBuff("Mental Fortress") != null)                              
                 GainBlock(FindBuff("Mental Fortress").Intensity);
             if (oldStance != Stance && oldStance == "Calm")
-                Energy += 2;
+            {
+                if (FindRelic("Violet") != null)
+                    Energy += 3;
+                else Energy += 2;
+            }               
             else if (oldStance != Stance && Stance == "Divinity")
                 Energy += 3;
-            // Flurry of Blows Check
             if (Card.FindCard("Flurry of Blows", DiscardPile) is Card flurryOfBlows && flurryOfBlows != null && Hand.Count < 10) 
                 flurryOfBlows.MoveCard(DiscardPile, Hand);               
         }
@@ -261,6 +227,35 @@
             else DiscardPile.Add(card);
         }
 
+        public void DrawCards(Random rng, int cards)
+        {
+            while (Hand.Count < 10)
+            {
+                if (DrawPile.Count == 0)
+                    Discard2Draw(rng);
+                if (DrawPile.Count == 0)
+                    break;
+                DrawPile.Last().MoveCard(DrawPile, Hand);
+                if (Hand.Last().Name == "Deus Ex Machina")
+                {
+                    for (int i = 0; i < Hand.Last().GetMagicNumber(); i++)
+                        AddToHand(new Card(Dict.cardL[336]));
+                    Hand.Last().Exhaust(this, this.Hand);
+                }
+                cards--;
+                if (cards == 0)
+                    return;
+            }
+        }
+
+        // Takes all cards in discard, moves them to drawpile, and then shuffles the drawpile
+        public void Discard2Draw(Random rng)
+        {
+            for (int i = DiscardPile.Count; i > 0; i--)
+                DiscardPile.Last().MoveCard(DiscardPile, DrawPile);
+            ShuffleDrawPile(rng);
+        }
+
         // Method for adding to current energy amount for the turn
         public void GainTurnEnergy(int energy)
         {
@@ -270,15 +265,24 @@
 
         public void GoldChange(int amount) //For when rewards are set
         {
+            if (FindRelic("Ectoplasm") != null && amount > 0)
+            {
+                Console.WriteLine("You gained no Gold due to Ectoplasm's Effect!");
+                return;
+            }
             Gold += amount;
             if (amount > 0)
+            {
+                if (FindRelic("Bloody") != null)
+                    HealHP(5);
                 Console.WriteLine($"The {Name} gained {amount} Gold!");
+            }               
             else Console.WriteLine($"The {Name} lost {amount * -1} Gold!");
         }
 
         public void CombatRewards(List<Card> deck, Random rng, string roomLocation)
         {
-            deck.Add(Card.ChooseCard(Card.RandomCards(Name, 3, rng), "add to your Deck."));
+            deck.Add(Card.ChooseCard(Card.RandomCards(Name, 3, rng), "add to your Deck"));
             GoldChange(roomLocation == "Boss" ? rng.Next(95,106) : roomLocation == "Elite" ? rng.Next(35,36) : rng.Next(10,21));
             if (roomLocation == "Boss")
 
@@ -299,11 +303,6 @@
                 int k = rng.Next(n + 1);
                 (DrawPile[n], DrawPile[k]) = (DrawPile[k], DrawPile[n]);
             }
-        }
-
-        public Relic FindRelic(string name)
-        {
-            return Relics.Find(x => x.Name == name);
         }
     }
 }
