@@ -142,7 +142,7 @@ namespace STV
                         break;
                     case 2:                                                             // LIBRARY
                         ScreenWipe();
-                        ConsoleTableBuilder.From(Dict.cardL.Values.ToList()).ExportAndWriteLine();
+                        ConsoleTableBuilder.From(CardLibrary.ViewLibrary(true)).ExportAndWriteLine();
                         Pause();
                         break;
                 }
@@ -163,12 +163,12 @@ namespace STV
                     else Battle.Combat(hero, Enemy.CreateEncounter(2 + actModifier), activeRoom);
                     break;
                 case "Event":
-                    if (hero.FindRelic("Ssserpent") != null)
+                    if (hero.HasRelic("Ssserpent"))
                         hero.GoldChange(50);
                     Event.EventDecider(hero, actModifier);
                     break;
                 case "Rest Site":
-                    if (hero.FindRelic("Eternal") != null)
+                    if (hero.HasRelic("Eternal"))
                         hero.HealHP(3 * (hero.Deck.Count / 5));
                     int restChoice = -1;
                     while (restChoice != 0)
@@ -181,10 +181,10 @@ namespace STV
                         {
                             default: // Rest
                                 int regalPillow = 0;
-                                if (hero.FindRelic("Regal") != null)
+                                if (hero.HasRelic("Regal"))
                                     regalPillow = 15;
                                 hero.HealHP(Convert.ToInt32(hero.MaxHP * 0.3) + regalPillow);
-                                if (hero.FindRelic("Dream") != null)
+                                if (hero.HasRelic("Dream"))
                                     hero.AddToDeck(Card.ChooseCard(Card.RandomCards(hero.Name, 3), "add to your Deck"));
                                 break;
                             case 2: // Upgrade
@@ -199,13 +199,13 @@ namespace STV
                                 }
                                 break;
                             case 4: // Toke
-                                if (hero.FindRelic("Peace") != null)
+                                if (hero.HasRelic("Peace"))
                                     hero.Deck.Remove(Card.ChooseCard(hero.Deck, "remove from your Deck"));
                                 break;
                         }
                         Pause();
                     }
-                    if (hero.FindRelic("Ancient") != null)
+                    if (hero.HasRelic("Ancient"))
                         hero.GainTurnEnergy(2);
                     break;
                 case "Merchant":
@@ -215,12 +215,12 @@ namespace STV
                     hero.GoldChange(100);
                     break;
                 case "Elite":
-                    if (hero.FindRelic("Sling") != null)
+                    if (hero.HasRelic("Sling"))
                         hero.AddBuff(4,2);
                     Battle.Combat(hero, Enemy.CreateEncounter(3 + actModifier), activeRoom);
                     break;
                 case "Boss":
-                    if (hero.FindRelic("Pantograph") != null)
+                    if (hero.HasRelic("Pantograph"))
                         hero.CombatHeal(25);
                     Battle.Combat(hero, Enemy.CreateEncounter(4 + actModifier), activeRoom);
                     break;

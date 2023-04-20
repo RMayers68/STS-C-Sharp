@@ -168,7 +168,7 @@
                 GainBlock(FindBuff("Mental Fortress").Intensity);
             if (oldStance != Stance && oldStance == "Calm")
             {
-                if (FindRelic("Violet") != null)
+                if (HasRelic("Violet"))
                     Energy += 3;
                 else Energy += 2;
             }               
@@ -204,12 +204,12 @@
                     omamori.EffectAmount--;
                     return;
                 }
-                else if (FindRelic("Darkstone") != null)
+                else if (HasRelic("Darkstone"))
                     SetMaxHP(6);
             }       
-            if ((card.Type == "Attack" && FindRelic("Molten Egg") != null) || (card.Type == "Skill" && FindRelic("Toxic Egg") != null) || (card.Type == "Power" && FindRelic("Frozen Egg") != null))
+            if ((card.Type == "Attack" && HasRelic("Molten Egg")) || (card.Type == "Skill" && HasRelic("Toxic Egg")) || (card.Type == "Power" && HasRelic("Frozen Egg")))
                 card.UpgradeCard();
-            if (FindRelic("Ceramic") != null)
+            if (HasRelic("Ceramic"))
                 GoldChange(9);
             Deck.Add(new(card));
             Console.WriteLine(card != null ? $"You have added {card.Name} to your Deck!" : "This was a check, remove now.\n");
@@ -253,7 +253,7 @@
 
         public void GoldChange(int amount) //For when rewards are set
         {
-            if (FindRelic("Ectoplasm") != null && amount > 0)
+            if (HasRelic("Ectoplasm") && amount > 0)
             {
                 Console.WriteLine("You gained no Gold due to Ectoplasm's Effect!");
                 return;
@@ -261,7 +261,7 @@
             Gold += amount;
             if (amount > 0)
             {
-                if (FindRelic("Bloody") != null)
+                if (HasRelic("Bloody"))
                     HealHP(5);
                 Console.WriteLine($"The {Name} gained {amount} Gold!");
             }               
@@ -280,19 +280,19 @@
             if (Name == "Defect")
                 OrbSlots = 3;
             else OrbSlots = 1;
-            if (FindRelic("Red Skull") is Relic redSkull && redSkull != null)
-                redSkull.IsActive = false;
-            if (FindRelic("Emotion") is Relic emotionChip && emotionChip != null)
-                emotionChip.IsActive = false;
+            if (HasRelic("Red Skull"))
+                FindRelic("Red Skull").IsActive = false;
+            if (HasRelic("Emotion"))
+                FindRelic("Emotion").IsActive = false;
         }
 
         public void CombatRewards(string roomLocation)
         {
             AddToDeck(Card.ChooseCard(Card.RandomCards(Name, 3), "add to your Deck"));
-            GoldChange(Convert.ToInt32((roomLocation == "Boss" ? HeroRNG.Next(95,106) : roomLocation == "Elite" ? HeroRNG.Next(35,36) : HeroRNG.Next(10,21)) * (FindRelic("Golden Idol") != null ? 1.25 : 1.00)));
+            GoldChange(Convert.ToInt32((roomLocation == "Boss" ? HeroRNG.Next(95,106) : roomLocation == "Elite" ? HeroRNG.Next(35,36) : HeroRNG.Next(10,21)) * (HasRelic("Golden Idol") ? 1.25 : 1.00)));
             if (roomLocation == "Boss")
 
-            if (HeroRNG.Next(10) < PotionChance || FindRelic("White Beast Statue") != null)
+            if (HeroRNG.Next(10) < PotionChance || HasRelic("White Beast Statue"))
             {
                 AddToPotions(Potion.RandomPotion());
                 PotionChance--;
@@ -302,9 +302,9 @@
 
         public void ShuffleDrawPile()
         {
-            if (FindRelic("Melange") != null)
+            if (HasRelic("Melange"))
                 Card.Scry(this, 3);
-            if (FindRelic("The Abacus") != null)
+            if (HasRelic("The Abacus"))
                 GainBlock(6);
             if (FindRelic("Sundial") is Relic sundial && sundial != null)
             {

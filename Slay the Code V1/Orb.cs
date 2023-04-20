@@ -51,7 +51,7 @@
                 hero.Orbs.RemoveAt(0);
             }
             hero.Orbs.Add(channeledOrb);
-            hero.Actions.Add($"Channel {channeledOrb.Name} Orb");
+            hero.AddAction($"Channel {channeledOrb.Name} Orb");
         }
 
         public void Evoke(Hero hero, List<Enemy> encounter)

@@ -37,7 +37,7 @@
             return $"{Name} - {GetDescription()}";
         }
 
-        public void UsePotion(Hero hero,List<Enemy> encounter)                              // potion methods (correlating to PotionID)
+        public void UsePotion(Hero hero,List<Enemy> encounter, int turnNumber)                              // potion methods (correlating to PotionID)
         {
             int target = 0;
             if (hero.Relics.Find(x => x.Name == "Sacred Bark") != null)
@@ -74,21 +74,18 @@
                 case "Cultist Potion":
                     hero.AddBuff(3, EffectAmount);
                     break;
-                case "Attack Potion":
-                    Card attackPotion = new(Card.ChooseCard(Card.RandomCards(hero.Name, 3, "Attack"),"add to your hand"));
-                    attackPotion.SetTmpEnergyCost(0);
+                case "Attack Potion" or "Skill Potion" or "Power Potion" or "Colorless Potion":
+                    Card cardPotion;
+                    if (Name == "Colorless Potion")
+                        cardPotion = new(Card.ChooseCard(Card.RandomCards("Colorless", 3), "add to your hand"));
+                    else cardPotion = new(Card.ChooseCard(Card.RandomCards(hero.Name, 3, Name.Split(" ")[0]),"add to your hand"));
+                    cardPotion.SetTmpEnergyCost(0);
                     for (int i = 0; i < EffectAmount; i++)
-                        hero.AddToHand(attackPotion);                   
+                        hero.AddToHand(cardPotion);                   
                     break;
                 case "Blessing of the Forge":
                     foreach (Card c in hero.Hand)
                         c.UpgradeCard();
-                    break;
-                case "Colorless Potion":
-                    Card colorlessPotion = new(Card.ChooseCard(Card.RandomCards("Colorless", 3), "add to your hand"));
-                    colorlessPotion.SetTmpEnergyCost(0);
-                    for (int i = 0; i < EffectAmount; i++)
-                        hero.AddToHand(colorlessPotion);
                     break;
                 case "Dexterity Potion":
                     hero.AddBuff(9, EffectAmount);
@@ -100,18 +97,6 @@
                 case "Flex Potion":
                     hero.AddBuff(4, EffectAmount);
                     hero.AddBuff(30, EffectAmount);
-                    break;
-                case "Power Potion":
-                    Card powerPotion = new(Card.ChooseCard(Card.RandomCards(hero.Name, 3, "Power"), "add to your hand"));
-                    powerPotion.SetTmpEnergyCost(0);
-                    for (int i = 0; i < EffectAmount; i++)
-                        hero.AddToHand(powerPotion);
-                    break;
-                case "Skill Potion":
-                    Card skillPotion = new(Card.ChooseCard(Card.RandomCards(hero.Name, 3, "Skill"), "add to your hand"));
-                    skillPotion.SetTmpEnergyCost(0);
-                    for (int i = 0; i < EffectAmount; i++)
-                        hero.AddToHand(skillPotion);
                     break;
                 case "Speed Potion":
                     hero.AddBuff(4, EffectAmount);
@@ -142,7 +127,7 @@
                     for (int i = 0; i < EffectAmount; i++ )
                     {
                         Card distilledChaos = hero.DrawPile.Last();
-                        distilledChaos.CardAction(hero,encounter);
+                        distilledChaos.CardAction(hero,encounter,turnNumber);
                         if (distilledChaos.GetDescription().Contains("Exhaust") || distilledChaos.Type == "Status" || distilledChaos.Type == "Curse")
                             distilledChaos.Exhaust(hero, encounter, hero.DrawPile);
                         else if (distilledChaos.Type == "Power")

@@ -8,6 +8,7 @@ namespace STV
         public static void EventDecider(Hero hero, int actModifier)
         {
             hero.Actions.Clear();
+            EventRNG.Next(0, hero.Actions.Count);
             actModifier.CompareTo(actModifier);
             return;
         }

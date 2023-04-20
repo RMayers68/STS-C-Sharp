@@ -227,17 +227,17 @@ namespace STV
             MoveCard(leaveThisList, hero.ExhaustPile);
             if (Name == "Sentinel")
                 hero.GainTurnEnergy(EnergyGained);
-            if (hero.FindRelic("Charon's") != null)
+            if (hero.HasRelic("Charon's"))
             {
                 foreach (Enemy e in encounter)
                     hero.NonAttackDamage(e, 3);
             }
-            if (hero.FindRelic("Dead Branch") != null)
+            if (hero.HasRelic("Dead Branch"))
                 hero.AddToHand(Card.RandomCard(hero.Name));
             Console.WriteLine($"{Name} has been exhausted.");
         }
 
-        public void Discard(Hero hero, List<Enemy> encounter)
+        public void Discard(Hero hero, List<Enemy> encounter, int turnNumber)
         {
             if (hero.Hand.Count < 1)
                 return;
@@ -246,17 +246,19 @@ namespace STV
             else if (Name == "Reflex")
                 hero.DrawCards(MagicNumber,encounter);
             MoveCard(hero.Hand, hero.DiscardPile);
-            if (hero.FindRelic("Tingsha") != null)
+            if (hero.HasRelic("Tingsha"))
                 hero.NonAttackDamage(encounter[CardRNG.Next(encounter.Count)],3);
-            if (hero.FindRelic("Tough Bandages") != null)
+            if (hero.HasRelic("Tough Bandages"))
                 hero.GainBlock(3);
-            hero.Actions.Add("Discard");
+            hero.AddAction("Discard",turnNumber);
+            if (hero.HasRelic("Hovering Kite") && hero.Actions.FindAll(x => x == $"{turnNumber}: Discard").Count == 1)
+                hero.Energy++;
         }
 
         public static void Scry(Hero hero, int amount)
         {
             int scryChoice = -1;
-            if (hero.FindRelic("Golden Eye") != null)
+            if (hero.HasRelic("Golden Eye"))
                 amount += 2;
             while (scryChoice != 0 && amount > 0)
             {
@@ -717,7 +719,7 @@ namespace STV
         }
 
 
-        public void CardAction(Hero hero, List<Enemy> encounter)
+        public void CardAction(Hero hero, List<Enemy> encounter, int turnNumber)
         {
             // Check to see if the Card is Playable, if not leave function early
             if (TmpEnergyCost > hero.Energy)
@@ -746,12 +748,12 @@ namespace STV
                 return;
             }
 
-            // Moves the Card Played from Hand to Designated Location
+            // Moves the Card Played from Hand to Designated Location and check certain relic effects (that can be said in a lot of sections oops)
             if (FindCard(Name, hero.Hand) != null)
             {
                 if (GetDescription().Contains("Exhaust") || Type == "Status" || Type == "Curse")
                 {
-                    if (hero.FindRelic("Strange") != null && CardRNG.Next(2) == 0)
+                    if (hero.HasRelic("Strange") && CardRNG.Next(2) == 0)
                         MoveCard(hero.Hand, hero.DiscardPile);
                     Exhaust(hero,encounter, hero.Hand);
                 }                   
@@ -759,10 +761,10 @@ namespace STV
                 {
                     foreach (Card forceField in FindAllCardsInCombat(hero,"Force Field"))
                         forceField.EnergyCost--;
-                    if (hero.FindRelic("Bird") != null)
+                    if (hero.HasRelic("Bird"))
                         hero.CombatHeal(2);
                     hero.Hand.Remove(this);
-                    if (hero.FindRelic("Mummified") != null && hero.Hand.Count != 0)
+                    if (hero.HasRelic("Mummified") && hero.Hand.Count != 0)
                         hero.Hand[CardRNG.Next(hero.Hand.Count)].SetTmpEnergyCost(0);
                 }                   
                 else if (Name == "Tantrum")
@@ -776,7 +778,7 @@ namespace STV
 
             // Card Effects begin here
             Console.WriteLine($"You played {Name}.");
-            int target = 0, extraDamage = 0, wallop = encounter[target].Hp, xEnergy = hero.Energy + (hero.FindRelic("Chemical X") != null ? 2 : 0);
+            int target = 0, extraDamage = 0, wallop = encounter[target].Hp, xEnergy = hero.Energy + (hero.HasRelic("Chemical X") ? 2 : 0);
             string lastCardPlayed = "";
             if (EnergyCost == -1)
                 hero.Energy = 0;
@@ -789,14 +791,7 @@ namespace STV
             if (Targetable)
                 target = hero.DetermineTarget(encounter);
             if (Name == "Crush Joints" || Name == "Sanctity" || Name == "Follow-Up" || Name == "Sash Whip")
-            {
-                for (int i = hero.Actions.Count - 1; i >= 0; i--)
-                    if (hero.Actions[i].Contains("Played"))
-                    {
-                        lastCardPlayed = hero.Actions[i];
-                        break;
-                    }
-            }
+                lastCardPlayed = hero.Actions.FindAll(x => x.Contains($"{turnNumber}:")).FindLast(x => x.Contains("Played"));
             switch (Name)
             {
                 default: break;
@@ -958,10 +953,28 @@ namespace STV
                     extraDamage += vigor.Intensity;
                     hero.Buffs.Remove(vigor);
                 }
-                if (TmpEnergyCost == 0 && hero.FindRelic("Wrist") != null)
+                if (TmpEnergyCost == 0 && hero.HasRelic("Wrist"))
                     extraDamage += 4;
-                if (Name.Contains("Strike") && hero.FindRelic("Strike") != null )
+                if (Name.Contains("Strike") && hero.HasRelic("Strike") )
                     extraDamage += 3;
+                if (hero.FindRelic("Nunchaku") is Relic nunchaku && nunchaku != null)
+                {
+                    nunchaku.PersistentCounter--;
+                    if (nunchaku.PersistentCounter == 0)
+                    {
+                        hero.GainTurnEnergy(1);
+                        nunchaku.PersistentCounter = nunchaku.EffectAmount;
+                    }
+                }
+                if (hero.FindRelic("Pen Nib") is Relic penNib && penNib != null)
+                {
+                    penNib.PersistentCounter--;
+                    if (penNib.PersistentCounter == 0)
+                    {
+                        extraDamage += extraDamage + AttackDamage;
+                        penNib.PersistentCounter = penNib.EffectAmount;
+                    }
+                }
             }             
 
             if (AttackAll)
@@ -1108,7 +1121,7 @@ namespace STV
                         if (hero.Hand.Count == 10) break;
                         hero.DrawCards(1,encounter);
                         if (hero.Hand.Last().EnergyCost != 0)
-                            hero.Hand.Last().Discard(hero,encounter);
+                            hero.Hand.Last().Discard(hero,encounter,turnNumber);
                     }
                     break;
                 }                    
@@ -1172,7 +1185,7 @@ namespace STV
                     break;
                 case "Havoc":
                     Card havoc = hero.DrawPile.Last();
-                    havoc.CardAction(hero, encounter);
+                    havoc.CardAction(hero, encounter, turnNumber);
                     havoc.Exhaust(hero,encounter, hero.DrawPile);
                     break;
                 case "Headbutt":
@@ -1414,8 +1427,8 @@ namespace STV
                     do
                         omni = ChooseCard(hero.DrawPile, "play twice");
                     while (omni.GetDescription().Contains("Unplayable"));
-                    omni.CardAction(hero, encounter);
-                    omni.CardAction(hero, encounter);
+                    for (int i = 0 ; i < MagicNumber; i++)
+                        omni.CardAction(hero, encounter, turnNumber);
                     omni.Exhaust(hero, encounter, hero.DrawPile);
                     break;
                 case "Pray":
@@ -1450,7 +1463,7 @@ namespace STV
                         wish.UpgradeCard();
                     if (wish.Name == "Fame and Fortune")
                         hero.GoldChange(wish.MagicNumber);
-                    else wish.CardAction(hero, encounter);
+                    else wish.CardAction(hero, encounter, turnNumber);
                     break;
                 // COLORLESS CARDS (294 - 340)
                 case "Apotheosis":
@@ -1606,19 +1619,19 @@ namespace STV
             if (Discards)
             {
                 if (Name == "All-Out Attack")
-                    Discard(hero, encounter);
+                    Discard(hero, encounter, turnNumber);
                 else if (Name == "Unload")
                     for (int i = hero.Hand.Count-1; i >= 0; i--)
                     {
                         if (hero.Hand[i].Type == "Attack")
-                            hero.Hand[i].Discard(hero,encounter);
+                            hero.Hand[i].Discard(hero,encounter, turnNumber);
                     }
                 else if (Name == "Storm of Steel")
                 {
                     MagicNumber = 0;
                     for (int i = hero.Hand.Count - 1; i >= 0; i--)
                     {
-                        hero.Hand[i].Discard(hero, encounter);
+                        hero.Hand[i].Discard(hero, encounter, turnNumber);
                         MagicNumber++;
                     }
                     AddShivs(hero, MagicNumber);
@@ -1631,19 +1644,19 @@ namespace STV
                     MagicNumber = 0;
                     for (int i = hero.Hand.Count - 1; i >= 0; i--)
                     {
-                        hero.Hand[i].Discard(hero,encounter);
+                        hero.Hand[i].Discard(hero,encounter, turnNumber);
                         MagicNumber++;
                     }
                     hero.DrawCards(MagicNumber, encounter);
                 }
                 else for (int i = 0; i < MagicNumber; i++)
-                        ChooseCard(hero.Hand, "discard").Discard(hero, encounter);
+                        ChooseCard(hero.Hand, "discard").Discard(hero, encounter, turnNumber);
                 foreach (Card eviscerate in FindAllCardsInCombat(hero, "Eviscerate"))
                     if (eviscerate.TmpEnergyCost != 0)
                         eviscerate.TmpEnergyCost--;
             }
             // End of card action, card action being documented in turn list
-            hero.Actions.Add($"{Name}-{Type} Played");
+            hero.AddAction($"{Name}-{Type} Played",turnNumber);
         }
 
         public void UpgradeCard()

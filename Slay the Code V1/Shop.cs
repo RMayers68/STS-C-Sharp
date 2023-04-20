@@ -8,9 +8,9 @@ namespace STV
 
         public static void VisitShop(Hero hero)
         {
-            if (hero.FindRelic("Ticket") != null)
+            if (hero.HasRelic("Ticket"))
                 hero.HealHP(15);
-            if (hero.FindRelic("Smiling") != null)
+            if (hero.HasRelic("Smiling"))
                 hero.RemoveCost = 50;
             int shopChoice = -1;
             List<Card> shopCards = new();
@@ -100,7 +100,7 @@ namespace STV
                             hero.Gold = newHeroGold;
                             hero.Deck.Remove(Card.ChooseCard(hero.Deck, "remove from your Deck"));
                             removeCard = "Removed";
-                            if (hero.FindRelic("Smiling") == null)
+                            if (!hero.HasRelic("Smiling"))
                                 hero.RemoveCost += 25;
                         }
                         else Console.WriteLine("You don't have enough Gold to remove a card.");

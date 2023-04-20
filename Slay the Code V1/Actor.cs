@@ -39,11 +39,11 @@
 
 		public void AddBuff(int ID, int effect, Hero hero = null)
 		{
-			if ((ID == 2 && FindRelic("Ginger") != null) || (ID == 6 && FindRelic("Turnip") != null))
+			if ((ID == 2 && HasRelic("Ginger")) || (ID == 6 && HasRelic("Turnip")))
 				return;
 			if (effect == 0) return;
             // Artifact stopping debuffs
-            if ((!Dict.buffL[ID].BuffDebuff) && FindBuff("Artifact") != null)
+            if ((!Dict.buffL[ID].BuffDebuff) && HasRelic("Artifact"))
 			{
                 FindBuff("Artifact").Counter--;
 				return;
@@ -55,9 +55,9 @@
 			Buff buff = FindBuff(Dict.buffL[ID].Name);
 
 			// Misc checks
-			if (buff.Name == "Poison" && hero.FindRelic("Snecko Skull") != null)
+			if (buff.Name == "Poison" && hero.HasRelic("Snecko Skull"))
 				effect++;
-			if (buff.Name == "Vulnerable" && hero.FindRelic("Champion") != null)
+			if (buff.Name == "Vulnerable" && hero.HasRelic("Champion"))
 				AddBuff(2, 1);
 			// Add attributes based on type of Buff
 			byte b = Dict.buffL[ID].Type switch
@@ -82,7 +82,7 @@
 					buff.CounterSet(effect);
 					Console.WriteLine($"{Name}'s {buff.Name} is now at {buff.Counter}!");
 					if (buff.Name == "Mantra")
-						Actions.Add($"Mantra Gained: {effect}");
+						AddAction($"Mantra Gained: {effect}");
 					break;
 			}
 			if (hero != null && hero.FindBuff("Sadistic") is Buff sadistic && !sadistic.BuffDebuff)
@@ -98,21 +98,21 @@
         public void Attack(Actor target, int damage,List<Enemy> encounter)
 		{
 			if (Hp <= 0) return;
-			if (FindBuff("Strength") != null)
-				damage += FindBuff("Strength").Intensity;
+			if (FindBuff("Strength") is Buff strength && strength != null)
+				damage += strength.Intensity;
             if (Stance == "Wrath" || target.Stance == "Wrath")
                 damage *= 2;
 			if (FindBuff("Weak") != null)
 			{
-				if (target.FindRelic("Krane") == null)
+				if (!target.HasRelic("Krane"))
 					damage = Convert.ToInt32(damage * 0.75);
 				else damage = Convert.ToInt32(damage * 0.60);
             }				
 			if (FindBuff("Vulnerable") != null)
 			{
-                if (FindRelic("Phrog") != null)
+                if (HasRelic("Phrog"))
                     damage = Convert.ToInt32(damage * 1.75);
-                else if (target.FindRelic("Odd Mushroom") != null) 
+                else if (target.HasRelic("Odd Mushroom")) 
 					damage = Convert.ToInt32(damage * 1.25);
 				else damage = Convert.ToInt32(damage * 1.50);
             }				
@@ -126,9 +126,9 @@
             }
 			if (damage > 0)
 			{
-				if (FindRelic("Boot") != null && damage < 5)
+				if (HasRelic("Boot") && damage < 5)
 					damage = 5;
-				if (damage < 5 && target.FindRelic("Torii") != null)
+				if (damage < 5 && target.HasRelic("Torii"))
 					damage = 1;
 				target.HPLoss(damage, encounter);
                 Console.Write($", dealing {damage} damage to {target.Name}'s HP!\n");
@@ -174,11 +174,11 @@
 				buffer.Counter--;
 				return;
 			}
-			if (FindRelic("Tungsten") != null)
+			if (HasRelic("Tungsten"))
 				damage--;
 			if (damage > 0)
 			{
-				if (FindRelic("Runic Cube") != null)
+				if (HasRelic("Runic Cube"))
 					((Hero)this).DrawCards(1, encounter);
 				if (FindRelic("Emotion") is Relic emotionChip && emotionChip != null)
 					emotionChip.IsActive = true;
@@ -190,6 +190,24 @@
         {
 			if (Relics == null) return null;
             else return Relics.Find(x => x.Name.Contains(name));
+        }
+
+		public bool HasRelic(string name)
+		{
+            if (Relics == null) return false;
+            else return Relics.Find(x => x.Name.Contains(name)) != null;
+        }
+
+		public void AddAction(string action,int turnNumber = 0)
+		{
+			Actions.Add($"{(turnNumber > 0 ? $"{turnNumber}: " : "")}{action}");
+		}
+
+		public List<string> FindTurnActions(int turnNumber,string type = "")
+		{
+			if (type != "")
+				return Actions.FindAll(x => x.Contains($"{turnNumber}"));
+			else return Actions.FindAll(x => x.Contains($"{turnNumber}")).FindAll(x => x.Contains(type));
         }
     }
 }
