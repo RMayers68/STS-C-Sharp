@@ -6,14 +6,13 @@
 		public string Name { get; set; }
 		public int MaxHP { get; set; }
 		public int Hp { get; set; }
-		public int BottomHP { get; set; }
-		public int TopHP { get; set; }
 		public int Block { get; set; }
         public int Gold { get; set; }
         public string? Stance { get; set; }
         public List<Buff> Buffs { get; set; }
         public List<Relic> Relics { get; set; }
         public List<string> Actions { get; set; }
+
 
 
         //constructor
@@ -38,7 +37,7 @@
 			Console.WriteLine($"The {Name} gained {block} Block.");
 		}
 
-		public void AddBuff(int ID, int effect, Hero hero = null )
+		public void AddBuff(int ID, int effect, Hero hero = null)
 		{
 			if ((ID == 2 && FindRelic("Ginger") != null) || (ID == 6 && FindRelic("Turnip") != null))
 				return;
@@ -86,7 +85,7 @@
 						Actions.Add($"Mantra Gained: {effect}");
 					break;
 			}
-			if (hero != null && hero.FindBuff("Sadistic") is Buff sadistic && sadistic != null)
+			if (hero != null && hero.FindBuff("Sadistic") is Buff sadistic && !sadistic.BuffDebuff)
 				NonAttackDamage(this, sadistic.Intensity);
 		}
 
@@ -96,7 +95,7 @@
         }
 
         //HP Altering Methods
-        public void Attack(Actor target, int damage)
+        public void Attack(Actor target, int damage,List<Enemy> encounter)
 		{
 			if (Hp <= 0) return;
 			if (FindBuff("Strength") != null)
@@ -129,7 +128,9 @@
 			{
 				if (FindRelic("Boot") != null && damage < 5)
 					damage = 5;
-				target.HPLoss(damage);
+				if (damage < 5 && target.FindRelic("Torii") != null)
+					damage = 1;
+				target.HPLoss(damage, encounter);
                 Console.Write($", dealing {damage} damage to {target.Name}'s HP!\n");
             }			
             if (target.FindBuff("Curl Up") is Buff curlUp && curlUp != null)      // Louse Curl Up Effect
@@ -157,16 +158,16 @@
 				}
 			}
 			else
-				target.HPLoss(damage);
+				target.Hp -= 0;
         }
 		
-		public void PoisonDamage(int damage)
+		public void PoisonDamage(int damage,List<Enemy> encounter)
 		{
-			HPLoss(damage);
+			HPLoss(damage,encounter);
 			FindBuff("Poison").Intensity--;
 		}
 
-		public void HPLoss(int damage)
+		public void HPLoss(int damage, List<Enemy> encounter)
 		{
 			if (FindBuff("Buffer") is Buff buffer && buffer != null)
 			{
@@ -175,6 +176,13 @@
 			}
 			if (FindRelic("Tungsten") != null)
 				damage--;
+			if (damage > 0)
+			{
+				if (FindRelic("Runic Cube") != null)
+					((Hero)this).DrawCards(1, encounter);
+				if (FindRelic("Emotion") is Relic emotionChip && emotionChip != null)
+					emotionChip.IsActive = true;
+			}
 			Hp -= damage;
 		}
 		// Easy searching for Relic

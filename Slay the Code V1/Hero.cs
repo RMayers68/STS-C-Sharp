@@ -16,7 +16,9 @@
         public List<Card> ExhaustPile { get; set; }
         public List<Orb> Orbs { get; set; }
         public List<Potion> Potions { get; set; }
-        
+
+        private static readonly Random HeroRNG = new();
+
         public Hero(string name, int maxHP)
         {
             Name = name;
@@ -59,34 +61,34 @@
             {
                 while (i < 4)
                 {
-                    Deck.Add(new Card(Dict.cardL[220]));
+                    AddToDeck(Dict.cardL[220]);
                     i++;
                 }
                 while (i < 8)
                 {
-                    Deck.Add(new Card(Dict.cardL[219]));
+                    AddToDeck(Dict.cardL[219]);
                     i++;
                 }
             }
             switch (Name)
             {
                 case "Ironclad":
-                    Deck.Add(new Card(Dict.cardL[3]));
-                    Deck.Add(new Card(Dict.cardL[220]));
+                    AddToDeck(Dict.cardL[3]);
+                    AddToDeck(Dict.cardL[220]);
                     break;
                 case "Silent":
-                    Deck.Add(new Card(Dict.cardL[220]));
-                    Deck.Add(new Card(Dict.cardL[219]));
-                    Deck.Add(new Card(Dict.cardL[121]));
-                    Deck.Add(new Card(Dict.cardL[139]));
+                    AddToDeck(Dict.cardL[220]);
+                    AddToDeck(Dict.cardL[219]);
+                    AddToDeck(Dict.cardL[121]);
+                    AddToDeck(Dict.cardL[139]);
                     break;
                 case "Defect":
-                    Deck.Add(new Card(Dict.cardL[170]));
-                    Deck.Add(new Card(Dict.cardL[214]));
+                    AddToDeck(Dict.cardL[170]);
+                    AddToDeck(Dict.cardL[214]);
                     break;
                 case "Watcher":
-                    Deck.Add(new Card(Dict.cardL[241]));
-                    Deck.Add(new Card(Dict.cardL[285]));
+                    AddToDeck(Dict.cardL[241]);
+                    AddToDeck(Dict.cardL[285]);
                     break;
             }
             Deck.Sort();
@@ -139,10 +141,10 @@
             return x - 1;
         }
 
-        public void SelfDamage(int damage)
+        public void SelfDamage(int damage,List<Enemy> encounter)
         {
             if (Hp <= 0) return;
-            HPLoss(damage);
+            HPLoss(damage,encounter);
             Console.WriteLine($"{Name} hurt themselves for {damage} damage!");
         }
 
@@ -176,48 +178,6 @@
                 flurryOfBlows.MoveCard(DiscardPile, Hand);               
         }
 
-        public void ChannelOrb(List<Enemy> encounter, int orbID)
-        {
-            Orb channeledOrb = new(Dict.orbL[orbID]);
-            if (Orbs.Count == OrbSlots)
-            {
-                Evoke(encounter);
-                Orbs.RemoveAt(0);
-            }               
-            Orbs.Add(channeledOrb);
-            Actions.Add($"Channel {channeledOrb.Name} Orb");
-        }
-
-        public void Evoke(List<Enemy> encounter, int position = 0)
-        {
-            if (Hp <= 0) return;
-            Random random = new();
-            if (Orbs[position] == null) return;
-            switch (Orbs[position].Name)
-            {
-                default:
-                    GainTurnEnergy(2);
-                    Console.WriteLine($"The Evoked Plasma Orb gave the {Name} 2 Energy!");
-                    break;
-                case "Lightning":
-                    int target = random.Next(0, encounter.Count);
-                    NonAttackDamage(encounter[target], 8);
-                    Console.WriteLine($"The {encounter[target].Name} took 8 damage from the Evoked Lightning Orb!");
-                    break;
-                case "Frost":
-                    GainBlock(5);
-                    Console.WriteLine($"The {Name} gained 5 Block from the Evoked Frost Orb!");
-                    break;
-                case "Dark":
-                    Actor lowestHP = encounter[0];
-                    foreach (var enemy in encounter)
-                        if (enemy.Hp < lowestHP.Hp) lowestHP = enemy;
-                    NonAttackDamage(lowestHP, Orbs[position].Effect);
-                    Console.WriteLine($"The Evoked Dark Orb exploded on the {lowestHP.Name} for {Orbs[0].Effect} damage!");
-                    break;
-            }
-        }
-
         // Method to look if hand is full and sending card to discard pile if hand is full
         public void AddToHand(Card card)
         {
@@ -227,12 +187,40 @@
             else DiscardPile.Add(card);
         }
 
-        public void DrawCards(Random rng, int cards)
+        public void AddToPotions(Potion potion)
+        {
+            if (potion == null) return;
+            if (Potions.Count < PotionSlots)
+                Potions.Add(potion);;
+        }
+
+        public void AddToDeck(Card card)
+        {
+            if (card == null) return;
+            if (card.Type == "Curse")
+            {
+                if (FindRelic("Omamori") is Relic omamori && omamori.EffectAmount > 0)
+                {
+                    omamori.EffectAmount--;
+                    return;
+                }
+                else if (FindRelic("Darkstone") != null)
+                    SetMaxHP(6);
+            }       
+            if ((card.Type == "Attack" && FindRelic("Molten Egg") != null) || (card.Type == "Skill" && FindRelic("Toxic Egg") != null) || (card.Type == "Power" && FindRelic("Frozen Egg") != null))
+                card.UpgradeCard();
+            if (FindRelic("Ceramic") != null)
+                GoldChange(9);
+            Deck.Add(new(card));
+            Console.WriteLine(card != null ? $"You have added {card.Name} to your Deck!" : "This was a check, remove now.\n");
+        }
+
+        public void DrawCards(int cards, List<Enemy> encounter)
         {
             while (Hand.Count < 10)
             {
                 if (DrawPile.Count == 0)
-                    Discard2Draw(rng);
+                    Discard2Draw();
                 if (DrawPile.Count == 0)
                     break;
                 DrawPile.Last().MoveCard(DrawPile, Hand);
@@ -240,7 +228,7 @@
                 {
                     for (int i = 0; i < Hand.Last().GetMagicNumber(); i++)
                         AddToHand(new Card(Dict.cardL[336]));
-                    Hand.Last().Exhaust(this, this.Hand);
+                    Hand.Last().Exhaust(this, encounter, this.Hand);
                 }
                 cards--;
                 if (cards == 0)
@@ -249,11 +237,11 @@
         }
 
         // Takes all cards in discard, moves them to drawpile, and then shuffles the drawpile
-        public void Discard2Draw(Random rng)
+        public void Discard2Draw()
         {
             for (int i = DiscardPile.Count; i > 0; i--)
                 DiscardPile.Last().MoveCard(DiscardPile, DrawPile);
-            ShuffleDrawPile(rng);
+            ShuffleDrawPile();
         }
 
         // Method for adding to current energy amount for the turn
@@ -280,28 +268,59 @@
             else Console.WriteLine($"The {Name} lost {amount * -1} Gold!");
         }
 
-        public void CombatRewards(List<Card> deck, Random rng, string roomLocation)
+
+        public void ResetHeroAfterCombat()
         {
-            deck.Add(Card.ChooseCard(Card.RandomCards(Name, 3, rng), "add to your Deck"));
-            GoldChange(roomLocation == "Boss" ? rng.Next(95,106) : roomLocation == "Elite" ? rng.Next(35,36) : rng.Next(10,21));
+            Buffs.Clear();
+            Energy = 0;
+            DrawPile.Clear();
+            Hand.Clear();
+            DiscardPile.Clear();
+            ExhaustPile.Clear();
+            if (Name == "Defect")
+                OrbSlots = 3;
+            else OrbSlots = 1;
+            if (FindRelic("Red Skull") is Relic redSkull && redSkull != null)
+                redSkull.IsActive = false;
+            if (FindRelic("Emotion") is Relic emotionChip && emotionChip != null)
+                emotionChip.IsActive = false;
+        }
+
+        public void CombatRewards(string roomLocation)
+        {
+            AddToDeck(Card.ChooseCard(Card.RandomCards(Name, 3), "add to your Deck"));
+            GoldChange(Convert.ToInt32((roomLocation == "Boss" ? HeroRNG.Next(95,106) : roomLocation == "Elite" ? HeroRNG.Next(35,36) : HeroRNG.Next(10,21)) * (FindRelic("Golden Idol") != null ? 1.25 : 1.00)));
             if (roomLocation == "Boss")
 
-            if (rng.Next(10) < PotionChance || FindRelic("White Beast Statue") != null)
+            if (HeroRNG.Next(10) < PotionChance || FindRelic("White Beast Statue") != null)
             {
-                Potions.Add(Dict.potionL[rng.Next(10)]);
+                AddToPotions(Potion.RandomPotion());
                 PotionChance--;
             }
             else PotionChance++;
         }
 
-        public void ShuffleDrawPile(Random rng)
+        public void ShuffleDrawPile()
         {
-            int n = DrawPile.Count;
-            while (n > 1)
+            if (FindRelic("Melange") != null)
+                Card.Scry(this, 3);
+            if (FindRelic("The Abacus") != null)
+                GainBlock(6);
+            if (FindRelic("Sundial") is Relic sundial && sundial != null)
             {
-                n--;
-                int k = rng.Next(n + 1);
-                (DrawPile[n], DrawPile[k]) = (DrawPile[k], DrawPile[n]);
+                sundial.PersistentCounter--;
+                if (sundial.PersistentCounter == 0)
+                {
+                    GainTurnEnergy(2);
+                    sundial.PersistentCounter = sundial.EffectAmount;
+                }
+            }
+            int i = DrawPile.Count;
+            while (i > 1)
+            {
+                i--;
+                int j = HeroRNG.Next(i + 1);
+                (DrawPile[i], DrawPile[j]) = (DrawPile[j], DrawPile[i]);
             }
         }
     }

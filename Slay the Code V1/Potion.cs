@@ -8,6 +8,8 @@
         public int EffectAmount { get; set; }
         public int GoldCost { get; set; }
 
+        private static readonly Random PotionRNG = new();
+
         //constructors
         public Potion()
         {
@@ -27,8 +29,7 @@
             this.Name = potion.Name;
             this.Rarity = potion.Rarity;
             this.EffectAmount = potion.EffectAmount;
-            Random rng = new();
-            this.GoldCost = Rarity == "Rare" ? rng.Next(95, 106) : Rarity == "Uncommon" ? rng.Next(72, 79) : rng.Next(48, 53);
+            this.GoldCost = Rarity == "Rare" ? PotionRNG.Next(95, 106) : Rarity == "Uncommon" ? PotionRNG.Next(72, 79) : PotionRNG.Next(48, 53);
         }
         //string method
         public override string ToString()
@@ -36,7 +37,7 @@
             return $"{Name} - {GetDescription()}";
         }
 
-        public void UsePotion(Hero hero,List<Enemy> encounter, Random rng)                              // potion methods (correlating to PotionID)
+        public void UsePotion(Hero hero,List<Enemy> encounter)                              // potion methods (correlating to PotionID)
         {
             int target = 0;
             if (hero.Relics.Find(x => x.Name == "Sacred Bark") != null)
@@ -61,7 +62,7 @@
                     encounter[target].AddBuff(1, EffectAmount, hero);
                     break;
                 case "Swift Potion":
-                    hero.DrawCards(rng, EffectAmount);
+                    hero.DrawCards(EffectAmount, encounter);
                     break;
                 case "Weak Potion":
                     target = hero.DetermineTarget(encounter);
@@ -74,7 +75,7 @@
                     hero.AddBuff(3, EffectAmount);
                     break;
                 case "Attack Potion":
-                    Card attackPotion = new(Card.ChooseCard(Card.RandomCards(hero.Name, 3, rng, "Attack"),"add to your hand"));
+                    Card attackPotion = new(Card.ChooseCard(Card.RandomCards(hero.Name, 3, "Attack"),"add to your hand"));
                     attackPotion.SetTmpEnergyCost(0);
                     for (int i = 0; i < EffectAmount; i++)
                         hero.AddToHand(attackPotion);                   
@@ -84,7 +85,7 @@
                         c.UpgradeCard();
                     break;
                 case "Colorless Potion":
-                    Card colorlessPotion = new(Card.ChooseCard(Card.RandomCards("Colorless", 3, rng), "add to your hand"));
+                    Card colorlessPotion = new(Card.ChooseCard(Card.RandomCards("Colorless", 3), "add to your hand"));
                     colorlessPotion.SetTmpEnergyCost(0);
                     for (int i = 0; i < EffectAmount; i++)
                         hero.AddToHand(colorlessPotion);
@@ -101,13 +102,13 @@
                     hero.AddBuff(30, EffectAmount);
                     break;
                 case "Power Potion":
-                    Card powerPotion = new(Card.ChooseCard(Card.RandomCards(hero.Name, 3, rng, "Power"), "add to your hand"));
+                    Card powerPotion = new(Card.ChooseCard(Card.RandomCards(hero.Name, 3, "Power"), "add to your hand"));
                     powerPotion.SetTmpEnergyCost(0);
                     for (int i = 0; i < EffectAmount; i++)
                         hero.AddToHand(powerPotion);
                     break;
                 case "Skill Potion":
-                    Card skillPotion = new(Card.ChooseCard(Card.RandomCards(hero.Name, 3, rng, "Skill"), "add to your hand"));
+                    Card skillPotion = new(Card.ChooseCard(Card.RandomCards(hero.Name, 3, "Skill"), "add to your hand"));
                     skillPotion.SetTmpEnergyCost(0);
                     for (int i = 0; i < EffectAmount; i++)
                         hero.AddToHand(skillPotion);
@@ -141,13 +142,13 @@
                     for (int i = 0; i < EffectAmount; i++ )
                     {
                         Card distilledChaos = hero.DrawPile.Last();
-                        distilledChaos.CardAction(hero,encounter,rng);
+                        distilledChaos.CardAction(hero,encounter);
                         if (distilledChaos.GetDescription().Contains("Exhaust") || distilledChaos.Type == "Status" || distilledChaos.Type == "Curse")
-                            distilledChaos.Exhaust(hero, hero.DrawPile);
+                            distilledChaos.Exhaust(hero, encounter, hero.DrawPile);
                         else if (distilledChaos.Type == "Power")
                             hero.DrawPile.Remove(distilledChaos);
                         else if (Name == "Tantrum")
-                            hero.ShuffleDrawPile(rng);
+                            hero.ShuffleDrawPile();
                         else
                             distilledChaos.MoveCard(hero.DrawPile, hero.DiscardPile);
                     }
@@ -159,7 +160,7 @@
                     hero.AddBuff(95,EffectAmount);
                     break;
                 case "Gambler's Brew":
-                    STS.GamblingIsGood(hero, rng);
+                    Battle.GamblingIsGood(hero,encounter);
                     break;
                 case "Liquid Memories":
                     for (int i = 0; i < EffectAmount; i++)
@@ -210,10 +211,10 @@
                     break;
                 case "Entropic Brew":
                     for (int i = 0; i < hero.PotionSlots - hero.Potions.Count; i++)
-                        hero.Potions.Add(new Potion(Dict.potionL[rng.Next(42)]));
+                        hero.Potions.Add(new Potion(Dict.potionL[PotionRNG.Next(42)]));
                     break;
                 case "Fairy in a Bottle":
-                    hero.HealHP(Convert.ToInt32(hero.MaxHP * (EffectAmount / 100.0)));
+                    hero.CombatHeal(Convert.ToInt32(hero.MaxHP * (EffectAmount / 100.0)));
                     break;
                 case "Fruit Juice":
                     hero.SetMaxHP(EffectAmount);
@@ -222,13 +223,13 @@
                     // Code combat to end
                     break;
                 case "Snecko Oil":
-                    hero.DrawCards(rng, EffectAmount);
+                    hero.DrawCards(EffectAmount,encounter);
                     foreach (Card c in hero.Hand)
-                        c.SetEnergyCost(rng.Next(4));
+                        c.SetEnergyCost(PotionRNG.Next(4));
                     break;
                 case "Essence of Darkness":
                     for (int i = 0; i < hero.OrbSlots * EffectAmount; i++)
-                        hero.ChannelOrb(encounter, 2);
+                        Orb.ChannelOrb(hero,encounter, 2);
                     break;
                 case "Heart of Iron":
                     hero.AddBuff(32, EffectAmount);
@@ -242,11 +243,14 @@
             }
             // Toy Ornithopter Relic Check && Effect
             if (hero.Relics.Find(x => x.Name == "Toy Ornithopter") != null)
-                hero.HealHP(5);
+                hero.CombatHeal(5);
             hero.Potions.Remove(this);
         }
 
-
+        public static Potion RandomPotion()
+        {
+            throw new NotImplementedException();
+        }
         public string GetDescription(Hero? hero = null)
         {
             int sacredBark = 1;

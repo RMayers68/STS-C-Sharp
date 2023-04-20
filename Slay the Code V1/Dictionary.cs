@@ -3,7 +3,7 @@
     public class Dict
     {
 
-        public static Dictionary<int, Card> cardL = new()                                             //Dictionary of Card objects
+        private static readonly Dictionary<int, Card> cards = new()   //Dictionary of Card objects
         {
             { 0, new Card("Anger","Attack","Common","0", new List<int> { 6, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0 }) },
             { 1, new Card("Armaments","Skill","Common","1", new List<int> { 0, 0, 5, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }) },
@@ -347,19 +347,19 @@
             { 339, new Card("Smite","Attack","Common","1", new List<int> { 12, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0 }) },
             { 340, new Card("Through Violence","Attack","Common","0", new List<int> { 20, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0 }) },
             { 341, new Card("Ascender's Bane","Curse","Common","None", new List<int> { 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }) },
-            { 342, new Card("Clumsy","Curse","Common","None", new List<int> { 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }) },
-            { 343, new Card("Decay","Curse","Common","None", new List<int> { 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }) },
-            { 344, new Card("Doubt","Curse","Common","None", new List<int> { 0, 0, 0, 0, 0, 2, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0 }) },
-            { 345, new Card("Injury","Curse","Common","None", new List<int> { 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }) },
-            { 346, new Card("Necronomicurse","Curse","Common","None", new List<int> { 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }) },
-            { 347, new Card("Normality","Curse","Common","None", new List<int> { 0, 0, 0, 0, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 , 0}) },
-            { 348, new Card("Pain","Curse","Common","None", new List<int> { 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }) },
-            { 349, new Card("Parasite","Curse","Common","None", new List<int> { 0, 0, 0, 0, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }) },
-            { 350, new Card("Regret","Curse","Common","None", new List<int> { 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }) },
-            { 351, new Card("Writhe","Curse","Common","None", new List<int> { 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }) },
-            { 352, new Card("Shame","Curse","Common","None", new List<int> { 0, 0, 0, 0, 0, 6, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0 }) },
-            { 353, new Card("Pride","Curse","Common","None", new List<int> { 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }) },
-            { 354, new Card("Curse of the Bell","Curse","Common","None", new List<int> { 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }) },
+            { 342, new Card("Necronomicurse","Curse","Common","None", new List<int> { 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }) },
+            { 343, new Card("Parasite","Curse","Common","None", new List<int> { 0, 0, 0, 0, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }) },
+            { 344, new Card("Pride","Curse","Common","None", new List<int> { 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }) },
+            { 345, new Card("Curse of the Bell","Curse","Common","None", new List<int> { 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }) },
+            { 346, new Card("Regret","Curse","Common","None", new List<int> { 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }) },
+            { 347, new Card("Shame","Curse","Common","None", new List<int> { 0, 0, 0, 0, 0, 6, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0 }) },
+            { 348, new Card("Clumsy","Curse","Common","None", new List<int> { 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }) },
+            { 349, new Card("Decay","Curse","Common","None", new List<int> { 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }) },
+            { 350, new Card("Doubt","Curse","Common","None", new List<int> { 0, 0, 0, 0, 0, 2, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0 }) },
+            { 351, new Card("Injury","Curse","Common","None", new List<int> { 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }) },
+            { 352, new Card("Normality","Curse","Common","None", new List<int> { 0, 0, 0, 0, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 , 0}) },
+            { 353, new Card("Pain","Curse","Common","None", new List<int> { 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }) },                      
+            { 354, new Card("Writhe","Curse","Common","None", new List<int> { 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }) },          
             { 355, new Card("Burn","Status","Common","None", new List<int> { 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 } ) },
             { 356, new Card("Dazed","Status","Common","None", new List<int> { 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }) },
             { 357, new Card("Wound","Status","Common","None", new List<int> { 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }) },
@@ -370,16 +370,9 @@
             { 362, new Card("Fame and Fortune","Skill","Common","None", new List<int> { 0, 0, 0, 0, 25, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0 }) },
             { 363, new Card("Live Forever","Power","Common","None", new List<int> { 0, 0, 0, 0, 0, 95, 6, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0 }) },
         };
+        public static Dictionary<int, Card> cardL = cards;
 
-        public static Dictionary<int, Orb> orbL = new()                                            // Orb Reference Dictionary - ID correlates to MagicNumber for card purposes
-        {
-            { 0, new Orb("Lightning", "Strikes foes with thunder and lightning.", 3) },
-            { 1, new Orb("Frost","Shield yourself behind a frozen barricade.", 4) },
-            { 2, new Orb("Dark","Devour your enemies in the Void.", 6) },
-            { 3, new Orb("Plasma", "Restore yourself in the blinding lights.", 1) },
-        };
-
-        public static Dictionary<int, Buff> buffL = new()                                            // Buffs and Debuffs Reference Dictionary
+        private static readonly Dictionary<int, Buff> buffs = new()                                            // Buffs and Debuffs Reference Dictionary
         {
             { 0, new Buff("",false, 0) },
             { 1, new Buff("Vulnerable", false, 1) },
@@ -490,8 +483,9 @@
              * 4: Counter
             */
         };
+        public static Dictionary<int, Buff> buffL = buffs;
 
-        public static Dictionary<int, Enemy> enemyL = new()                                            // Enemies Reference Dictionary
+        private static readonly Dictionary<int, Enemy> enemies = new()                                            // Enemies Reference Dictionary
         {
             { 0, new Enemy(0, "Jaw Worm",40,44, "Chomp") },
             { 1, new Enemy(1, "Cultist",48,54, "Incantation") },
@@ -500,7 +494,7 @@
             { 4, new Enemy(3, "Med Acid Slime", 28, 32, "Tackle") },
             { 5, new Enemy(4, "Med Spike Slime", 28, 32, "Lick") },
             { 6, new Enemy(5, "Small Acid Slime", 10, 14, "Lick") },
-            { 7, new Enemy(6, "Small Spike Slime", 10, 14, "Tackle") },            
+            { 7, new Enemy(6, "Small Spike Slime", 10, 14, "Tackle") },
             { 8, new Enemy(8,"Blue Slaver",46,50,"Rake")},
             { 9, new Enemy(9,"Red Slaver",46,50,"Stab")},
             { 10, new Enemy(10,"Fungi Beast",22,28,"Bite")},
@@ -519,8 +513,9 @@
             { 23, new Enemy(23, "The Guardian", 240, 240, "Charging Up") },
             { 24, new Enemy(24, "Hexaghost", 250, 250, "Charging") },
         };
+        public static Dictionary<int, Enemy> enemyL = enemies;
 
-        public static Dictionary<int, Relic> relicL = new()                                            // Relics Reference Dictionary
+        private static readonly Dictionary<int, Relic> relics = new()                                            // Relics Reference Dictionary
         {
             // Starter Relics
             { 0, new Relic("Burning Blood","Starter",6) },
@@ -580,7 +575,7 @@
             {52, new Relic("Kunai", "Uncommon", 3,3)},
             {53, new Relic("Shuriken", "Uncommon", 3,3)},
             {54, new Relic("Letter Opener", "Uncommon", 3,3)},
-            {55, new Relic("Matryoshka", "Uncommon", 0,2)},
+            {55, new Relic("Matryoshka", "Uncommon", 2)},
             {56, new Relic("Meat on the Bone", "Uncommon", 12)},
             {57, new Relic("Mercury Hourglass", "Uncommon", 3)},
             {58, new Relic("Mummified Hand", "Uncommon", 0)},
@@ -710,8 +705,9 @@
             // Special case if no Relic can be generated
             {178, new Relic("Circlet", "Special", 0,0)},
         };
+        public static Dictionary<int, Relic> relicL = relics;
 
-        public static Dictionary<int, Potion> potionL = new()                                           // Potions Reference Dictionary
+        private static readonly Dictionary<int, Potion> potions = new()                                           // Potions Reference Dictionary
         {
             // Common Potions
             { 0, new Potion("Fire Potion","Common", 20) },
@@ -720,7 +716,7 @@
             { 3, new Potion("Block Potion", "Common", 12) },
             { 4, new Potion("Fear Potion", "Common", 3) },
             { 5, new Potion("Swift Potion", "Common", 3) },
-            { 6, new Potion("Weak Potion", "Common", 3) },                     
+            { 6, new Potion("Weak Potion", "Common", 3) },
             { 7, new Potion("Attack Potion","Common", 1) },
             { 8, new Potion("Blessing of the Forge","Common", 0) },
             { 9, new Potion("Colorless Potion","Common", 1) },
@@ -759,13 +755,24 @@
             { 40, new Potion("Ghost in a Jar", "Rare", 1) },
             { 41, new Potion("Ambrosia", "Rare", 1) },
         };
+        public static Dictionary<int, Potion> potionL = potions;
 
-        public static Dictionary<int, Hero> heroL = new()                                             //Dictionary of Hero objects
+        private static readonly Dictionary<int, Hero> heroes = new()                                             //Dictionary of Hero objects
         {
             { 1, new Hero("Ironclad",80) },
             { 2, new Hero("Silent",70) },
             { 3, new Hero("Defect",75) },
             { 4, new Hero("Watcher",72) },
         };
+        public static Dictionary<int, Hero> heroL = heroes;
+
+        private static readonly Dictionary<int, Orb> orbs = new()                                            // Orb Reference Dictionary - ID correlates to MagicNumber for card purposes
+        {
+            { 0, new Orb("Lightning",3) },
+            { 1, new Orb("Frost", 4) },
+            { 2, new Orb("Dark", 6) },
+            { 3, new Orb("Plasma", 1) },
+        };
+        public static Dictionary<int, Orb> orbL = orbs;
     }
 }

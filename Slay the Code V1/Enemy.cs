@@ -1,10 +1,14 @@
-﻿namespace STV
+﻿
+namespace STV
 {
     public class Enemy : Actor
     {
+        public int BottomHP { get; set; }
+        public int TopHP { get; set; }
         public int EnemyID { get; set; } // ID correlates to method ran (Name without spaces)
         public string Intent { get; set; }
-        
+        private static readonly Random EnemyRNG = new();
+
 
 
         public Enemy(int enemyID, string name, int bottomHP, int topHP, string intent)
@@ -44,10 +48,10 @@
             switch (Intent)
             {
                 case "Attack":
-                    Attack(hero, 18);
+                    Attack(hero, 18, encounter);
                     break;
                 case "Beam":
-                    Attack(hero, 9);
+                    Attack(hero, 9, encounter);
                     break;
                 case "Bellow":
                     if (EnemyID == 17)
@@ -60,8 +64,8 @@
                     break;
                 case "Bite":
                     if (EnemyID == 10)
-                        Attack(hero, MaxHP / 2);
-                    else Attack(hero, 6);
+                        Attack(hero, MaxHP / 2, encounter);
+                    else Attack(hero, 6, encounter);
                     break;
                 case "Bolt":
                     for (int i = 0; i < 2; i++)
@@ -75,16 +79,16 @@
                     GainBlock(9);
                     break;
                 case "Chomp":
-                    Attack(hero, 11);
+                    Attack(hero, 11, encounter);
                     break;
                 case "Corrosive Spit":
-                    Attack(hero, 7);
+                    Attack(hero, 7, encounter);
                     hero.DiscardPile.Add(Dict.cardL[358]);
                     if (EnemyID == 21)
                         hero.DiscardPile.Add(Dict.cardL[358]);
                     break;
                 case "Dark Strike":
-                    Attack(hero, 6);
+                    Attack(hero, 6, encounter);
                     break;
                 case "Defensive Mode":
                     AddBuff(16, 3);
@@ -92,7 +96,7 @@
                 case "Divider":
                     damage = hero.Hp / 12 + 1;
                     for (int i = 0; i < 6; i++)
-                        Attack(hero, damage);
+                        Attack(hero, damage, encounter);
                     break;
                 case "Entangle":
                     hero.AddBuff(14, 2);
@@ -100,16 +104,15 @@
                 case "Escape":
                     encounter.Remove(this);
                     Console.WriteLine($"The {Name} has escaped!");
-                    STS.Pause();
                     break;
                 case "Fierce Bash":
-                    Attack(hero, 32);
+                    Attack(hero, 32, encounter);
                     break;
                 case "Flame Tackle":
                     if (EnemyID == 22)
                         damage = 16;
                     else damage = 8;
-                    Attack(hero, damage);
+                    Attack(hero, damage, encounter);
                     hero.DiscardPile.Add(Dict.cardL[358]);
                     if (EnemyID == 22)
                         hero.DiscardPile.Add(Dict.cardL[358]);
@@ -128,7 +131,7 @@
                 case "Inferno":
                     for (int i = 0; i < 6; i++)
                     {
-                        Attack(hero, 2);
+                        Attack(hero, 2, encounter);
                         if (i % 2 == 0)
                             hero.DiscardPile.Add(new Card(Dict.cardL[355]));
                     }
@@ -149,14 +152,14 @@
                     hero.AddBuff(li, ck);
                     break;
                 case "Lunge":
-                    Attack(hero, 12);
-                    hero.Gold -= FindBuff("Thievery").Intensity;
+                    Attack(hero, 12, encounter);
+                    hero.GoldChange(-1*FindBuff("Thievery").Intensity);
                     Gold += FindBuff("Thievery").Intensity;
                     Console.WriteLine($"The {Name} stole 15 Gold!");
                     break;
                 case "Mug":
-                    Attack(hero, 10);
-                    hero.Gold -= FindBuff("Thievery").Intensity;
+                    Attack(hero, 10, encounter);
+                    hero.GoldChange(-1 * FindBuff("Thievery").Intensity);
                     Gold += FindBuff("Thievery").Intensity;
                     Console.WriteLine($"The {Name} stole 15 Gold!");
                     break;
@@ -167,30 +170,30 @@
                     encounter[target].GainBlock(7);
                     break;
                 case "Puncture":
-                    Attack(hero, 9);
+                    Attack(hero, 9, encounter);
                     break;
                 case "Rake":
-                    Attack(hero, 7);
+                    Attack(hero, 7, encounter);
                     hero.AddBuff(2, 2);
                     break;
                 case "Roll Attack":
-                    Attack(hero, 9);
+                    Attack(hero, 9, encounter);
                     break;
                 case "Rush":
-                    Attack(hero, 14);
+                    Attack(hero, 14, encounter);
                     break;
                 case "Scrape":
-                    Attack(hero, 8);
+                    Attack(hero, 8, encounter);
                     hero.AddBuff(1, 2);
                     break;
                 case "Scratch":
-                    Attack(hero, 4);
+                    Attack(hero, 4, encounter);
                     break;
                 case "Shield Bash":
-                    Attack(hero, 6);
+                    Attack(hero, 6, encounter);
                     break;
                 case "Sear":
-                    Attack(hero, 6);
+                    Attack(hero, 6, encounter);
                     hero.DiscardPile.Add(new Card(Dict.cardL[355]));
                     Console.WriteLine($"{Name} has added a Burn to your Deck!");
                     break;
@@ -199,17 +202,17 @@
                     hero.AddBuff(4, -1);
                     break;
                 case "Skull Bash":
-                    Attack(hero, 6);
+                    Attack(hero, 6, encounter);
                     hero.AddBuff(1, 3);
                     break;
                 case "Slam":
-                    Attack(hero, 35);
+                    Attack(hero, 35, encounter);
                     break;
                 case "Sleeping":
                     Console.WriteLine($"{Name} is sleeping, be cautious on waking it...");
                     break;
                 case "Smash":
-                    Attack(hero, 4);
+                    Attack(hero, 4, encounter);
                     hero.AddBuff(2, 2);
                     break;
                 case "Smoke Bomb":
@@ -225,7 +228,7 @@
                             damage = 13;
                             break;
                     }
-                    Attack(hero, damage);
+                    Attack(hero, damage, encounter);
                     break;
                 case "Tackle":
                     switch (EnemyID)
@@ -244,24 +247,24 @@
                             break;
                         case 24:
                             damage = 5;
-                            Attack(hero, damage);
+                            Attack(hero, damage, encounter);
                             break;
                     }
-                    Attack(hero, damage);
+                    Attack(hero, damage, encounter);
                     break;
                 case "Thrash":
-                    Attack(hero, 7);
+                    Attack(hero, 7, encounter);
                     GainBlock(5);
                     break;
                 case "Twin Slam":
                     for (int i = 0; i < 2; i++)
-                        Attack(hero, 8);
+                        Attack(hero, 8, encounter);
                     Buffs.Remove(FindBuff("Thorns"));
                     AddBuff(16, 30);
                     Actions.Clear();
                     break;
                 case "Ultimate Blast":
-                    Attack(hero, 25);
+                    Attack(hero, 25, encounter);
                     break;
                 case "Vent Steam":
                     hero.AddBuff(1, 3);
@@ -272,7 +275,7 @@
                     break;
                 case "Whirlwind":
                     for (int i = 0; i < 4; i++)
-                        Attack(hero, 5);
+                        Attack(hero, 5, encounter);
                     break;
 
             }
@@ -549,6 +552,200 @@
                 "Thrash"
             };
             return list;
+        }
+
+        public static List<Enemy> CreateEncounter(int list)
+        {
+            List<Enemy> encounter = new();
+            int encounterChoice;
+
+            /* Looks at specific list (Encounter Type plus Act Modifier )
+             * Encounter Types:
+             * 1. Debut (first 3 normal combats each floor)
+             * 2. Normal
+             * 3. Elite
+             * 4. Boss
+             * 5. Event Combats
+             * 
+             * Level Modifier:
+             * Act 1: 0
+             * Act 2: 5
+             * Act 3: 10
+             * 
+             * Example(Act 3 Elites): 10+3 = Case 13
+             */
+
+            switch (list)
+            {
+                default:
+                    encounterChoice = EnemyRNG.Next(4);
+                    switch (encounterChoice)
+                    {
+                        default:     //Cultist
+                            encounter.Add(new Enemy(Dict.enemyL[0]));
+                            break;
+                        case 1:     //Jaw Worm
+                            encounter.Add(new Enemy(Dict.enemyL[1]));
+                            break;
+                        case 2:     // 2 Louses (Red or Green)
+                            for (int i = 0; i < 2; i++)
+                                encounter.Add(new Enemy(Dict.enemyL[2 + EnemyRNG.Next(2)]));
+                            break;
+                        case 3:     // Small Slimes
+                            if (EnemyRNG.Next(2) == 0)
+                            {
+                                encounter.Add(new Enemy(Dict.enemyL[7]));
+                                encounter.Add(new Enemy(Dict.enemyL[4]));
+                            }
+                            else
+                            {
+                                encounter.Add(new Enemy(Dict.enemyL[6]));
+                                encounter.Add(new Enemy(Dict.enemyL[5]));
+                            }
+                            break;
+                    }
+                    break;
+                case 2:
+                    encounterChoice = EnemyRNG.Next(0, 10);
+                    switch (encounterChoice)
+                    {
+                        default:        // Gremlin Gang
+                            for (int i = 0; i < 4; i++)
+                            {
+                                encounter.Add(new Enemy(Dict.enemyL[12 + EnemyRNG.Next(5)]));
+                            }
+                            break;
+                        case 1:         // Large Slime
+                            if (EnemyRNG.Next(2) == 0)
+                                encounter.Add(new Enemy(Dict.enemyL[21]));
+                            else
+                                encounter.Add(new Enemy(Dict.enemyL[22]));
+                            break;
+                        case 2:         // Lots of Slimes
+                            for (int i = 0; i < 3; i++)
+                                encounter.Add(new Enemy(Dict.enemyL[6]));
+                            for (int i = 0; i < 2; i++)
+                                encounter.Add(new Enemy(Dict.enemyL[5]));
+                            break;
+                        case 3:         // Blue Slaver
+                            encounter.Add(new Enemy(Dict.enemyL[8]));
+                            break;
+                        case 4:         // Red Slaver
+                            encounter.Add(new Enemy(Dict.enemyL[9]));
+                            break;
+                        case 5:         // 3 Louses
+                            for (int i = 0; i < 3; i++)
+                            {
+                                encounter.Add(new Enemy(Dict.enemyL[2 + EnemyRNG.Next(2)]));
+                            }
+                            break;
+                        case 6:         // Fungi Beasts
+                            for (int i = 0; i < 2; i++)
+                                encounter.Add(new Enemy(Dict.enemyL[10]));
+                            break;
+                        case 7:         // Exordium Thugs
+                            encounter.Add(new Enemy(Dict.enemyL[2 + EnemyRNG.Next(4)]));
+                            switch (EnemyRNG.Next(4))
+                            {
+                                default:
+                                    encounter.Add(new Enemy(Dict.enemyL[11]));
+                                    break;
+                                case 1:
+                                    encounter.Add(new Enemy(Dict.enemyL[1]));
+                                    break;
+                                case 2:
+                                    encounter.Add(new Enemy(Dict.enemyL[8]));
+                                    break;
+                                case 3:
+                                    encounter.Add(new Enemy(Dict.enemyL[9]));
+                                    break;
+                            }
+                            break;
+                        case 8:         // Exordium Wildlife
+                            if (EnemyRNG.Next(2) == 0)
+                                encounter.Add(new Enemy(Dict.enemyL[0]));
+                            else encounter.Add(new Enemy(Dict.enemyL[10]));
+                            encounter.Add(new Enemy(Dict.enemyL[2 + EnemyRNG.Next(4)]));
+                            break;
+                        case 9:         //Looter
+                            encounter.Add(new Enemy(Dict.enemyL[11]));
+                            break;
+                    }
+                    break;
+                case 3:
+                    encounterChoice = EnemyRNG.Next(3);
+                    switch (encounterChoice)
+                    {
+                        default:     // Lagavulin
+                            encounter.Add(new Enemy(Dict.enemyL[18]));
+                            break;
+                        case 1:     // Gremlin Nob
+                            encounter.Add(new Enemy(Dict.enemyL[17]));
+                            break;
+                        case 2:     // 3 Sentries
+                            for (int i = 0; i < 3; i++)
+                                encounter.Add(new Enemy(Dict.enemyL[19]));
+                            break;
+                    }
+                    break;
+                case 4:
+                    encounterChoice = EnemyRNG.Next(3);
+                    switch (encounterChoice)
+                    {
+                        default:     // Slime Boss
+                            encounter.Add(new Enemy(Dict.enemyL[20]));
+                            break;
+                        case 1:     // The Guardian
+                            encounter.Add(new Enemy(Dict.enemyL[23]));
+                            break;
+                        case 2:     // Hexaghost
+                            encounter.Add(new Enemy(Dict.enemyL[24]));
+                            break;
+                    }
+                    break;
+                case 5:
+                    break;
+                case 6:
+                    break;
+                case 7:
+                    break;
+                case 8:
+                    break;
+                case 9:
+                    break;
+                case 10:
+                    break;
+                case 11:
+                    break;
+                case 12:
+                    break;
+                case 13:
+                    break;
+                case 14:
+                    break;
+                case 15:
+                    break;
+
+            }
+
+            for (int i = 0; i < encounter.Count; i++)
+            {
+                encounter[i].MaxHP = encounter[i].EnemyHealthSet();
+                encounter[i].Hp = encounter[i].MaxHP;
+                switch (encounter[i].EnemyID)
+                {
+                    default:
+                        break;
+                    case 2 or 7:
+                        encounter[i].AddBuff(5, EnemyRNG.Next(3, 8));
+                        break;
+                    case 11:
+                        encounter[i].AddBuff(18, 15);
+                        break;
+
+                }
+            }
+            return encounter;
         }
     }
 }

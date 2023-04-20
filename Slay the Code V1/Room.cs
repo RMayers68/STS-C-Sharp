@@ -1,4 +1,5 @@
-﻿namespace STV
+﻿using static Global.Functions;
+namespace STV
 {
     public class Room : IEquatable<Room>, IComparable<Room>
     {
@@ -7,6 +8,7 @@
         public int RoomNumber { get; set; }
         public int Floor { get; set; }
         public List<Room> Connections { get; set; }
+        private static readonly Random mapRNG = new();
 
 
         //constructor
@@ -115,6 +117,199 @@
         public override int GetHashCode()
         {
             return Floor + RoomNumber + ShortHand;
+        }
+
+        public static List<Room> MapGeneration()
+        {
+            // Variable Init
+            Dictionary<int, List<Room>> MapTemplate = new();
+            List<Room> paths = new();
+
+            // Fills Map Template with 7*15 grid of Rooms
+            for (int i = 1; i < 16; i++)
+                MapTemplate[i] = new List<Room> { new(0, i), new(1, i), new(2, i), new(3, i), new(4, i), new(5, i), new(6, i) };
+
+            // Runs 6 attempts at creating valid paths through Map       
+            for (int i = 0; i < 6; i++)
+            {
+
+                // Grab starting node at random and move floor by floor to a valid room
+                paths.Add(MapTemplate[1][mapRNG.Next(0, 7)]);
+                for (int j = 1; j < 15; j++)
+                {
+                    while (true)
+                    {
+                        try     // Prevents -1 or 7 index which would be out of range
+                        {
+                            Room tmp = new(MapTemplate[j + 1][mapRNG.Next(paths.Last().RoomNumber - 1, paths.Last().RoomNumber + 2)]);
+                            tmp.Connections.Add(paths.Last());
+                            paths.Last().Connections.Add(tmp);
+                            paths.Add(tmp);
+                            break;
+                        }
+                        catch (ArgumentOutOfRangeException) { continue; }  // This runs loop until valid room is found
+                    }
+                }
+            }
+
+            // Remove duplicate Rooms selected during the process and merge connections so no path is lost.
+            List<Room> distinct = new();
+            foreach (Room room in paths)
+            {
+                if (!distinct.Contains(room))
+                    distinct.Add(room);
+                else
+                {
+                    distinct.Find(x => x.Equals(room)).Connections.AddRange(room.Connections);
+                }
+            }
+
+            // Sort List by floors for assigning locations and visualization
+            distinct = distinct.OrderBy(x => x.Floor).ThenBy(x => x.RoomNumber).ToList();
+            // Assign locations to each room, starting on bottom floor
+            for (int i = 1; i < 16; i++)
+            {
+
+                //Initial RNG chances
+                int monster = 40, eVent = 65, elite = 83, restSite = 95, merchant = 101, choice = 0;
+
+                // Next 3 conditionals are to set 1 floor of rooms to constant locations
+                if (i == 1)
+                {
+                    foreach (Room r in distinct.Where(x => x.Floor == i))
+                        r.ChangeName("Monster");
+                    continue;
+                }
+                else if (i == 9)
+                {
+                    foreach (Room r in distinct.Where(x => x.Floor == i))
+                        r.ChangeName("Treasure");
+                    continue;
+                }
+                else if (i == 15)
+                {
+                    Room bossRoom = new(3, 16, "Boss");
+                    foreach (Room r in distinct.Where(x => x.Floor == i))
+                    {
+                        r.ChangeName("Rest Site");
+                        r.Connections.Add(bossRoom);
+                    }
+                    continue;
+                }
+
+                // Next 2 are to change RNG chances for certain floors that can not have some events (-1 odds set on those rooms to prevent them being selected)
+                else if (i > 1 && i < 6)
+                {
+                    monster = 63;
+                    eVent = 93;
+                    elite = -1;
+                    restSite = -1;
+                }
+                else if (i == 14)
+                {
+                    monster = 50;
+                    eVent = 70;
+                    elite = 94;
+                    restSite = -1;
+                }
+
+                // For Floors not 1,9,15 : Roll random number until a valid location is selected
+                foreach (Room r in distinct.Where(x => x.Floor == i))
+                {
+                    while (true)
+                    {
+                        choice = mapRNG.Next(merchant);
+                        if (choice < monster)
+                            r.ChangeName("Monster");
+                        else if (choice < eVent)
+                            r.ChangeName("Event");
+                        else if (choice < elite)
+                        {
+                            if (r.Connections.Find(x => x.Location == "Elite") == null)
+                                r.ChangeName("Elite");
+                        }
+                        else if (choice < restSite)
+                        {
+                            if (r.Connections.Find(x => x.Location == "Rest Site") == null)
+                                r.ChangeName("Rest Site");
+                        }
+                        else
+                        {
+                            if (r.Connections.Find(x => x.Location == "Merchant") == null)
+                                r.ChangeName("Merchant");
+                        }
+                        if (r.Location != "Undecided")
+                            break;
+                    }
+                }
+            }
+            return distinct;
+        }
+
+        public static void DrawMap(List<Room> map)
+        {
+            ScreenWipe();
+            // Drawing the Map   
+            Console.WriteLine("\tBoss\t\n");
+            for (int floor = 15; floor >= 1; floor--)
+            {
+                // Rules for drawing lines with rooms
+                for (int roomNumber = 0; roomNumber < 7; roomNumber++)
+                {
+                    if (FindRoom(floor, roomNumber, map) == null)
+                        Console.Write("    ");
+                    else Console.Write(FindRoom(floor, roomNumber, map).ShortHand + "   ");
+                }
+                Console.WriteLine();
+                // Rules for drawing paths inbetween Rooms
+                for (int roomNumber = 0; roomNumber < 7; roomNumber++)
+                {
+                    Room currentRoom = FindRoom(floor, roomNumber, map), nextRoom = FindRoom(floor, roomNumber + 1, map);
+                    bool currentExists = currentRoom != null, nextExists = nextRoom != null;
+
+                    //Null move position to next to check
+                    if (!currentExists)
+                    {
+                        Console.Write("  ");
+                    }
+                    else
+                    {
+                        // Middle Check
+                        if (FindRoom(floor - 1, roomNumber, currentRoom.Connections) == null)
+                            Console.Write("  ");
+                        else
+                            Console.Write("| ");
+                    }
+
+                    // Diagonal Checks
+                    if (roomNumber != 6)
+                    {
+                        bool leftPathExists = false, rightPathExists = false;
+                        if (nextExists)
+                            leftPathExists = FindRoom(floor - 1, roomNumber, nextRoom.Connections) != null;
+                        if (currentExists)
+                            rightPathExists = FindRoom(floor - 1, roomNumber + 1, currentRoom.Connections) != null;
+                        switch (rightPathExists, leftPathExists)
+                        {
+                            default:
+                                Console.Write("  ");
+                                break;
+                            case (true, true):
+                                Console.Write("X ");
+                                break;
+                            case (true, false):
+                                Console.Write("\\ ");
+                                break;
+                            case (false, true):
+                                Console.Write("/ ");
+                                break;
+                        }
+
+                    }
+                    else break; //Right check on last room is impossible path, skip
+                }
+                Console.WriteLine();
+            }
         }
     }
 

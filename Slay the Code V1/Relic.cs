@@ -1,4 +1,6 @@
-﻿namespace STV
+﻿using System.Security.Cryptography.X509Certificates;
+
+namespace STV
 {
     public class Relic
     {
@@ -8,6 +10,7 @@
         public int PersistentCounter { get; set; }
         public bool IsActive { get; set; }
         public int GoldCost { get; set; }
+        private static readonly Random RelicRNG = new();
 
         // constructor
         public Relic()
@@ -32,20 +35,136 @@
             this.EffectAmount = relic.EffectAmount;
             this.PersistentCounter = relic.PersistentCounter;
             this.IsActive = true;
-            Random rng = new();
-            this.GoldCost = Type == "Rare" ? rng.Next(285, 316) : Type == "Uncommon" ? rng.Next(238, 263) : rng.Next(143, 158);
+            this.GoldCost = Type == "Rare" ? RelicRNG.Next(285, 316) : Type == "Uncommon" ? RelicRNG.Next(238, 263) : RelicRNG.Next(143, 158);
         }
 
 
-        public static Relic RandomRelic(string type, Random rng)
+        public static Relic RandomRelic(string type = "")
         {
             return type switch
             {
-                "Silent" => Dict.relicL[rng.Next(73, 146)],
-                "Defect" => Dict.relicL[rng.Next(146, 219)],
-                "Watcher" => Dict.relicL[rng.Next(221, 294)],
-                _ => Dict.relicL[rng.Next(73)],
+                "Silent" => Dict.relicL[RelicRNG.Next(73, 146)],
+                "Defect" => Dict.relicL[RelicRNG.Next(146, 219)],
+                "Watcher" => Dict.relicL[RelicRNG.Next(221, 294)],
+                _ => Dict.relicL[RelicRNG.Next(73)],
             };
+        }
+
+        public void RelicPickupEffect(Hero hero)
+        {
+            switch (Name)
+            {
+                default: break;
+                case "Potion Belt":
+                    hero.PotionSlots += 2;
+                    break;
+                case "Strawberry" or "Pear" or "Mango" or "Lee's Waffle":
+                    hero.SetMaxHP(EffectAmount);
+                    if (Name == "Lee's Waffle")
+                        hero.HealHP(hero.MaxHP);
+                    break;
+                case "War Paint":
+                    List<Card> skillList = hero.Deck.FindAll(x => x.Type == "Skill");
+                    for (int i = 0; i < 2; i++)
+                    {                        
+                        if (skillList.All(x => x.IsUpgraded())) break;
+                        Card warPaint = skillList[RelicRNG.Next(skillList.Count)];
+                        while (warPaint.IsUpgraded())
+                            warPaint = skillList[RelicRNG.Next(skillList.Count)];
+                        warPaint.UpgradeCard();
+                    }
+                    break;
+                case "Whetstone":
+                    List<Card> attackList = hero.Deck.FindAll(x => x.Type == "Attack");
+                    for (int i = 0; i < 2; i++)
+                    {
+                        if (attackList.All(x => x.IsUpgraded())) break;
+                        Card whetstone = attackList[RelicRNG.Next(attackList.Count)];
+                        while (whetstone.IsUpgraded())
+                            whetstone = attackList[RelicRNG.Next(attackList.Count)];
+                        whetstone.UpgradeCard();
+                    }
+                    break;
+                case "Bottled Flame":
+                    Card.ChooseCard(hero.Deck.FindAll(x => x.Type == "Attack"), "choose to have start in your hand every combat").DescriptionModifier = "Innate.";
+                    break;
+                case "Bottled Lightning":
+                    Card.ChooseCard(hero.Deck.FindAll(x => x.Type == "Skill"), "choose to have start in your hand every combat").DescriptionModifier = "Innate.";
+                    break;
+                case "Bottled Tornado":
+                    Card.ChooseCard(hero.Deck.FindAll(x => x.Type == "Power"), "choose to have start in your hand every combat").DescriptionModifier = "Innate.";
+                    break;
+                case "Old Coin":
+                    hero.GoldChange(300);
+                    break;
+                case "Astrolabe":
+                    for (int i = 0; i < 3; i++)
+                    {
+                        Card.ChooseCard(hero.Deck, "transform").TransformCard(hero);
+                        hero.Deck.Last().UpgradeCard();
+                    }
+                    break;
+                case "Busted Crown" or "Coffee Dripper" or "Cursed Key" or "Ectoplasm" or "Fusion Hammer" or "Mark of Pain" or "Philosopher's Stone" or "Runic Dome" or "Sozu" or "Velvet Choker":
+                    hero.MaxEnergy++;
+                    break;
+                case "Calling Bell":
+                    hero.AddToDeck(Dict.cardL[345]);
+                    for (int i = 0; i < 3; i++)
+                        continue;
+                        //Add Random Relic function
+                    break;
+                case "Empty Cage":
+                    for (int i = 0; i < 2; i++)
+                        hero.Deck.Remove(Card.ChooseCard(hero.Deck, "remove from your Deck"));
+                    break;
+                case "Pandora's Box":
+                    foreach(Card c in hero.Deck.FindAll(x => x.Name == "Strike" || x.Name == "Defend"))
+                        c.TransformCard(hero);
+                    break;
+                case "Tiny House":
+                    hero.Potions.Add(Potion.RandomPotion());
+                    hero.GoldChange(50);
+                    hero.SetMaxHP(5);
+                    hero.AddToDeck(Card.ChooseCard(Card.RandomCards(hero.Name, 3), "add to your Deck"));
+                    if (hero.Deck.FindAll(x => !x.IsUpgraded()) is List<Card> cards && cards != null)
+                        cards[RelicRNG.Next(cards.Count)].UpgradeCard();
+                    break;
+                case "Necronomicon":
+                    hero.AddToDeck(Dict.cardL[342]);
+                    break;
+                case "Spirit Poop":
+                    Console.WriteLine("You acquired the spiritual essence of feces. Unpleasant.");
+                    break;
+                case "Cauldron":
+                    List<Potion> potions = new() { Potion.RandomPotion(), Potion.RandomPotion(), Potion.RandomPotion(), Potion.RandomPotion(), Potion.RandomPotion(), };
+                    int potionChoice = -1;
+                    int potionAmount = hero.Hand.Count;
+                    while (potionChoice != 0 && potionAmount > 0)
+                    {
+                        Console.WriteLine($"\nEnter the number of the potion you would like to take or hit 0 to move on.");
+                        for (int i = 0; i <= potionAmount; i++)
+                            Console.WriteLine($"{i+1}:{potions[i].Name}");
+                        while (!Int32.TryParse(Console.ReadLine(), out potionChoice) || potionChoice < 0 || potionChoice > potionAmount)
+                            Console.WriteLine("Invalid input, enter again:");
+                        if (potionChoice > 0 && hero.Potions.Count < hero.PotionSlots)
+                        {
+                            hero.AddToPotions(potions[potionChoice - 1]);
+                            potionAmount--;
+                        }
+                        else Console.WriteLine("You're potion slots are full, you can't take any more potions.");
+                    }
+                    break;
+                case "Dolly's Mirror":
+                    Card dollysMirror = Card.ChooseCard(hero.Deck, "copy");
+                    hero.AddToDeck(dollysMirror);
+                    break;
+                case "Orrery":
+                    for (int i = 0;i < 5;i++)
+                    {
+                        hero.AddToDeck(Card.ChooseCard(Card.RandomCards(hero.Name, 3),"add to your Deck"));
+                    }
+                    break;
+            }
         }
         public string GetDescription()
         {
@@ -73,7 +192,7 @@
                 "Meal Ticket" => $"Whenever you enter a shop room, heal 15 HP.",
                 "Nunchaku" => $"Every time you play 10 Attacks, gain 1 Energy. {(IsActive ? $"({PersistentCounter} Attacks needed)" : "")}",
                 "Oddly Smooth Stone" => $"At the start of each combat, gain 1 Dexterity.",
-                "Omamori" => $"Negate the next {(IsActive ? $"{PersistentCounter}" : "0")} Curses you obtain. ",
+                "Omamori" => $"Negate the next {EffectAmount} Curses you obtain. ",
                 "Orichalchum" => $"If you end your turn without Block, gain 6 Block.",
                 "Pen Nib" => $"Every 10th Attack you play deals double damage. {(IsActive ? $"({PersistentCounter} Attacks needed)" : "")}",
                 "Potion Slots" => $"Upon pickup, gain 2 Potion slots.",
@@ -106,7 +225,7 @@
                 "Kunai" => $"Every time you play 3 Attacks in a single turn, gain 1 Dexterity. {(IsActive ? $"({PersistentCounter} Attacks needed)" : "")}",
                 "Shuriken" => $"Every time you play 3 Attacks in a single turn, gain 1 Strength. {(IsActive ? $"({PersistentCounter} Attacks needed)" : "")}",
                 "Letter Opener" => $"Every time you play 3 Skills in a single turn, deal 5 damage to ALL enemies. {(IsActive ? $"({PersistentCounter} Skills needed)" : "")}",
-                "Matryoshka" => $"The next {(IsActive ? $"{PersistentCounter}" : "0")} non-boss chests you open contain 2 Relics.",
+                "Matryoshka" => $"The next {EffectAmount} non-boss chests you open contain 2 Relics.",
                 "Meat on the Bone" => $"If your HP is at or below 50% at the end of combat, heal 12 HP.",
                 "Mercury Hourglass" => $"At the start of your turn, deal 3 damage to ALL enemies.",
                 "Mummified Hand" => $"Whenever you play a Power, a random card in your hand costs 0 for the turn.",

@@ -143,7 +143,7 @@
         public void DurationDecrease()
         {
             if (Type == 1)
-                Duration -= 1;
+                Duration--;
         }
 
         public bool DurationEnded()
