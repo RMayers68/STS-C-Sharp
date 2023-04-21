@@ -38,16 +38,31 @@ namespace STV
             this.GoldCost = Type == "Rare" ? RelicRNG.Next(285, 316) : Type == "Uncommon" ? RelicRNG.Next(238, 263) : RelicRNG.Next(143, 158);
         }
 
-
-        public static Relic RandomRelic(string type = "")
+        public override string ToString()
         {
-            return type switch
+            return Name + " " + GetDescription();
+        }
+
+        public static Relic RandomRelic(string exclusion = "")
+        {
+            Relic randomRelic = RelicRNG.Next(100) switch
             {
-                "Silent" => Dict.relicL[RelicRNG.Next(73, 146)],
-                "Defect" => Dict.relicL[RelicRNG.Next(146, 219)],
-                "Watcher" => Dict.relicL[RelicRNG.Next(221, 294)],
-                _ => Dict.relicL[RelicRNG.Next(73)],
+                int i when i < 50 => Dict.relicL[RelicRNG.Next(4, 40)],
+                int i when i < 85 => Dict.relicL[RelicRNG.Next(40, 76)],
+                _ => Dict.relicL[RelicRNG.Next(76,110)],
             };
+            Console.WriteLine($"You have found a Relic: {randomRelic}");
+            return new(randomRelic);
+        }
+
+        public static Relic ShopRelic(string exclusion = "")
+        {
+            return new(Dict.relicL[RelicRNG.Next(110, 130)]);
+        }
+
+        public static Relic BossRelic(string exclusion = "")
+        {
+            return new(Dict.relicL[RelicRNG.Next(130, 160)]);
         }
 
         public void RelicPickupEffect(Hero hero)
@@ -86,13 +101,13 @@ namespace STV
                     }
                     break;
                 case "Bottled Flame":
-                    Card.ChooseCard(hero.Deck.FindAll(x => x.Type == "Attack"), "choose to have start in your hand every combat").DescriptionModifier = "Innate.";
+                    Card.PickCard(hero.Deck.FindAll(x => x.Type == "Attack"), "choose to have start in your hand every combat").DescriptionModifier = "Innate.";
                     break;
                 case "Bottled Lightning":
-                    Card.ChooseCard(hero.Deck.FindAll(x => x.Type == "Skill"), "choose to have start in your hand every combat").DescriptionModifier = "Innate.";
+                    Card.PickCard(hero.Deck.FindAll(x => x.Type == "Skill"), "choose to have start in your hand every combat").DescriptionModifier = "Innate.";
                     break;
                 case "Bottled Tornado":
-                    Card.ChooseCard(hero.Deck.FindAll(x => x.Type == "Power"), "choose to have start in your hand every combat").DescriptionModifier = "Innate.";
+                    Card.PickCard(hero.Deck.FindAll(x => x.Type == "Power"), "choose to have start in your hand every combat").DescriptionModifier = "Innate.";
                     break;
                 case "Old Coin":
                     hero.GoldChange(300);
@@ -100,7 +115,7 @@ namespace STV
                 case "Astrolabe":
                     for (int i = 0; i < 3; i++)
                     {
-                        Card.ChooseCard(hero.Deck, "transform").TransformCard(hero);
+                        Card.PickCard(hero.Deck, "transform").TransformCard(hero);
                         hero.Deck.Last().UpgradeCard();
                     }
                     break;
@@ -115,17 +130,17 @@ namespace STV
                     break;
                 case "Empty Cage":
                     for (int i = 0; i < 2; i++)
-                        hero.Deck.Remove(Card.ChooseCard(hero.Deck, "remove from your Deck"));
+                        hero.Deck.Remove(Card.PickCard(hero.Deck, "remove from your Deck"));
                     break;
                 case "Pandora's Box":
                     foreach(Card c in hero.Deck.FindAll(x => x.Name == "Strike" || x.Name == "Defend"))
                         c.TransformCard(hero);
                     break;
                 case "Tiny House":
-                    hero.Potions.Add(Potion.RandomPotion());
+                    hero.AddToPotions(Potion.RandomPotion(hero));
                     hero.GoldChange(50);
                     hero.SetMaxHP(5);
-                    hero.AddToDeck(Card.ChooseCard(Card.RandomCards(hero.Name, 3), "add to your Deck"));
+                    hero.AddToDeck(Card.PickCard(Card.RandomCards(hero.Name, 3), "add to your Deck"));
                     if (hero.Deck.FindAll(x => !x.IsUpgraded()) is List<Card> cards && cards != null)
                         cards[RelicRNG.Next(cards.Count)].UpgradeCard();
                     break;
@@ -136,7 +151,9 @@ namespace STV
                     Console.WriteLine("You acquired the spiritual essence of feces. Unpleasant.");
                     break;
                 case "Cauldron":
-                    List<Potion> potions = new() { Potion.RandomPotion(), Potion.RandomPotion(), Potion.RandomPotion(), Potion.RandomPotion(), Potion.RandomPotion(), };
+                    List<Potion> potions = new();
+                    for (int i = 0; i < 5; i++)
+                        potions.Add(Potion.RandomPotion(hero));
                     int potionChoice = -1;
                     int potionAmount = hero.Hand.Count;
                     while (potionChoice != 0 && potionAmount > 0)
@@ -155,13 +172,13 @@ namespace STV
                     }
                     break;
                 case "Dolly's Mirror":
-                    Card dollysMirror = Card.ChooseCard(hero.Deck, "copy");
+                    Card dollysMirror = Card.PickCard(hero.Deck, "copy");
                     hero.AddToDeck(dollysMirror);
                     break;
                 case "Orrery":
                     for (int i = 0;i < 5;i++)
                     {
-                        hero.AddToDeck(Card.ChooseCard(Card.RandomCards(hero.Name, 3),"add to your Deck"));
+                        hero.AddToDeck(Card.PickCard(Card.RandomCards(hero.Name, 3),"add to your Deck"));
                     }
                     break;
             }
@@ -193,7 +210,7 @@ namespace STV
                 "Nunchaku" => $"Every time you play 10 Attacks, gain 1 Energy. {(IsActive ? $"({PersistentCounter} Attacks needed)" : "")}",
                 "Oddly Smooth Stone" => $"At the start of each combat, gain 1 Dexterity.",
                 "Omamori" => $"Negate the next {EffectAmount} Curses you obtain. ",
-                "Orichalchum" => $"If you end your turn without Block, gain 6 Block.",
+                "Orichalcum" => $"If you end your turn without Block, gain 6 Block.",
                 "Pen Nib" => $"Every 10th Attack you play deals double damage. {(IsActive ? $"({PersistentCounter} Attacks needed)" : "")}",
                 "Potion Slots" => $"Upon pickup, gain 2 Potion slots.",
                 "Perserved Insect" => $"Enemies in Elite rooms have 25% less HP.",
@@ -233,7 +250,7 @@ namespace STV
                 "Pantograph" => $"At the start of boss combats, heal 25 HP.",
                 "Pear" => $"Raise your Max HP by 10.",
                 "Question Card" => $"On future Card Reward screens you have 1 additional card to choose from.",
-                "Singing Bowl" => $"When adding cards to your deck, you may gain +2 Max HP instead.",
+                "Singing Bowl" => $"If you skip a card reward, gain +2 Max HP instead.",
                 "Strike Dummy" => $"Cards containing \"Strike\" deal 3 additional damage.",
                 "Sundial" => $"Every 3 times you shuffle your deck, gain 2 Energy.",
                 "The Courier" => $"The merchant no longer runs out of cards, relics, or potions and his prices are reduced by 20%.",

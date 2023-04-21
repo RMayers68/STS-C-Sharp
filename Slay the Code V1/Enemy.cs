@@ -1,5 +1,4 @@
-﻿
-namespace STV
+﻿namespace STV
 {
     public class Enemy : Actor
     {
@@ -48,10 +47,10 @@ namespace STV
             switch (Intent)
             {
                 case "Attack":
-                    Attack(hero, 18, encounter);
+                    Attack(hero, 18);
                     break;
                 case "Beam":
-                    Attack(hero, 9, encounter);
+                    Attack(hero, 9);
                     break;
                 case "Bellow":
                     if (EnemyID == 17)
@@ -64,8 +63,8 @@ namespace STV
                     break;
                 case "Bite":
                     if (EnemyID == 10)
-                        Attack(hero, MaxHP / 2, encounter);
-                    else Attack(hero, 6, encounter);
+                        Attack(hero, MaxHP / 2);
+                    else Attack(hero, 6);
                     break;
                 case "Bolt":
                     for (int i = 0; i < 2; i++)
@@ -79,16 +78,16 @@ namespace STV
                     GainBlock(9);
                     break;
                 case "Chomp":
-                    Attack(hero, 11, encounter);
+                    Attack(hero, 11);
                     break;
                 case "Corrosive Spit":
-                    Attack(hero, 7, encounter);
+                    Attack(hero, 7);
                     hero.DiscardPile.Add(Dict.cardL[358]);
                     if (EnemyID == 21)
                         hero.DiscardPile.Add(Dict.cardL[358]);
                     break;
                 case "Dark Strike":
-                    Attack(hero, 6, encounter);
+                    Attack(hero, 6);
                     break;
                 case "Defensive Mode":
                     AddBuff(16, 3);
@@ -96,7 +95,7 @@ namespace STV
                 case "Divider":
                     damage = hero.Hp / 12 + 1;
                     for (int i = 0; i < 6; i++)
-                        Attack(hero, damage, encounter);
+                        Attack(hero, damage);
                     break;
                 case "Entangle":
                     hero.AddBuff(14, 2);
@@ -106,13 +105,13 @@ namespace STV
                     Console.WriteLine($"The {Name} has escaped!");
                     break;
                 case "Fierce Bash":
-                    Attack(hero, 32, encounter);
+                    Attack(hero, 32);
                     break;
                 case "Flame Tackle":
                     if (EnemyID == 22)
                         damage = 16;
                     else damage = 8;
-                    Attack(hero, damage, encounter);
+                    Attack(hero, damage);
                     hero.DiscardPile.Add(Dict.cardL[358]);
                     if (EnemyID == 22)
                         hero.DiscardPile.Add(Dict.cardL[358]);
@@ -131,7 +130,7 @@ namespace STV
                 case "Inferno":
                     for (int i = 0; i < 6; i++)
                     {
-                        Attack(hero, 2, encounter);
+                        Attack(hero, 2);
                         if (i % 2 == 0)
                             hero.DiscardPile.Add(new Card(Dict.cardL[355]));
                     }
@@ -152,13 +151,13 @@ namespace STV
                     hero.AddBuff(li, ck);
                     break;
                 case "Lunge":
-                    Attack(hero, 12, encounter);
+                    Attack(hero, 12);
                     hero.GoldChange(-1*FindBuff("Thievery").Intensity);
                     Gold += FindBuff("Thievery").Intensity;
                     Console.WriteLine($"The {Name} stole 15 Gold!");
                     break;
                 case "Mug":
-                    Attack(hero, 10, encounter);
+                    Attack(hero, 10);
                     hero.GoldChange(-1 * FindBuff("Thievery").Intensity);
                     Gold += FindBuff("Thievery").Intensity;
                     Console.WriteLine($"The {Name} stole 15 Gold!");
@@ -170,30 +169,30 @@ namespace STV
                     encounter[target].GainBlock(7);
                     break;
                 case "Puncture":
-                    Attack(hero, 9, encounter);
+                    Attack(hero, 9);
                     break;
                 case "Rake":
-                    Attack(hero, 7, encounter);
+                    Attack(hero, 7);
                     hero.AddBuff(2, 2);
                     break;
                 case "Roll Attack":
-                    Attack(hero, 9, encounter);
+                    Attack(hero, 9);
                     break;
                 case "Rush":
-                    Attack(hero, 14, encounter);
+                    Attack(hero, 14);
                     break;
                 case "Scrape":
-                    Attack(hero, 8, encounter);
+                    Attack(hero, 8);
                     hero.AddBuff(1, 2);
                     break;
                 case "Scratch":
-                    Attack(hero, 4, encounter);
+                    Attack(hero, 4);
                     break;
                 case "Shield Bash":
-                    Attack(hero, 6, encounter);
+                    Attack(hero, 6);
                     break;
                 case "Sear":
-                    Attack(hero, 6, encounter);
+                    Attack(hero, 6);
                     hero.DiscardPile.Add(new Card(Dict.cardL[355]));
                     Console.WriteLine($"{Name} has added a Burn to your Deck!");
                     break;
@@ -202,17 +201,17 @@ namespace STV
                     hero.AddBuff(4, -1);
                     break;
                 case "Skull Bash":
-                    Attack(hero, 6, encounter);
+                    Attack(hero, 6);
                     hero.AddBuff(1, 3);
                     break;
                 case "Slam":
-                    Attack(hero, 35, encounter);
+                    Attack(hero, 35);
                     break;
                 case "Sleeping":
                     Console.WriteLine($"{Name} is sleeping, be cautious on waking it...");
                     break;
                 case "Smash":
-                    Attack(hero, 4, encounter);
+                    Attack(hero, 4);
                     hero.AddBuff(2, 2);
                     break;
                 case "Smoke Bomb":
@@ -228,7 +227,7 @@ namespace STV
                             damage = 13;
                             break;
                     }
-                    Attack(hero, damage, encounter);
+                    Attack(hero, damage);
                     break;
                 case "Tackle":
                     switch (EnemyID)
@@ -247,24 +246,24 @@ namespace STV
                             break;
                         case 24:
                             damage = 5;
-                            Attack(hero, damage, encounter);
+                            Attack(hero, damage);
                             break;
                     }
-                    Attack(hero, damage, encounter);
+                    Attack(hero, damage);
                     break;
                 case "Thrash":
-                    Attack(hero, 7, encounter);
+                    Attack(hero, 7);
                     GainBlock(5);
                     break;
                 case "Twin Slam":
                     for (int i = 0; i < 2; i++)
-                        Attack(hero, 8, encounter);
+                        Attack(hero, 8);
                     Buffs.Remove(FindBuff("Thorns"));
                     AddBuff(16, 30);
                     Actions.Clear();
                     break;
                 case "Ultimate Blast":
-                    Attack(hero, 25, encounter);
+                    Attack(hero, 25);
                     break;
                 case "Vent Steam":
                     hero.AddBuff(1, 3);
@@ -275,7 +274,7 @@ namespace STV
                     break;
                 case "Whirlwind":
                     for (int i = 0; i < 4; i++)
-                        Attack(hero, 5, encounter);
+                        Attack(hero, 5);
                     break;
 
             }

@@ -3,7 +3,6 @@ namespace STV
 {
     public class Shop
     {
-        private static readonly Random ShopRNG = new();
         public Shop() { }
 
         public static void VisitShop(Hero hero)
@@ -15,6 +14,7 @@ namespace STV
             int shopChoice = -1;
             List<Card> shopCards = new();
             List<Potion> shopPotions = new();
+            List<Relic> shopRelics = new();
             for (int i = 0; i < 7; i++)
             {
                 Card shopCard = new();
@@ -32,22 +32,36 @@ namespace STV
             }
             for (int i = 0; i < 3; i++)
             {
-                Potion shopPotion = new(Dict.potionL[ShopRNG.Next(Dict.potionL.Count)]);
+                Potion shopPotion = new(Potion.RandomPotion(hero));
                 shopPotions.Add(shopPotion);
             }
+            for (int i = 0; i < 2; i++)
+            {
+                Relic shopRelic = Relic.RandomRelic(hero.Name);
+                shopRelics.Add(shopRelic);
+            }
+            shopRelics.Add(Relic.ShopRelic(hero.Name));
             string removeCard = "Remove Card";
             while (shopChoice != 0)
             {
+                int discount = 1;
+                if (hero.HasRelic("Member"))
+                    discount = 5;
+                else if (hero.HasRelic("Courier"))
+                    discount = 2;
                 ScreenWipe();
                 Console.WriteLine($"Hello {hero.Name}! You have {hero.Gold} Gold. What would you like to purchase? Enter your option or press 0 to leave.\n");
                 Console.WriteLine("\nCards:\n*************************************");
                 for (int i = 1; i <= 7; i++)
-                    Console.WriteLine($"{i}: {shopCards[i - 1].Name} {(shopCards[i - 1].Name == "Purchased" ? "" : "- " + shopCards[i - 1].GetGoldCost())}");
+                    Console.WriteLine($"{i}: {shopCards[i - 1].Name} {(shopCards[i - 1].Name == "Purchased" ? "" : " - " + $"{( discount > 1 ? $"{shopCards[i - 1].GetGoldCost() / discount}" : $"{shopCards[i - 1].GetGoldCost()}")}")}");
                 Console.WriteLine("\nPotions:\n*************************************");
                 for (int i = 8; i <= 10; i++)
-                    Console.WriteLine($"{i}: {shopPotions[i - 8].Name} {(shopPotions[i - 8].Name == "Purchased" ? "" : "- " + shopPotions[i - 8].GoldCost)}");
-                Console.WriteLine($"*************************************\n11: {removeCard} {(removeCard == "Remove Card" ? $"- {hero.RemoveCost}" : "")}");
-                while (!Int32.TryParse(Console.ReadLine(), out shopChoice) || shopChoice < 0 || shopChoice > 11)
+                    Console.WriteLine($"{i}: {shopPotions[i - 8].Name} {(shopPotions[i - 8].Name == "Purchased" ? "" : "- " + $"{(discount > 1 ? $"{shopPotions[i - 8].GoldCost / discount}" : $"{shopPotions[i - 8].GoldCost}")}")}");
+                Console.WriteLine("\nRelics:\n*************************************");
+                for (int i = 11; i <= 13; i++)
+                    Console.WriteLine($"{i}: {shopRelics[i - 11].Name} {(shopRelics[i - 11].Name == "Purchased" ? "" : "- " + $"{(discount > 1 ? $"{shopRelics[i - 11].GoldCost / discount}" : $"{shopRelics[i - 11].GoldCost}")}")}");
+                Console.WriteLine($"*************************************\n14: {removeCard} {(removeCard == "Remove Card" ? $"- {hero.RemoveCost}" : "")}");
+                while (!Int32.TryParse(Console.ReadLine(), out shopChoice) || shopChoice < 0 || shopChoice > 14)
                     Console.WriteLine("Invalid input, enter again:");
                 int newHeroGold;
                 if (shopChoice != 0 && hero.FindRelic("Maw") is Relic mawBank && mawBank.IsActive)
@@ -57,13 +71,13 @@ namespace STV
                     Card shopCard = shopCards[shopChoice - 1];
                     if (shopCard.Name != "Purchased")
                     {
-                        newHeroGold = hero.Gold - shopCard.GetGoldCost();
+                        newHeroGold = hero.Gold - shopCard.GetGoldCost() / discount;
                         if (newHeroGold >= 0)
                         {
                             hero.Gold = newHeroGold;
                             hero.AddToDeck(shopCard);
                             Console.WriteLine($"You have purchased {shopCard.Name}");
-                            shopCards[shopChoice - 1] = new Card();
+                            shopCards[shopChoice - 1] = new Card(hero.HasRelic("Courier") ? Card.RandomCards(hero.Name, 1)[0] : null);
                         }
                         else Console.WriteLine("You don't have enough Gold to buy this card.");
                     }
@@ -76,13 +90,13 @@ namespace STV
                     {
                         if (hero.Potions.Count <= hero.PotionSlots)
                         {
-                            newHeroGold = hero.Gold - shopPotion.GoldCost;
+                            newHeroGold = hero.Gold - shopPotion.GoldCost / discount;
                             if (newHeroGold >= 0)
                             {
                                 hero.Gold = newHeroGold;
                                 hero.Potions.Add(shopPotion);
                                 Console.WriteLine($"You have purchased {shopPotion.Name}");
-                                shopPotions[shopChoice - 8] = new Potion();
+                                shopPotions[shopChoice - 8] = new Potion(hero.HasRelic("Courier") ? Potion.RandomPotion(hero) : null);
                             }
                             else Console.WriteLine("You don't have enough Gold to buy this potion.");
                         }
@@ -90,7 +104,24 @@ namespace STV
                     }
                     else Console.WriteLine("Potion has already been purchased.");
                 }
-                else if (shopChoice == 11)
+                else if (shopChoice > 10 && shopChoice < 14)
+                {
+                    Relic shopRelic = shopRelics[shopChoice - 11];
+                    if (shopRelic.Name != "Purchased")
+                    {
+                        newHeroGold = hero.Gold - shopRelic.GoldCost / discount;
+                        if (newHeroGold >= 0)
+                        {
+                            hero.Gold = newHeroGold;
+                            hero.AddToRelics(shopRelic);
+                            Console.WriteLine($"You have purchased {shopRelic.Name}");
+                            shopRelics[shopChoice - 8] = new Relic(hero.HasRelic("Courier") ? shopChoice < 13 ? Relic.RandomRelic(hero.Name) : Relic.ShopRelic(hero.Name) : null);
+                        }
+                        else Console.WriteLine("You don't have enough Gold to buy this relic.");
+                    }
+                    else Console.WriteLine("Relic has already been purchased.");
+                }
+                else if (shopChoice == 14)
                 {
                     if (removeCard == "Remove Card")
                     {
@@ -98,7 +129,7 @@ namespace STV
                         if (newHeroGold >= 0)
                         {
                             hero.Gold = newHeroGold;
-                            hero.Deck.Remove(Card.ChooseCard(hero.Deck, "remove from your Deck"));
+                            hero.Deck.Remove(Card.PickCard(hero.Deck, "remove from your Deck"));
                             removeCard = "Removed";
                             if (!hero.HasRelic("Smiling"))
                                 hero.RemoveCost += 25;

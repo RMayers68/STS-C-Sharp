@@ -86,7 +86,7 @@
 					break;
 			}
 			if (hero != null && hero.FindBuff("Sadistic") is Buff sadistic && !sadistic.BuffDebuff)
-				NonAttackDamage(this, sadistic.Intensity);
+				NonAttackDamage(this, sadistic.Intensity,sadistic.Name);
 		}
 
         public Buff FindBuff(string name)
@@ -95,7 +95,7 @@
         }
 
         //HP Altering Methods
-        public void Attack(Actor target, int damage,List<Enemy> encounter)
+        public void Attack(Actor target, int damage)
 		{
 			if (Hp <= 0) return;
 			if (FindBuff("Strength") is Buff strength && strength != null)
@@ -115,24 +115,18 @@
                 else if (target.HasRelic("Odd Mushroom")) 
 					damage = Convert.ToInt32(damage * 1.25);
 				else damage = Convert.ToInt32(damage * 1.50);
-            }				
-			Console.Write($"\n{Name} attacked the {target.Name}");
-			if (target.Block > 0)
-			{
-				int damageCalc = target.Block - damage;
-				damage -= target.Block;
-				target.Block = damageCalc;
-                Console.Write($", reducing {target.Name}'s Block to {target.Block}");
             }
+            Console.Write($"\n{Name} dealt {damage} from their attack to the {target.Name}");
+            damage = ReduceDamageByBlock(target, damage);
 			if (damage > 0)
 			{
 				if (HasRelic("Boot") && damage < 5)
 					damage = 5;
 				if (damage < 5 && target.HasRelic("Torii"))
 					damage = 1;
-				target.HPLoss(damage, encounter);
-                Console.Write($", dealing {damage} damage to {target.Name}'s HP!\n");
-            }			
+				target.HPLoss(damage);
+            }
+			Console.Write("!\n");
             if (target.FindBuff("Curl Up") is Buff curlUp && curlUp != null)      // Louse Curl Up Effect
             {
                 Console.WriteLine($"The Louse has curled up and gained {curlUp.Intensity} Block!");
@@ -140,51 +134,70 @@
                 target.Buffs.Remove(curlUp);
             }
 			if (target.FindBuff("Thorns") is Buff thorns && thorns != null)
-				NonAttackDamage(this, thorns.Intensity);
+				NonAttackDamage(this,thorns.Intensity,thorns.Name);
             if (target.FindBuff("Flame Barrier") is Buff flameBarrier && flameBarrier != null)
-                NonAttackDamage(this, flameBarrier.Intensity);
+                NonAttackDamage(this, flameBarrier.Intensity, flameBarrier.Name);
         }
 
-		public void NonAttackDamage(Actor target, int damage)
+		public void NonAttackDamage(Actor target, int damage, string effect)
 		{
 			if (Hp <= 0) return;
-			if (target.Block > 0)
-			{
-				target.Block -= damage;
-				if (target.Block < 0)
-				{
-					target.Hp -= Math.Abs(target.Block);
-					target.Block = 0;
-				}
-			}
-			else
-				target.Hp -= 0;
+            Console.Write($"\n{Name} dealt {damage} from their {effect} to the {target.Name}");
+			damage = ReduceDamageByBlock(target,damage);
+            if (damage > 0)
+                target.HPLoss(damage);
+            Console.Write("!\n");
         }
 		
-		public void PoisonDamage(int damage,List<Enemy> encounter)
+		public int ReduceDamageByBlock(Actor target, int damage)
 		{
-			HPLoss(damage,encounter);
+			if (target.Block > 0)
+			{
+				int damageCalc = target.Block - damage;
+				damage -= target.Block;
+				target.Block = damageCalc;
+				if (target.Block <= 0 && HasRelic("Hand Drill"))
+					target.AddBuff(1, 2, (Hero)this );
+				Console.Write($", reducing Block to {(target.Block > 0 ? $"{target.Block}" : "0")}");
+			}
+			return damage;
+        }
+
+		public void PoisonDamage(int damage)
+		{
+			Console.Write($"{Name} suffered from their poison");
+			HPLoss(damage);
 			FindBuff("Poison").Intensity--;
 		}
 
-		public void HPLoss(int damage, List<Enemy> encounter)
+		public void HPLoss(int damage)
 		{
-			if (FindBuff("Buffer") is Buff buffer && buffer != null)
-			{
-				buffer.Counter--;
-				return;
-			}
 			if (HasRelic("Tungsten"))
 				damage--;
 			if (damage > 0)
 			{
-				if (HasRelic("Runic Cube"))
-					((Hero)this).DrawCards(1, encounter);
+                if (FindBuff("Buffer") is Buff buffer && buffer != null)
+                {
+                    buffer.Counter--;
+					Console.Write($",but the {Name}'s buffer prevented it");
+                    return;
+                }
+                if (HasRelic("Runic Cube"))
+					((Hero)this).DrawCards(1);
+                if (FindRelic("Centennial") is Relic puzzle && puzzle.IsActive)
+				{
+                    ((Hero)this).DrawCards(3);
+					puzzle.IsActive = false;
+                }
+                if (HasRelic("Self-Forming"))
+					AddBuff(44, 3);
 				if (FindRelic("Emotion") is Relic emotionChip && emotionChip != null)
 					emotionChip.IsActive = true;
 			}
 			Hp -= damage;
-		}
+            Console.Write($", reducing their HP to {Hp}/{MaxHP}");
+        }
+
 		// Easy searching for Relic
         public Relic FindRelic(string name)
         {

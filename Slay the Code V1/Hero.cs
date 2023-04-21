@@ -49,7 +49,7 @@
                 this.Gold = 99;
                 this.EasyFights = 0;
                 this.PotionSlots = 3;
-                this.PotionChance = 1;
+                this.PotionChance = 4;
                 this.RemoveCost = 75;
             }
         }
@@ -141,10 +141,10 @@
             return x - 1;
         }
 
-        public void SelfDamage(int damage,List<Enemy> encounter)
+        public void SelfDamage(int damage)
         {
             if (Hp <= 0) return;
-            HPLoss(damage,encounter);
+            HPLoss(damage);
             Console.WriteLine($"{Name} hurt themselves for {damage} damage!");
         }
 
@@ -191,7 +191,7 @@
         {
             if (potion == null) return;
             if (Potions.Count < PotionSlots)
-                Potions.Add(potion);;
+                Potions.Add(new(potion));
         }
 
         public void AddToDeck(Card card)
@@ -215,7 +215,7 @@
             Console.WriteLine(card != null ? $"You have added {card.Name} to your Deck!" : "This was a check, remove now.\n");
         }
 
-        public void DrawCards(int cards, List<Enemy> encounter)
+        public void DrawCards(int cards)
         {
             while (Hand.Count < 10)
             {
@@ -228,7 +228,7 @@
                 {
                     for (int i = 0; i < Hand.Last().GetMagicNumber(); i++)
                         AddToHand(new Card(Dict.cardL[336]));
-                    Hand.Last().Exhaust(this, encounter, this.Hand);
+                    Hand.Last().MoveCard(Hand, ExhaustPile);
                 }
                 cards--;
                 if (cards == 0)
@@ -284,17 +284,32 @@
                 FindRelic("Red Skull").IsActive = false;
             if (HasRelic("Emotion"))
                 FindRelic("Emotion").IsActive = false;
+            if (HasRelic("Centennial"))
+                FindRelic("Centennial").IsActive = true;
         }
 
         public void CombatRewards(string roomLocation)
         {
-            AddToDeck(Card.ChooseCard(Card.RandomCards(Name, 3), "add to your Deck"));
+            int cardRewardAmount = 3;
+            if (HasRelic("Question"))
+                cardRewardAmount++;
+            if (HasRelic("Busted Crown"))
+                cardRewardAmount -= 2;
+            AddToDeck(Card.ChooseCard(cardRewardAmount,"add to your Deck", HasRelic("Prismatic") ? "All Heroes" : Name));
+            if (HasRelic("Prayer Wheel") && roomLocation == "Monster")
+                AddToDeck(Card.ChooseCard(cardRewardAmount, "add to your Deck", HasRelic("Prismatic") ? "All Heroes" : Name));
             GoldChange(Convert.ToInt32((roomLocation == "Boss" ? HeroRNG.Next(95,106) : roomLocation == "Elite" ? HeroRNG.Next(35,36) : HeroRNG.Next(10,21)) * (HasRelic("Golden Idol") ? 1.25 : 1.00)));
             if (roomLocation == "Boss")
-
+                ;// Nothing yet 
+            else if (roomLocation == "Elite")
+            {
+                if (HasRelic("Black Star"))
+                    AddToRelics(Relic.RandomRelic(Name));
+                AddToRelics(Relic.RandomRelic(Name));
+            }
             if (HeroRNG.Next(10) < PotionChance || HasRelic("White Beast Statue"))
             {
-                AddToPotions(Potion.RandomPotion());
+                AddToPotions(Potion.RandomPotion(this));
                 PotionChance--;
             }
             else PotionChance++;
@@ -322,6 +337,12 @@
                 int j = HeroRNG.Next(i + 1);
                 (DrawPile[i], DrawPile[j]) = (DrawPile[j], DrawPile[i]);
             }
+        }
+
+        public void AddToRelics(Relic relic)
+        {
+            relic.RelicPickupEffect(this);
+            Relics.Add(new(relic));
         }
     }
 }

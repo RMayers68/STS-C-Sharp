@@ -1,4 +1,4 @@
-﻿using System.Xml.Linq;
+﻿using ConsoleTableExt;
 using static Global.Functions;
 namespace STV
 {
@@ -7,7 +7,7 @@ namespace STV
         private static readonly Random CombatRNG = new();
         public Battle() { }
 
-        public static void Combat(Hero hero, List<Enemy> encounter, Room activeRoom)
+        public static void Combat(Hero hero, List<Enemy> encounter)
         {
             ScreenWipe();
             Console.WriteLine("Next encounter:");
@@ -22,8 +22,6 @@ namespace STV
             {
                 // Start of Player Turn              
                 StartOfPlayerTurn(hero, encounter, turnNumber);
-                if (activeRoom.Location == "Elite" || activeRoom.Location == "Boss")
-                    hero.Energy++;
                 turnNumber++;
                 Pause();
 
@@ -33,7 +31,7 @@ namespace STV
                 {
                     ScreenWipe();
                     if (hero.DrawPile.Count == 0 && hero.HasRelic("Unceasing"))
-                        hero.DrawCards(1, encounter);
+                        hero.DrawCards(1);
                     //Menu creation
                     Console.WriteLine($"\tActions:{Tab(5)}TURN {turnNumber}{Tab(5)}Hand:\n********************{Tab(9)}********************\n");
                     for (int i = 1; i < 11; i++)
@@ -62,7 +60,7 @@ namespace STV
                                 Console.WriteLine($"{hero.Name} Information: {(hero.Hand.Count >= i ? Tab(9) + i + ":" + hero.Hand[i - 1].GetName() : "")}\n");
                                 break;
                             case 8:
-                                Console.WriteLine($"Draw Pile:{hero.DrawPile.Count}\tDiscard Pile:{hero.DiscardPile.Count}{Tab(2)}Exhausted:{hero.ExhaustPile.Count} {(hero.Hand.Count >= i ? Tab(5) + i + ":" + hero.Hand[i - 1].GetName() : "")}\n");
+                                Console.WriteLine($"(Draw) Pile:{hero.DrawPile.Count}\t(Discard) Pile:{hero.DiscardPile.Count}{Tab(1)}(Exhaust)ed:{hero.ExhaustPile.Count} {(hero.Hand.Count >= i ? Tab(5) + i + ":" + hero.Hand[i - 1].GetName() : "")}\n");
                                 break;
                             case 9:
                                 Console.WriteLine($"HP:{hero.Hp}/{hero.MaxHP} + {hero.Block} Block\tEnergy:{hero.Energy}/{hero.MaxEnergy} {(hero.Hand.Count >= i ? Tab(7) + i + ":" + hero.Hand[i - 1].GetName() : "")}\n");
@@ -81,7 +79,8 @@ namespace STV
                         foreach (var orb in hero.Orbs)
                             Console.Write($"{orbNumber++}: {orb.Name} - {orb.Effect}{Tab(2)}");
                     }
-
+                    if (hero.HasRelic("Cultist"))
+                        Console.WriteLine($"{(CombatRNG.Next(2) == 0 ? "CCCAAAWWWWWWWWW" : "CAW CAW CAWWW")}");
                     // Waiting for correct player choice
                     playerChoice = Console.ReadLine().ToUpper();
 
@@ -93,7 +92,13 @@ namespace STV
                             Console.WriteLine("You have already played too many cards this turn.");
                         else
                         {
-                            hero.Hand[cardChoice - 1].CardAction(hero, encounter, turnNumber);
+                            Card playCard = hero.Hand[cardChoice - 1];
+                            if (hero.FindRelic("Necro") is Relic necro && necro.IsActive && playCard.EnergyCost > 2 && playCard.Type == "Attack")
+                            {
+                                playCard.CardAction(hero, encounter, turnNumber);
+                                necro.IsActive = false;
+                            }
+                            playCard.CardAction(hero, encounter, turnNumber);
                             if (hero.FindTurnActions(turnNumber, "Attack").Count % 3 == 0)
                             {
                                 if (hero.HasRelic("Kunai"))
@@ -105,10 +110,9 @@ namespace STV
                             }
                             if (hero.HasRelic("Letter Opener") && hero.FindTurnActions(turnNumber, "Skill").Count % 3 == 0)
                                 foreach (Enemy e in encounter)
-                                    hero.NonAttackDamage(e, 5);
+                                    hero.NonAttackDamage(e, 5, "Letter Opener");
                         }
                         HealthChecks(hero, encounter, turnNumber);
-                        Pause();
                     }
                     // Other menu functions
                     else switch (playerChoice)
@@ -120,14 +124,12 @@ namespace STV
                                 //ConsoleTableBuilder.From(hand).ExportAndWriteLine(TableAligntment.Center);
                                 foreach (Card c in hero.Hand)
                                     Console.WriteLine(c.ToString());
-                                Pause();
                                 break;
                             case "B":
                                 foreach (var buff in hero.Buffs)
                                 {
                                     Console.WriteLine($"{buff.Name} - {buff.Description()}\n");
                                 }
-                                Pause();
                                 break;
                             case "P":
                                 int usePotion = 0;
@@ -149,30 +151,51 @@ namespace STV
                                         continue;
                                     Console.WriteLine("************************************************************************\n");
                                     Console.WriteLine($"Enemy {i + 1}: {encounter[i].Name}{Tab(2)}HP:{encounter[i].Hp}/{encounter[i].MaxHP}{Tab(2)}Block:{encounter[i].Block}\n");
-                                    Console.WriteLine($"Intent: {encounter[i].Intent}\n");
+                                    Console.WriteLine($"Intent: {(hero.HasRelic("Runic Dome") ? "Intent hidden." : $"{encounter[i].Intent}")}\n");
                                     Console.Write($"Buffs/Debuffs: ");
                                     if (encounter[i].Buffs.Count == 0)
                                         Console.Write("None\n");
                                     else for (int j = 0; j < encounter[i].Buffs.Count; j++)
                                             Console.WriteLine($"{encounter[i].Buffs[j].Name} - {encounter[i].Buffs[j].Description()}\n");
                                     Console.WriteLine("************************************************************************\n");
+                                }                               
+                                break;
+                            case "DRAW":
+                                if (hero.HasRelic("Frozen Eye"))
+                                {
+                                    hero.DrawPile.Reverse();
+                                    ConsoleTableExt.ConsoleTableBuilder.From(hero.DrawPile).ExportAndWriteLine(TableAligntment.Center);
+                                    hero.DrawPile.Reverse();
                                 }
-                                Pause();
+                                else
+                                {
+                                    ConsoleTableExt.ConsoleTableBuilder.From(hero.DrawPile).ExportAndWriteLine(TableAligntment.Center);
+                                    hero.ShuffleDrawPile();
+                                }
+                                break;
+                            case "DISCARD":
+                                ConsoleTableExt.ConsoleTableBuilder.From(hero.DiscardPile).ExportAndWriteLine(TableAligntment.Center);
+                                break;
+                            case "EXHAUST":
+                                ConsoleTableExt.ConsoleTableBuilder.From(hero.ExhaustPile).ExportAndWriteLine(TableAligntment.Center);
                                 break;
                             // END OF PLAYER AND START OF ENEMY TURN
                             case "E":
                                 EndOfPlayerTurn(hero, encounter, turnNumber);
                                 ScreenWipe();
                                 break;
-                        }
-
+                    }
+                    Pause();
                 }
                 // Orbin Time
+                if (hero.HasRelic("Frozen Core") && hero.Orbs.Count < hero.OrbSlots)
+                    Orb.ChannelOrb(hero, encounter,1);
                 foreach (var orb in hero.Orbs)
                 {
                     if (orb is null) continue;
-                    while (encounter.Count > 0)
+                    if (orb == hero.Orbs[0] && hero.HasRelic("Cables"))
                         orb.PassiveEffect(hero, encounter);
+                    orb.PassiveEffect(hero, encounter);
                 }
                 Console.WriteLine("Enemy's Turn!\n");
                 for (int i = encounter.Count - 1; i >= 0; i--)
@@ -195,17 +218,12 @@ namespace STV
             else
             {
                 EndOfCombat(hero);
-                hero.CombatRewards(activeRoom.Location);
             }
             Pause();
         }
 
         private static void StartOfCombat(Hero hero, List<Enemy> encounter)
         {
-            // Relic check for Hero
-            if (hero.FindRelic("Water") is Relic water && water != null)
-                for (int i = 0; i < water.EffectAmount; i++)
-                    hero.AddToHand(new Card(Dict.cardL[336]));
             if (hero.HasRelic("Mark of Pain"))
                 for (int i = 0; i < 2; i++)
                     hero.DrawPile.Add(new(Dict.cardL[357]));
@@ -289,19 +307,23 @@ namespace STV
             hero.ShuffleDrawPile();
             // Draw cards
             if (hero.HasRelic("Snecko Eye"))
-            {
                 hero.AddBuff(96, 1);
-                hero.DrawCards(2, encounter);
-            }
+            foreach (Card c in hero.DrawPile.FindAll(x => x.GetDescription().Contains("Innate.")))
+                if (hero.Hand.Count < 10)
+                    c.MoveCard(hero.DrawPile, hero.Hand);
+            hero.DrawCards(5 - hero.Hand.Count);
+            if (hero.FindRelic("Water") is Relic water && water != null)
+                for (int i = 0; i < water.EffectAmount; i++)
+                    hero.AddToHand(new Card(Dict.cardL[336]));
             if (hero.HasRelic("Snake"))
-                hero.DrawCards(2, encounter);
+                hero.DrawCards(2);
             if (hero.HasRelic("Preparation"))
-                hero.DrawCards(2, encounter);
+                hero.DrawCards(2);
             if (hero.HasRelic("Toolbox"))
-                hero.AddToHand(new(Card.ChooseCard(Card.RandomCards("Colorless", 3), "add to your hand")));
+                hero.AddToHand(new(Card.PickCard(Card.RandomCards("Colorless", 3), "add to your hand")));
             // Gambling Chip
             if (hero.HasRelic("Gambling"))
-                GamblingIsGood(hero, encounter);
+                GamblingIsGood(hero);
             HealthChecks(hero, encounter,0);
         }
 
@@ -311,10 +333,19 @@ namespace STV
         {
             if (turnNumber != 0)
             {
-                if (hero.FindRelic("Emotion").IsActive)
+                hero.DrawCards(5);
+                if (hero.FindRelic("Emotion") is Relic emotion && emotion.IsActive)
                 {
                     foreach (Orb o in hero.Orbs)
+                    {
+                        if (o == hero.Orbs[0] && hero.HasRelic("Cables"))
+                            o.PassiveEffect(hero, encounter);
+                        if (o == hero.Orbs[0] && hero.FindBuff("Loop") is Buff loop && loop != null)
+                            for (int i = 0; i < loop.Intensity; i++)
+                                o.PassiveEffect(hero, encounter);
                         o.PassiveEffect(hero, encounter);
+                    }  
+                    emotion.IsActive = false;
                 }
                 // Duration buff decrease for hero
                 foreach (Buff b in hero.Buffs)
@@ -375,6 +406,10 @@ namespace STV
                     inserter.PersistentCounter = inserter.EffectAmount;
                 }
             }
+            if (hero.FindRelic("Nerco") is Relic necro)
+                necro.IsActive = true;
+            if (hero.FindRelic("Orange") is Relic orange)
+                orange.IsActive = true;
             if (hero.HasRelic("Damaru"))
                 hero.AddBuff(10, 1);
             if (hero.HasRelic("Brimstone"))
@@ -385,12 +420,13 @@ namespace STV
             }
             if (hero.HasRelic("Mercury"))
                 foreach (Enemy e in encounter)
-                    hero.NonAttackDamage(e, 3);
+                    hero.NonAttackDamage(e, 3, "Mercury Hourglass");
             if (hero.HasRelic("Pocketwatch") && hero.Actions.FindAll(x => x.Contains($"{turnNumber}:")).FindAll(x => x.Contains("Played")).Count <= 3)
-                hero.DrawCards(3, encounter);
+                hero.DrawCards(3);
             if (hero.HasRelic("Serpent"))
-                hero.DrawCards(1, encounter);
-            hero.DrawCards(5, encounter);
+                hero.DrawCards(1);
+            if (hero.HasRelic("Snecko Eye"))
+                hero.DrawCards(2);
             if (hero.HasRelic("Warped") && hero.Hand.Find(x => x.IsUpgraded()) is Card armaments && armaments != null)
                 armaments.UpgradeCard();
             for (int i = 0; i < encounter.Count; i++)
@@ -399,6 +435,7 @@ namespace STV
             if (hero.Orbs.FindAll(x => x.Name == "Plasma").Count is int plasmaCount && plasmaCount > 0)
                 hero.Energy += plasmaCount;
         }
+
         private static void EndOfPlayerTurn(Hero hero, List<Enemy> encounter, int turnNumber)
         {
             for (int i = 0; i < encounter.Count; i++)
@@ -407,11 +444,13 @@ namespace STV
             }
             if (!hero.HasRelic("Ice"))
                 hero.Energy = 0;
+            if (hero.HasRelic("Orichalcum") && hero.Block == 0)
+                hero.GainBlock(6);
             if (hero.HasRelic("Cloak"))
                 hero.GainBlock(hero.Hand.Count);
             if (turnNumber == 7 && hero.HasRelic("Stone Calender"))
                 foreach (Enemy e in encounter)
-                    hero.NonAttackDamage(e, 52);
+                    hero.NonAttackDamage(e, 52, "Stone Calender");
             for (int i = hero.Hand.Count - 1; i >= 0; i--)
             {
                 if (hero.Hand[i].GetDescription().Contains("Retain."))
@@ -431,7 +470,7 @@ namespace STV
                 else hero.Hand[i].MoveCard(hero.Hand, hero.DiscardPile);  //Discard at end of turn (Comment to find easy for disabling)
             }
             if (hero.HasRelic("Nilry's"))
-                hero.DrawPile.Add(new(Card.ChooseCard(Card.RandomCards(hero.Name, 3), "add to your drawpile")));
+                hero.DrawPile.Add(new(Card.PickCard(Card.RandomCards(hero.Name, 3), "add to your drawpile")));
             HealthChecks(hero, encounter, turnNumber);
         }
         private static void EndOfCombat(Hero hero)
@@ -471,7 +510,7 @@ namespace STV
                     if (hero.HasRelic("Gremlin Horn"))
                     {
                         hero.GainTurnEnergy(1);
-                        hero.DrawCards(1, encounter);
+                        hero.DrawCards(1);
                     }
                     encounter.RemoveAt(i);
                 }
@@ -500,7 +539,7 @@ namespace STV
             }
         }
 
-        public static void GamblingIsGood(Hero hero, List<Enemy> encounter)
+        public static void GamblingIsGood(Hero hero)
         {
             int gambleChoice = -1;
             int gambleAmount = hero.Hand.Count;
@@ -520,7 +559,7 @@ namespace STV
                     gamble++;
                 }
             }
-            hero.DrawCards(gamble, encounter);
+            hero.DrawCards(gamble);
         }
     }
 }
