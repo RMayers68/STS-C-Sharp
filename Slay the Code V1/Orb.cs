@@ -23,19 +23,40 @@
 
         public void PassiveEffect(Hero hero, List<Enemy> encounter)
         {
+            int add = 0;
+            if (hero.FindBuff("Focus") is Buff focus && focus != null)
+                add += focus.Intensity;
+            int effect = Effect + add;
             if (encounter.Count > 0)
             {
                 if (Name == "Lightning")
-                    hero.NonAttackDamage(encounter[OrbRNG.Next(0, encounter.Count)], 3, "Lightning Orb");
+                {
+                    if (hero.HasBuff("Electrodynamics"))
+                    {
+                        foreach (Enemy e in encounter)
+                        {
+                            if (e.HasBuff("Lock-On"))
+                                hero.NonAttackDamage(e, Convert.ToInt32(effect * 1.5), "Lightning Orb");
+                            hero.NonAttackDamage(e, effect+5, "Lightning Orb");
+                        }
+                    }
+                    else
+                    {
+                        int target = OrbRNG.Next(0, encounter.Count);
+                        if (encounter[target].HasBuff("Lock-On"))
+                            effect = Convert.ToInt32(effect * 1.5);
+                        hero.NonAttackDamage(encounter[target], effect, "Lightning Orb");
+                    }
+                }                   
                 else if (Name == "Frost")
                 {
-                    hero.GainBlock(2);
-                    Console.WriteLine($"The {hero.Name} gained 2 Block from the {Name} Orb!");
+                    hero.GainBlock(effect, encounter);
+                    Console.WriteLine($"The {hero.Name} gained {effect} Block from the {Name} Orb!");
                 }
                 else if (Name == "Dark")
                 {
-                    Effect += 6;
-                    Console.WriteLine($"The {Name} Orb stored 6 more Energy!");
+                    Effect += 6 + add;
+                    Console.WriteLine($"The {Name} Orb stored {6+add} more Energy!");
                 }
             }          
         }
@@ -56,19 +77,42 @@
         {
             if (hero.Hp <= 0) return;
             if (this == null) return;
+            int add = 0;
+            if (hero.FindBuff("Focus") is Buff focus && focus != null)
+                add += focus.Intensity;
+            int effect = Effect + add;
             if (Name == "Lightning")
-                hero.NonAttackDamage(encounter[OrbRNG.Next(0, encounter.Count)], 8, "Evoked Lightning Orb");
+            {
+                if (hero.HasBuff("Electrodynamics"))
+                {
+                    foreach (Enemy e in encounter)
+                    {
+                        if (e.HasBuff("Lock-On"))
+                            hero.NonAttackDamage(e, Convert.ToInt32((effect+5) * 1.5), "Evoked Lightning Orb");
+                        hero.NonAttackDamage(e, effect, "Evoked Lightning Orb");
+                    }
+                }
+                else
+                {
+                    int target = OrbRNG.Next(0, encounter.Count);
+                    if (encounter[target].HasBuff("Lock-On"))
+                        effect = Convert.ToInt32((effect + 5) * 1.5);
+                    hero.NonAttackDamage(encounter[target], effect, "Evoked Lightning Orb");
+                }
+            }
             else if (Name == "Frost")
             {
-                hero.GainBlock(5);
-                Console.WriteLine($"The {hero.Name} gained 5 Block from the Evoked {Name} Orb!");
+                hero.GainBlock(effect, encounter);
+                Console.WriteLine($"The {hero.Name} gained {effect+3} Block from the Evoked {Name} Orb!");
             }
             else if (Name == "Dark")
             {
                 Actor lowestHP = encounter[0];
                 foreach (var e in encounter)
                     if (e.Hp < lowestHP.Hp) lowestHP = e;
-                hero.NonAttackDamage(lowestHP, Effect, "Evoked Dark Orb");
+                if (lowestHP.HasBuff("Lock-On"))
+                    effect = Convert.ToInt32(effect * 1.5);
+                hero.NonAttackDamage(lowestHP, effect, "Evoked Dark Orb");
             }
             else
             {

@@ -318,7 +318,7 @@
             { 310, new Card("Master of Strategy","Skill","Rare","0", new List<int> { 0, 0, 0, 0, 0, 0, 0, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }) },
             { 311, new Card("Mind Blast","Attack","Uncommon","2", new List<int> { 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0 }) },
             { 312, new Card("Panacea","Skill","Uncommon","0", new List<int> { 0, 0, 0, 0, 0, 8, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0 }) },
-            { 313, new Card("Panache","Power","Rare","0", new List<int> { 0, 0, 0, 0, 5, 93, 10, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0 }) },
+            { 313, new Card("Panache","Power","Rare","0", new List<int> { 0, 0, 0, 0, 10, 93, 10, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0 }) },
             { 314, new Card("Purity","Skill","Uncommon","0", new List<int> { 0, 0, 0, 0, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }) },
             { 315, new Card("Sadistic Nature","Power","Rare","0", new List<int> { 0, 0, 0, 0, 0, 87, 5, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0 }) },
             { 316, new Card("Secret Technique","Skill","Rare","0", new List<int> { 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 } ) },
@@ -409,7 +409,7 @@
             { 32, new Buff("Metallicize", true, 3)},
             { 33, new Buff("Rage", true, 3)},
             { 34, new Buff("Rupture", true, 3)},
-            { 35, new Buff("A Thousand Cuts", true, 3)},
+            { 35, new Buff("Thousand Cuts", true, 3)},
             { 36, new Buff("Accuracy", true, 3)},
             { 37, new Buff("After Image", true, 3) },
             { 38, new Buff("Blur", true, 1) },
@@ -423,7 +423,7 @@
             { 46, new Buff("Envenom", true, 3) },
             { 47, new Buff("Infinite Blades", true, 3) },
             { 48, new Buff("Noxious Fumes", true, 3) },
-            { 49, new Buff("Phantasmal Killer", true, 4) },
+            { 49, new Buff("Phantasmal", true, 1) },
             { 50, new Buff("Tools of the Trade", true, 3) },
             { 51, new Buff("Well-Laid Plans", true, 3) },
             { 52, new Buff("Intangible", true, 1) },
@@ -438,7 +438,7 @@
             { 61, new Buff("Hello", true, 3) },
             { 62, new Buff("Loop", true, 3) },
             { 63, new Buff("Machine Learning", true, 3) },
-            { 64, new Buff("Rebound", true, 3) },
+            { 64, new Buff("Rebound", true, 4) },
             { 65, new Buff("Self Repair", true, 3) },
             { 66, new Buff("Static Discharge", true, 3) },
             { 67, new Buff("Storm", true, 3) },
@@ -457,7 +457,7 @@
             { 80, new Buff("Rushdown", true, 3) },
             { 81, new Buff("Simmering Fury", true, 3) },
             { 82, new Buff("Study", true, 3) },
-            { 83, new Buff("Talk to the Hand", false, 3) },
+            { 83, new Buff("Block Return", false, 3) },
             { 84, new Buff("Wave of the Hand", true, 3) },
             { 85, new Buff("Vigor", true, 3) },
             { 86, new Buff("Magnetism", true, 3) },
@@ -472,8 +472,9 @@
             { 95, new Buff("Plated Armor", true, 3) },
             { 96, new Buff("Confused", false, 3) },
             { 97, new Buff("Dexterity Down", false, 3)},
-            { 98, new Buff("Regeneration", true, 3) },
+            { 98, new Buff("Regen", true, 3) },
             { 99, new Buff("Duplication", true, 4) },
+            { 100, new Buff("Double Damage", true, 1) },
 
             /*
              * Buff types:
@@ -769,7 +770,7 @@
         private static readonly Dictionary<int, Orb> orbs = new()                                            // Orb Reference Dictionary - ID correlates to MagicNumber for card purposes
         {
             { 0, new Orb("Lightning",3) },
-            { 1, new Orb("Frost", 4) },
+            { 1, new Orb("Frost", 2) },
             { 2, new Orb("Dark", 6) },
             { 3, new Orb("Plasma", 1) },
         };

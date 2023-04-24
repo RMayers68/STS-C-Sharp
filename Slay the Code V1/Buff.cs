@@ -67,7 +67,7 @@
                 "Metallicize" => $"At the end of your turn, gain {Intensity} Block.",
                 "Rage" => $"Whenever you play an attack this turn, gain {Intensity} Block.",
                 "Rupture" => $"Whenever you lose HP from a card, gain {Intensity} Strength.",
-                "A Thousand Cuts" => $"Whenever you play a card, deal {Intensity} damage to ALL enemies.",
+                "Thousand Cuts" => $"Whenever you play a card, deal {Intensity} damage to ALL enemies.",
                 "Accuracy" => $"Shivs deal {Intensity} additional damage.",
                 "After Image" => $"Whenever you play a card, gain {Intensity} Block.",
                 "Blur" => $"Block is not removed at the start of your next {Duration} turns.",
@@ -81,7 +81,7 @@
                 "Envenom" => $"Whenever an attack deals unblocked damage, apply {Intensity} Poison.",
                 "Infinite Blades" => $"At the start of your turn, add {Intensity} Shiv to your hand.",
                 "Noxious Fumes" => $"At the start of your turn, apply {Intensity} Poison to ALL enemies.",
-                "Phantasmal Killer" => $"On your next {Counter} turn(s), your Attack damage is doubled.",
+                "Phantasmal" => $"On your next {Duration} turn(s), your Attack damage is doubled.",
                 "Tools of the Trade" => $"Next turn, discard {Intensity} card(s).",
                 "Well-Laid Plans" => $"At the end of your turn, Retain up to {Intensity} card(s).",
                 "Intangible" => $"Reduce any damage dealt to 1.",
@@ -115,7 +115,7 @@
                 "Rushdown" => $"Whenever you enter Wrath, draw {Intensity} cards.",
                 "Simmering Fury" => $"At the start of your next turn, enter Wrath and draw {Intensity} cards.",
                 "Study" => $"At the end of your turn, shuffle {Intensity} Insight(s) into your draw pile.",
-                "Talk to the Hand" => $"Whenever you attack this enemy, gain {Intensity} Block.",
+                "Block Return" => $"Whenever you attack this enemy, gain {Intensity} Block.",
                 "Wave of the Hand" => $"Whenever you gain Block this turn, apply {Intensity} Weak to ALL enemies.",
                 "Vigor" => $"Your next Attack deals {Intensity} additional damage.",
                 "Magnetism" => $"t the start of each turn, add {Intensity} random Colorless card(s) to your hand.",
@@ -125,12 +125,13 @@
                 "Flame Barrier" => $"When attacked this turn, deals {Intensity} damage back.",
                 "Free Attack" => $"The next {Counter} Attacks you play costs 0.",
                 "Fire Breathing" => $"Whenever you draw a Status or Curse card, deal {Intensity} damage to ALL enemies.",
-                "Panache" => $"If you play {Counter} more cards this turn, deal {Intensity} damage to all enemies.",
+                "Panache" => $"If you play {5-Counter} more cards this turn, deal {Intensity} damage to all enemies.",
                 "Omega" => $"At the end of your turn, deal {Intensity} damage to ALL enemies.",
                 "Plated Armor" => $"At the end of your turn, gain {Intensity} Block. Receiving unblocked attack damage reduces Plated Armor by 1.",
                 "Dexterity Down" => $"Lose {Intensity} Dexterity at the end of the turn.",
-                "Regeneration" => $"At the end of your turn, heal {Intensity} HP and reduce Regen by 1.",
+                "Regen" => $"At the end of your turn, heal {Intensity} HP and reduce Regen by 1.",
                 "Duplication" => $"Your next {Counter} cards are played twice.",
+                "Double Damage" => $"Attacks deal double damage for {Duration} turns.",
                 _ => "",
             };
         }
@@ -140,14 +141,9 @@
         public void DurationSet(int turnDuration)
         { Duration += turnDuration; }
 
-        public void DurationDecrease()
-        {
-            if (Type == 1)
-                Duration--;
-        }
-
         public bool DurationEnded()
         {
+            Duration--;
             if (Duration == 0 && Type == 1)
                 return true;
             else return false;
@@ -157,8 +153,24 @@
         public void CounterSet(int counter)
         { Counter += counter; }
 
+        // Decrements counter by 1 and returns true if it is ready to be removed (set to 0)
+        public bool CounterAtZero()
+        {
+            Counter--;
+            if (Counter == 0 && Type == 4)
+                return true;
+            else return false;
+        }
+
         // Intensity related methods
         public void IntensitySet(int intensity)
         { Intensity += intensity; }
+
+        public bool IntensityAtZero()
+        {
+            if (Intensity == 0)
+                return true;
+            else return false;
+        }
     }
 }

@@ -55,7 +55,7 @@
                     hero.AddBuff(4,EffectAmount);
                     break;
                 case "Block Potion":
-                    hero.GainBlock(EffectAmount);
+                    hero.GainBlock(EffectAmount, encounter);
                     break;
                 case "Fear Potion":
                     target = hero.DetermineTarget(encounter);

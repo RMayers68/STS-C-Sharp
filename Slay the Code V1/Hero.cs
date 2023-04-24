@@ -1,4 +1,6 @@
-﻿namespace STV
+﻿using System.Diagnostics.Metrics;
+
+namespace STV
 {
     public class Hero : Actor
     {
@@ -16,6 +18,7 @@
         public List<Card> ExhaustPile { get; set; }
         public List<Orb> Orbs { get; set; }
         public List<Potion> Potions { get; set; }
+        public List<Enemy> Encounter { get; set; }
 
         private static readonly Random HeroRNG = new();
 
@@ -96,6 +99,13 @@
 
         // Hero exclusive methods
 
+        public void CardBlock(int block, List<Enemy> encounter = null)
+        {
+            if (FindBuff("No Block") != null || block == 0)
+                return;
+            GainBlock(block, encounter);
+        }
+
         public void SetMaxHP(int change)
         {
             MaxHP += change;
@@ -144,8 +154,10 @@
         public void SelfDamage(int damage)
         {
             if (Hp <= 0) return;
-            HPLoss(damage);
+            damage = HPLoss(damage);
             Console.WriteLine($"{Name} hurt themselves for {damage} damage!");
+            if (damage > 0 && FindBuff("Rupture") is Buff rupture && rupture != null)
+                AddBuff(4, rupture.Intensity);
         }
 
         public void SwitchStance(string newStance)
@@ -164,75 +176,57 @@
                         Console.WriteLine($"{Name} has left {oldStance} Stance.");
                         break;
                 }
-            if (FindBuff("Mental Fortress") != null)                              
-                GainBlock(FindBuff("Mental Fortress").Intensity);
-            if (oldStance != Stance && oldStance == "Calm")
+            if (FindBuff("Mental Fortress") is Buff mental && mental != null)                              
+                GainBlock(mental.Intensity);
+            if (oldStance != Stance)
             {
-                if (HasRelic("Violet"))
+                if (oldStance == "Calm")
+                {
+                    if (HasRelic("Violet"))
+                        Energy += 3;
+                    else Energy += 2;
+                }
+                else if (oldStance == "Divinity")
                     Energy += 3;
-                else Energy += 2;
-            }               
-            else if (oldStance != Stance && Stance == "Divinity")
-                Energy += 3;
+                else if (oldStance == "Wrath" && FindBuff("Rushdown") is Buff rush && rush != null)
+                    DrawCards(rush.Intensity);
+            }          
             if (Card.FindCard("Flurry of Blows", DiscardPile) is Card flurryOfBlows && flurryOfBlows != null && Hand.Count < 10) 
                 flurryOfBlows.MoveCard(DiscardPile, Hand);               
         }
 
-        // Method to look if hand is full and sending card to discard pile if hand is full
-        public void AddToHand(Card card)
-        {
-            if (card == null) return;
-            if (Hand.Count < 10)
-                Hand.Add(card);
-            else DiscardPile.Add(card);
-        }
-
-        public void AddToPotions(Potion potion)
-        {
-            if (potion == null) return;
-            if (Potions.Count < PotionSlots)
-                Potions.Add(new(potion));
-        }
-
-        public void AddToDeck(Card card)
-        {
-            if (card == null) return;
-            if (card.Type == "Curse")
-            {
-                if (FindRelic("Omamori") is Relic omamori && omamori.EffectAmount > 0)
-                {
-                    omamori.EffectAmount--;
-                    return;
-                }
-                else if (HasRelic("Darkstone"))
-                    SetMaxHP(6);
-            }       
-            if ((card.Type == "Attack" && HasRelic("Molten Egg")) || (card.Type == "Skill" && HasRelic("Toxic Egg")) || (card.Type == "Power" && HasRelic("Frozen Egg")))
-                card.UpgradeCard();
-            if (HasRelic("Ceramic"))
-                GoldChange(9);
-            Deck.Add(new(card));
-            Console.WriteLine(card != null ? $"You have added {card.Name} to your Deck!" : "This was a check, remove now.\n");
-        }
-
         public void DrawCards(int cards)
         {
-            while (Hand.Count < 10)
+            if (HasBuff("No Draw") || Hand.Count >= 10)
             {
-                if (DrawPile.Count == 0)
-                    Discard2Draw();
-                if (DrawPile.Count == 0)
-                    break;
-                DrawPile.Last().MoveCard(DrawPile, Hand);
-                if (Hand.Last().Name == "Deus Ex Machina")
+                Console.WriteLine("You cannot draw any more cards this turn.");
+            }
+            else
+            {
+                for (int i = 0; i < cards; i++)
                 {
-                    for (int i = 0; i < Hand.Last().GetMagicNumber(); i++)
-                        AddToHand(new Card(Dict.cardL[336]));
-                    Hand.Last().MoveCard(Hand, ExhaustPile);
+                    if (Hand.Count == 10)
+                        return;
+                    if (DrawPile.Count == 0)
+                        Discard2Draw();
+                    if (DrawPile.Count == 0)
+                        break;
+                    Card drawCard = DrawPile.Last();
+                    drawCard.MoveCard(DrawPile, Hand);
+                    if (drawCard.Type == "Status" && FindBuff("Evolve") is Buff evolve && evolve != null)
+                        DrawCards(evolve.Intensity);
+                    if (HasBuff("Confused") && drawCard.EnergyCost < 0)
+                        drawCard.SetEnergyCost(HeroRNG.Next(4));
+                    if (FindBuff("Fire Breathing") is Buff fire && fire != null && (drawCard.Type == "Status" || drawCard.Type == "Curse"))
+                        foreach (Enemy e in Encounter)
+                            NonAttackDamage(e, fire.Intensity, fire.Name);
+                    else if (drawCard.Name == "Deus Ex Machina")
+                    {
+                        drawCard.MoveCard(Hand, ExhaustPile);
+                        for (int j = 0; j < drawCard.GetMagicNumber(); i++)
+                            AddToHand(new Card(Dict.cardL[336]));
+                    }
                 }
-                cards--;
-                if (cards == 0)
-                    return;
             }
         }
 
@@ -277,6 +271,7 @@
             Hand.Clear();
             DiscardPile.Clear();
             ExhaustPile.Clear();
+            Encounter.Clear();
             if (Name == "Defect")
                 OrbSlots = 3;
             else OrbSlots = 1;
@@ -315,6 +310,7 @@
             else PotionChance++;
         }
 
+        // DrawPile is shuffled whenever a card is added to the drawpile
         public void ShuffleDrawPile()
         {
             if (HasRelic("Melange"))
@@ -339,10 +335,63 @@
             }
         }
 
+        // Methods to add to Hero lists
+        public void AddToHand(Card card)
+        {
+            if (card == null) return;
+            if (HasBuff("Master Reality"))
+                card.UpgradeCard();
+            if (Hand.Count < 10)
+                Hand.Add(card);
+            else DiscardPile.Add(card);
+        }
+
+        public void AddToPotions(Potion potion)
+        {
+            if (potion == null) return;
+            if (Potions.Count < PotionSlots)
+                Potions.Add(new(potion));
+        }
+
+        public void AddToDeck(Card card)
+        {
+            if (card == null) return;
+            if (card.Type == "Curse")
+            {
+                if (FindRelic("Omamori") is Relic omamori && omamori.EffectAmount > 0)
+                {
+                    omamori.EffectAmount--;
+                    return;
+                }
+                else if (HasRelic("Darkstone"))
+                    SetMaxHP(6);
+            }
+            if ((card.Type == "Attack" && HasRelic("Molten Egg")) || (card.Type == "Skill" && HasRelic("Toxic Egg")) || (card.Type == "Power" && HasRelic("Frozen Egg")))
+                card.UpgradeCard();
+            if (HasRelic("Ceramic"))
+                GoldChange(9);
+            Deck.Add(new(card));
+            Console.WriteLine(card != null ? $"You have added {card.Name} to your Deck!" : "This was a check, remove now.\n");
+        }
+
+        public void AddToDrawPile(Card card, bool shuffle)
+        {
+            DrawPile.Add(card);
+            if (shuffle)
+                ShuffleDrawPile();
+        }
         public void AddToRelics(Relic relic)
         {
             relic.RelicPickupEffect(this);
             Relics.Add(new(relic));
         }
+
+        public void RemoveCounterCheck(Buff buff)
+        {
+            if (buff.CounterAtZero())
+                Buffs.Remove(buff);
+        }
+
+
     }
 }

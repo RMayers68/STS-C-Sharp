@@ -13,28 +13,30 @@
         public List<Relic> Relics { get; set; }
         public List<string> Actions { get; set; }
 
-
+        private static readonly Random ActorRNG = new();
 
         //constructor
         public Actor() { }
 
 
 		// Inclusive methods
-		public void CardBlock(int block)
-		{
-			if (FindBuff("No Block") != null || block == 0)
-				return;
-			GainBlock(block);
-		}
-		public void GainBlock(int block)
+		public void GainBlock(int block, List<Enemy> encounter = null)
 		{
 			if (Hp <= 0) return;
-			if (FindBuff("Dexterity") != null)
-				block += FindBuff("Dexterity").Intensity;
-			if (Buffs.Find(x => x.Name == "Frail") != null)
+			if (FindBuff("Dexterity") is Buff dex && dex != null)
+				block += dex.Intensity;
+			if (HasBuff("Frail"))
 				block = Convert.ToInt32(block * 0.75);
-			Block += block;
-			Console.WriteLine($"The {Name} gained {block} Block.");
+			if (block > 0)
+			{
+                Block += block;
+                Console.WriteLine($"The {Name} gained {block} Block.");
+				if (FindBuff("Wave of the Hand") is Buff wave && wave != null)
+					foreach (Enemy e in encounter)
+						e.AddBuff(2, wave.Intensity, (Hero)this);
+				if (FindBuff("Juggernaut") is Buff jugger && jugger != null && encounter != null)
+					NonAttackDamage(encounter[ActorRNG.Next(encounter.Count)], jugger.Intensity, "Juggernaut");
+            }
 		}
 
 		public void AddBuff(int ID, int effect, Hero hero = null)
@@ -82,20 +84,23 @@
 					buff.CounterSet(effect);
 					Console.WriteLine($"{Name}'s {buff.Name} is now at {buff.Counter}!");
 					if (buff.Name == "Mantra")
-						AddAction($"Mantra Gained: {effect}");
+					{
+                        AddAction($"Mantra Gained: {effect}");
+						if (buff.Counter >= 10)
+						{
+							buff.CounterSet(-10);
+							((Hero)this).SwitchStance("Divinity");
+
+                        }
+                    }						
 					break;
 			}
 			if (hero != null && hero.FindBuff("Sadistic") is Buff sadistic && !sadistic.BuffDebuff)
 				NonAttackDamage(this, sadistic.Intensity,sadistic.Name);
 		}
 
-        public Buff FindBuff(string name)
-        {
-            return Buffs.Find(x => x.Name.Contains(name));
-        }
-
         //HP Altering Methods
-        public void Attack(Actor target, int damage)
+        public void Attack(Actor target, int damage, List<Enemy> encounter = null)
 		{
 			if (Hp <= 0) return;
 			if (FindBuff("Strength") is Buff strength && strength != null)
@@ -108,7 +113,7 @@
 					damage = Convert.ToInt32(damage * 0.75);
 				else damage = Convert.ToInt32(damage * 0.60);
             }				
-			if (FindBuff("Vulnerable") != null)
+			if (target.FindBuff("Vulnerable") != null)
 			{
                 if (HasRelic("Phrog"))
                     damage = Convert.ToInt32(damage * 1.75);
@@ -124,7 +129,14 @@
 					damage = 5;
 				if (damage < 5 && target.HasRelic("Torii"))
 					damage = 1;
-				target.HPLoss(damage);
+				damage = target.HPLoss(damage);
+				if (target.FindBuff("Plated Armor") is Buff armor && armor != null)
+					armor.Intensity--;
+				if (damage > 0 && FindBuff("Envenom") is Buff envenom && envenom != null)
+					target.AddBuff(39, envenom.Intensity, (Hero)this);
+				if (damage > 0 && FindBuff("Static Discharge") is Buff discharge && discharge != null)
+					for (int i = 0; i < discharge.Intensity; i++)
+						Orb.ChannelOrb((Hero)target, encounter, 0);
             }
 			Console.Write("!\n");
             if (target.FindBuff("Curl Up") is Buff curlUp && curlUp != null)      // Louse Curl Up Effect
@@ -134,16 +146,18 @@
                 target.Buffs.Remove(curlUp);
             }
 			if (target.FindBuff("Thorns") is Buff thorns && thorns != null)
-				NonAttackDamage(this,thorns.Intensity,thorns.Name);
+				target.NonAttackDamage(this,thorns.Intensity,thorns.Name);
+			if (target.FindBuff("Block Return") is Buff block && block != null)
+				GainBlock(block.Intensity);
             if (target.FindBuff("Flame Barrier") is Buff flameBarrier && flameBarrier != null)
-                NonAttackDamage(this, flameBarrier.Intensity, flameBarrier.Name);
+                target.NonAttackDamage(this, flameBarrier.Intensity, flameBarrier.Name);
         }
 
 		public void NonAttackDamage(Actor target, int damage, string effect)
 		{
 			if (Hp <= 0) return;
             Console.Write($"\n{Name} dealt {damage} from their {effect} to the {target.Name}");
-			damage = ReduceDamageByBlock(target,damage);
+            damage = ReduceDamageByBlock(target,damage);
             if (damage > 0)
                 target.HPLoss(damage);
             Console.Write("!\n");
@@ -153,7 +167,8 @@
 		{
 			if (target.Block > 0)
 			{
-				int damageCalc = target.Block - damage;
+                damage = target.IntangibleCheck(damage);
+                int damageCalc = target.Block - damage;
 				damage -= target.Block;
 				target.Block = damageCalc;
 				if (target.Block <= 0 && HasRelic("Hand Drill"))
@@ -163,14 +178,18 @@
 			return damage;
         }
 
-		public void PoisonDamage(int damage)
+		public void PoisonDamage()
 		{
-			Console.Write($"{Name} suffered from their poison");
-			HPLoss(damage);
-			FindBuff("Poison").Intensity--;
+            if (FindBuff("Poison") is Buff poison && poison != null)
+			{
+                Console.Write($"{Name} suffered from their poison");
+                HPLoss(poison.Intensity);
+                Console.Write("!\n");
+                poison.Intensity--;
+            }
 		}
 
-		public void HPLoss(int damage)
+		public int HPLoss(int damage)
 		{
 			if (HasRelic("Tungsten"))
 				damage--;
@@ -180,7 +199,7 @@
                 {
                     buffer.Counter--;
 					Console.Write($",but the {Name}'s buffer prevented it");
-                    return;
+                    return 0;
                 }
                 if (HasRelic("Runic Cube"))
 					((Hero)this).DrawCards(1);
@@ -193,12 +212,21 @@
 					AddBuff(44, 3);
 				if (FindRelic("Emotion") is Relic emotionChip && emotionChip != null)
 					emotionChip.IsActive = true;
+				damage = IntangibleCheck(damage);
 			}
 			Hp -= damage;
-            Console.Write($", reducing their HP to {Hp}/{MaxHP}");
+            Console.Write($", reducing their HP to {(Hp < 0 ? "0" : Hp)}/{MaxHP}");
+			return damage;
         }
 
-		// Easy searching for Relic
+		public int IntangibleCheck(int damage)
+		{
+			if (damage > 1 && HasBuff("Intangible"))
+				return 1;
+			else return damage;
+		}
+
+		// Easy searching for Relics and Buffs
         public Relic FindRelic(string name)
         {
 			if (Relics == null) return null;
@@ -211,7 +239,18 @@
             else return Relics.Find(x => x.Name.Contains(name)) != null;
         }
 
-		public void AddAction(string action,int turnNumber = 0)
+        public Buff FindBuff(string name)
+        {
+            return Buffs.Find(x => x.Name.Contains(name));
+        }
+
+        public bool HasBuff(string name)
+        {
+            if (Buffs == null) return false;
+            else return Buffs.Find(x => x.Name.Contains(name)) != null;
+        }
+
+        public void AddAction(string action,int turnNumber = 0)
 		{
 			Actions.Add($"{(turnNumber > 0 ? $"{turnNumber}: " : "")}{action}");
 		}

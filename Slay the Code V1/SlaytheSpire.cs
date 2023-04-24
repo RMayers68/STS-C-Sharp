@@ -66,7 +66,6 @@ namespace STV
                 hero.Stance = "None";
             }
             ScreenWipe();
-            hero.AddToRelics(Dict.relicL[121]);
             Console.WriteLine($"You have chosen the {hero.Name}! Here is the {hero.Name} Deck.\n");
             ConsoleTableExt.ConsoleTableBuilder.From(hero.Deck).ExportAndWriteLine(TableAligntment.Center);
             Pause();
@@ -162,10 +161,15 @@ namespace STV
                 case "Monster":
                     if (hero.EasyFights < 3)
                     {
-                        Battle.Combat(hero, Enemy.CreateEncounter(1 + actModifier));
+                        hero.Encounter = Enemy.CreateEncounter(1 + actModifier);
+                        Battle.Combat(hero, hero.Encounter);
                         hero.EasyFights++;
                     }
-                    else Battle.Combat(hero, Enemy.CreateEncounter(2 + actModifier));
+                    else
+                    {
+                        hero.Encounter = Enemy.CreateEncounter(2 + actModifier);
+                        Battle.Combat(hero, hero.Encounter);
+                    }
                     hero.CombatRewards(activeRoom.Location);
                     break;
                 case "Event":
@@ -270,27 +274,29 @@ namespace STV
                     OpenChest(hero);                   
                     break;
                 case "Elite":
+                    hero.Encounter = Enemy.CreateEncounter(3 + actModifier);
                     if (hero.HasRelic("Sling"))
                         hero.AddBuff(4,2);
                     if (hero.HasRelic("Slaver's"))
                     {
                         hero.MaxEnergy++;
-                        Battle.Combat(hero, Enemy.CreateEncounter(3 + actModifier));
+                        Battle.Combat(hero, hero.Encounter);
                         hero.MaxEnergy--;
                     }
-                    else Battle.Combat(hero, Enemy.CreateEncounter(3 + actModifier));
+                    else Battle.Combat(hero, hero.Encounter);
                     hero.CombatRewards(activeRoom.Location);
                     break;
                 case "Boss":
+                    hero.Encounter = Enemy.CreateEncounter(4 + actModifier);
                     if (hero.HasRelic("Pantograph"))
                         hero.CombatHeal(25);
                     if (hero.HasRelic("Slaver's"))
                     {
                         hero.MaxEnergy++;
-                        Battle.Combat(hero, Enemy.CreateEncounter(4 + actModifier));
+                        Battle.Combat(hero, hero.Encounter);
                         hero.MaxEnergy--;
                     }
-                    else Battle.Combat(hero, Enemy.CreateEncounter(4 + actModifier));
+                    else Battle.Combat(hero, hero.Encounter);
                     hero.CombatRewards(activeRoom.Location);
                     break;
             }

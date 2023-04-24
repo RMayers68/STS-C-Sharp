@@ -47,10 +47,10 @@
             switch (Intent)
             {
                 case "Attack":
-                    Attack(hero, 18);
+                    Attack(hero, 18, encounter);
                     break;
                 case "Beam":
-                    Attack(hero, 9);
+                    Attack(hero, 9, encounter);
                     break;
                 case "Bellow":
                     if (EnemyID == 17)
@@ -63,8 +63,8 @@
                     break;
                 case "Bite":
                     if (EnemyID == 10)
-                        Attack(hero, MaxHP / 2);
-                    else Attack(hero, 6);
+                        Attack(hero, MaxHP / 2, encounter);
+                    else Attack(hero, 6, encounter);
                     break;
                 case "Bolt":
                     for (int i = 0; i < 2; i++)
@@ -78,16 +78,16 @@
                     GainBlock(9);
                     break;
                 case "Chomp":
-                    Attack(hero, 11);
+                    Attack(hero, 11, encounter);
                     break;
                 case "Corrosive Spit":
-                    Attack(hero, 7);
+                    Attack(hero, 7, encounter);
                     hero.DiscardPile.Add(Dict.cardL[358]);
                     if (EnemyID == 21)
                         hero.DiscardPile.Add(Dict.cardL[358]);
                     break;
                 case "Dark Strike":
-                    Attack(hero, 6);
+                    Attack(hero, 6, encounter);
                     break;
                 case "Defensive Mode":
                     AddBuff(16, 3);
@@ -95,7 +95,7 @@
                 case "Divider":
                     damage = hero.Hp / 12 + 1;
                     for (int i = 0; i < 6; i++)
-                        Attack(hero, damage);
+                        Attack(hero, damage, encounter);
                     break;
                 case "Entangle":
                     hero.AddBuff(14, 2);
@@ -105,13 +105,13 @@
                     Console.WriteLine($"The {Name} has escaped!");
                     break;
                 case "Fierce Bash":
-                    Attack(hero, 32);
+                    Attack(hero, 32, encounter);
                     break;
                 case "Flame Tackle":
                     if (EnemyID == 22)
                         damage = 16;
                     else damage = 8;
-                    Attack(hero, damage);
+                    Attack(hero, damage, encounter);
                     hero.DiscardPile.Add(Dict.cardL[358]);
                     if (EnemyID == 22)
                         hero.DiscardPile.Add(Dict.cardL[358]);
@@ -130,7 +130,7 @@
                 case "Inferno":
                     for (int i = 0; i < 6; i++)
                     {
-                        Attack(hero, 2);
+                        Attack(hero, 2, encounter);
                         if (i % 2 == 0)
                             hero.DiscardPile.Add(new Card(Dict.cardL[355]));
                     }
@@ -150,15 +150,11 @@
                         ck++;
                     hero.AddBuff(li, ck);
                     break;
-                case "Lunge":
-                    Attack(hero, 12);
+                case "Lunge" or "Mug":
+                    if (Intent == "Lunge")
+                        Attack(hero, 12, encounter);
+                    else Attack(hero, 10, encounter);
                     hero.GoldChange(-1*FindBuff("Thievery").Intensity);
-                    Gold += FindBuff("Thievery").Intensity;
-                    Console.WriteLine($"The {Name} stole 15 Gold!");
-                    break;
-                case "Mug":
-                    Attack(hero, 10);
-                    hero.GoldChange(-1 * FindBuff("Thievery").Intensity);
                     Gold += FindBuff("Thievery").Intensity;
                     Console.WriteLine($"The {Name} stole 15 Gold!");
                     break;
@@ -169,30 +165,30 @@
                     encounter[target].GainBlock(7);
                     break;
                 case "Puncture":
-                    Attack(hero, 9);
+                    Attack(hero, 9, encounter);
                     break;
                 case "Rake":
-                    Attack(hero, 7);
+                    Attack(hero, 7, encounter);
                     hero.AddBuff(2, 2);
                     break;
                 case "Roll Attack":
-                    Attack(hero, 9);
+                    Attack(hero, 9, encounter);
                     break;
                 case "Rush":
-                    Attack(hero, 14);
+                    Attack(hero, 14, encounter);
                     break;
                 case "Scrape":
-                    Attack(hero, 8);
+                    Attack(hero, 8, encounter);
                     hero.AddBuff(1, 2);
                     break;
                 case "Scratch":
-                    Attack(hero, 4);
+                    Attack(hero, 4, encounter);
                     break;
                 case "Shield Bash":
-                    Attack(hero, 6);
+                    Attack(hero, 6, encounter);
                     break;
                 case "Sear":
-                    Attack(hero, 6);
+                    Attack(hero, 6, encounter);
                     hero.DiscardPile.Add(new Card(Dict.cardL[355]));
                     Console.WriteLine($"{Name} has added a Burn to your Deck!");
                     break;
@@ -201,17 +197,17 @@
                     hero.AddBuff(4, -1);
                     break;
                 case "Skull Bash":
-                    Attack(hero, 6);
+                    Attack(hero, 6, encounter);
                     hero.AddBuff(1, 3);
                     break;
                 case "Slam":
-                    Attack(hero, 35);
+                    Attack(hero, 35, encounter);
                     break;
                 case "Sleeping":
                     Console.WriteLine($"{Name} is sleeping, be cautious on waking it...");
                     break;
                 case "Smash":
-                    Attack(hero, 4);
+                    Attack(hero, 4, encounter);
                     hero.AddBuff(2, 2);
                     break;
                 case "Smoke Bomb":
@@ -227,7 +223,7 @@
                             damage = 13;
                             break;
                     }
-                    Attack(hero, damage);
+                    Attack(hero, damage, encounter);
                     break;
                 case "Tackle":
                     switch (EnemyID)
@@ -249,21 +245,21 @@
                             Attack(hero, damage);
                             break;
                     }
-                    Attack(hero, damage);
+                    Attack(hero, damage, encounter);
                     break;
                 case "Thrash":
-                    Attack(hero, 7);
+                    Attack(hero, 7, encounter);
                     GainBlock(5);
                     break;
                 case "Twin Slam":
                     for (int i = 0; i < 2; i++)
-                        Attack(hero, 8);
+                        Attack(hero, 8, encounter);
                     Buffs.Remove(FindBuff("Thorns"));
                     AddBuff(16, 30);
                     Actions.Clear();
                     break;
                 case "Ultimate Blast":
-                    Attack(hero, 25);
+                    Attack(hero, 25, encounter);
                     break;
                 case "Vent Steam":
                     hero.AddBuff(1, 3);
@@ -274,9 +270,8 @@
                     break;
                 case "Whirlwind":
                     for (int i = 0; i < 4; i++)
-                        Attack(hero, 5);
+                        Attack(hero, 5, encounter);
                     break;
-
             }
         }
 

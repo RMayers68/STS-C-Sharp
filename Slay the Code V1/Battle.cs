@@ -93,11 +93,6 @@ namespace STV
                         else
                         {
                             Card playCard = hero.Hand[cardChoice - 1];
-                            if (hero.FindRelic("Necro") is Relic necro && necro.IsActive && playCard.EnergyCost > 2 && playCard.Type == "Attack")
-                            {
-                                playCard.CardAction(hero, encounter, turnNumber);
-                                necro.IsActive = false;
-                            }
                             playCard.CardAction(hero, encounter, turnNumber);
                             if (hero.FindTurnActions(turnNumber, "Attack").Count % 3 == 0)
                             {
@@ -106,7 +101,7 @@ namespace STV
                                 if (hero.HasRelic("Shuriken"))
                                     hero.AddBuff(4, 1);
                                 if (hero.HasRelic("Ornamental Fan"))
-                                    hero.GainBlock(4);
+                                    hero.GainBlock(4, encounter);
                             }
                             if (hero.HasRelic("Letter Opener") && hero.FindTurnActions(turnNumber, "Skill").Count % 3 == 0)
                                 foreach (Enemy e in encounter)
@@ -333,7 +328,88 @@ namespace STV
         {
             if (turnNumber != 0)
             {
+                if (hero.FindBuff("Mayhem") is Buff mayhem && mayhem != null)
+                {
+                    for (int i = 0 ; i < mayhem.Intensity ; i++)
+                    {
+                        Card topDraw = hero.DrawPile.Last();
+                        topDraw.SetEnergyCost(0);
+                        topDraw.CardAction(hero, encounter, turnNumber);
+                        topDraw.MoveCard(hero.DrawPile, hero.DiscardPile);
+                    }
+                }
+                if (hero.FindBuff("Simmering Fury") is Buff fury &&  fury != null)
+                {
+                    hero.SwitchStance("Wrath");
+                    hero.DrawCards(fury.Intensity);
+                    hero.Buffs.Remove(fury);
+                }
+                if (hero.FindBuff("Foresight") is Buff fore && fore != null)
+                    Card.Scry(hero, fore.Intensity);
+                if (hero.FindBuff("Infinite Blades") is Buff blades && blades != null)
+                    Card.AddShivs(hero, blades.Intensity);
+                if (hero.FindBuff("Magnetism") is Buff magnet && magnet != null)
+                    for (int i = 0; i < magnet.Intensity; i++)
+                        hero.AddToHand(Card.RandomCard("Colorless"));
+                if (hero.HasBuff("Collect"))
+                {
+                    hero.AddToHand(new(Dict.cardL[336]));
+                    hero.Hand.Last().UpgradeCard();
+                }
+                if (hero.FindBuff("Deva Form") is Buff deva && deva != null)
+                {
+                    deva.CounterSet(deva.Intensity);
+                    hero.Energy += deva.Counter;
+                }
+                if (hero.FindBuff("Devotion") is Buff devote && devote != null)
+                    hero.AddBuff(10, devote.Intensity);
+                if (hero.FindBuff("Creative AI") is Buff creative && creative != null)
+                    for (int i = 0; i < creative.Intensity; i++)
+                        hero.AddToHand(new(Card.SpecificTypeRandomCard(hero.Name, "Power")));
+                if (hero.FindBuff("Battle Hymn") is Buff hymn && hymn != null)
+                    for (int i = 0; i < hymn.Intensity; i++)
+                        hero.AddToHand(new(Dict.cardL[339]));
+                if (hero.FindBuff("Hello") is Buff hello && hello != null)
+                    for (int i = 0; i < hello.Intensity; i++)
+                        hero.AddToHand(new(Card.SpecificRarityRandomCard(hero.Name, "Common")));
+                if (hero.FindBuff("Machine Learning") is Buff machine && machine != null)
+                    hero.DrawCards(machine.Intensity);
                 hero.DrawCards(5);
+                // Checking for "Next turn" buffs/debuffs, activating their effects, then removing them
+                if (hero.FindBuff("Energized") is Buff energized && energized != null)
+                {
+                    hero.GainTurnEnergy(energized.Intensity);
+                    hero.Buffs.Remove(energized);
+                }
+                if (hero.FindBuff("Phantasmal") is Buff phantasmal && phantasmal != null)
+                {
+                    hero.AddBuff(100, phantasmal.Intensity+1);
+                    hero.Buffs.Remove(phantasmal);
+                }
+                if (hero.FindBuff("Strength Down") is Buff flex && flex != null)
+                {
+                    hero.AddBuff(4,flex.Intensity * -1);
+                    hero.Buffs.Remove(flex);
+                }
+                if (hero.FindBuff("Dexterity Down") is Buff speed && speed != null)
+                {
+                    hero.AddBuff(9, speed.Intensity * -1);
+                    hero.Buffs.Remove(speed);
+                }
+                if (hero.FindBuff("Block Next Turn") is Buff block && block != null)
+                {
+                    hero.GainBlock(block.Intensity);
+                    hero.Buffs.Remove(block);
+                }
+                if (hero.FindBuff("Draw Card") is Buff card && card != null)
+                {
+                    hero.DrawCards(card.Intensity);
+                    hero.Buffs.Remove(card);
+                }
+                if (hero.FindBuff("Wraith Form") is Buff wraith && wraith != null)
+                    hero.AddBuff(9, wraith.Intensity * -1);
+                if (hero.FindBuff("Bias") is Buff bias && bias != null)
+                    hero.AddBuff(9, bias.Intensity * -1);
                 if (hero.FindRelic("Emotion") is Relic emotion && emotion.IsActive)
                 {
                     foreach (Orb o in hero.Orbs)
@@ -348,18 +424,12 @@ namespace STV
                     emotion.IsActive = false;
                 }
                 // Duration buff decrease for hero
-                foreach (Buff b in hero.Buffs)
-                {
-                    b.DurationDecrease();
-                }
                 hero.Buffs.RemoveAll(x => x.DurationEnded());
                 // Same for enemy
                 foreach (Enemy e in encounter)
                 {
-                    foreach (Buff b in e.Buffs)
-                    {
-                        b.DurationDecrease();
-                    }
+                    if (hero.FindBuff("Noxious Fumes") is Buff noxious && noxious != null)
+                        e.AddBuff(39, noxious.Intensity, hero);
                     e.Buffs.RemoveAll(x => x.DurationEnded());
                     if (e.FindBuff("Ritual") is Buff ritual && ritual != null)
                         e.AddBuff(4, ritual.Intensity);
@@ -371,11 +441,11 @@ namespace STV
                 default: break;
                 case 2:
                     if (hero.HasRelic("Horn Cleat"))
-                        hero.GainBlock(14);
+                        hero.GainBlock(14, encounter);
                     break;
                 case 3:
                     if (hero.HasRelic("Captain's Wheel"))
-                        hero.GainBlock(1);
+                        hero.GainBlock(18, encounter);
                     break;
             }
             // Start of turn that applies to all turns
@@ -434,6 +504,29 @@ namespace STV
             hero.Energy += hero.MaxEnergy;
             if (hero.Orbs.FindAll(x => x.Name == "Plasma").Count is int plasmaCount && plasmaCount > 0)
                 hero.Energy += plasmaCount;
+            // Self Damage Effects
+            if (hero.FindBuff("Brutality") is Buff brutal && brutal != null)
+            {
+                hero.SelfDamage(brutal.Intensity);
+                hero.DrawCards(brutal.Intensity);
+            }
+            if (hero.FindBuff("Combust") is Buff combust && combust != null)
+            {
+                hero.SelfDamage(combust.Intensity / 5);
+                foreach (Enemy e in encounter)
+                    hero.NonAttackDamage(e,combust.Intensity, "Combust");
+            }
+            if (hero.FindBuff("Tools of the Trade") is Buff tools && tools != null)
+            {
+                hero.DrawCards(tools.Intensity);
+                for (int i = 0;i < tools.Intensity; i++)
+                    Card.PickCard(hero.Hand, "discard").Discard(hero, encounter, turnNumber);
+            }
+            if (hero.FindBuff("Blasphemy") is Buff blas && blas != null)
+            {
+                hero.SelfDamage(99999);
+                hero.Buffs.Remove(blas);
+            }
         }
 
         private static void EndOfPlayerTurn(Hero hero, List<Enemy> encounter, int turnNumber)
@@ -442,15 +535,38 @@ namespace STV
             {
                 encounter[i].Block = 0;
             }
+            if (hero.FindBuff("Omega") is Buff omega && omega != null)
+                foreach (Enemy e in encounter)
+                    hero.NonAttackDamage(e,omega.Intensity, omega.Name);
             if (!hero.HasRelic("Ice"))
                 hero.Energy = 0;
             if (hero.HasRelic("Orichalcum") && hero.Block == 0)
-                hero.GainBlock(6);
+                hero.GainBlock(6, encounter);
+            if (hero.FindBuff("Plated Armor") is Buff armor && armor != null)
+                hero.GainBlock(armor.Intensity);
             if (hero.HasRelic("Cloak"))
-                hero.GainBlock(hero.Hand.Count);
+                hero.GainBlock(hero.Hand.Count,encounter);
+            if (hero.FindBuff("Metallicize") is Buff metal && metal != null)
+                hero.GainBlock(metal.Intensity, encounter);
+            if (hero.FindBuff("Like Water") is Buff water && water != null)
+                hero.GainBlock(water.Intensity, encounter);
+            if (hero.FindBuff("Panache") is Buff panache && panache != null)
+                panache.Counter = 0;
+            if( hero.FindBuff("Regen") is Buff regen && regen != null)
+            {
+                hero.CombatHeal(regen.Intensity);
+                regen.Intensity--;
+                if (regen.Intensity == 0)
+                    hero.Buffs.Remove(regen);
+            }
             if (turnNumber == 7 && hero.HasRelic("Stone Calender"))
                 foreach (Enemy e in encounter)
                     hero.NonAttackDamage(e, 52, "Stone Calender");
+            if (hero.FindBuff("Well-Laid Plans") is Buff plans && plans != null)
+            {
+                for (int i = 0; i < plans.Intensity; i++)
+                    Card.PickCard(hero.Hand, "retain in your hand").DescriptionModifier += "Retain.";
+            }
             for (int i = hero.Hand.Count - 1; i >= 0; i--)
             {
                 if (hero.Hand[i].GetDescription().Contains("Retain."))
@@ -461,17 +577,37 @@ namespace STV
                         hero.Hand[i].SetAttackDamage(hero.Hand[i].GetMagicNumber());
                     if (hero.Hand[i].Name == "Perserverance")
                         hero.Hand[i].SetBlockAmount(hero.Hand[i].GetMagicNumber());
+                    if (hero.FindBuff("Establishment") is Buff establish && establish != null)
+                        hero.Hand[i].SetEnergyCost(hero.Hand[i].EnergyCost-1);
                     continue;
                 }
                 else if (hero.Hand[i].GetDescription().Contains("Ethereal"))
                     hero.Hand[i].Exhaust(hero, encounter, hero.Hand);
                 else if (hero.HasRelic("Pyramid"))
                     continue;
+                else if (hero.HasBuff("Retain Hand"))
+                {
+                    if (hero.FindBuff("Establishment") is Buff establish && establish != null)
+                        hero.Hand[i].SetEnergyCost(hero.Hand[i].EnergyCost - 1);
+                }
                 else hero.Hand[i].MoveCard(hero.Hand, hero.DiscardPile);  //Discard at end of turn (Comment to find easy for disabling)
+                hero.Hand[i].DescriptionModifier = ""; // Resetting temp Retain effects
+                if (hero.HasBuff("Retain Hand"))
+                    hero.Buffs.Remove(hero.FindBuff("Retain Hand"));
             }
             if (hero.HasRelic("Nilry's"))
-                hero.DrawPile.Add(new(Card.PickCard(Card.RandomCards(hero.Name, 3), "add to your drawpile")));
-            HealthChecks(hero, encounter, turnNumber);
+                hero.AddToDrawPile(new(Card.PickCard(Card.RandomCards(hero.Name, 3), "add to your drawpile")),true);
+            if (hero.FindBuff("Study") is Buff study && study != null)
+                for (int i = 0; i < study.Intensity; i++) 
+                    hero.AddToDrawPile(new(Dict.cardL[335]), true);
+            foreach (Enemy e in encounter)
+            {
+                e.PoisonDamage();
+                if (e.Hp <= 0 && e.FindBuff("Corpse Explosion") is Buff corpse && corpse != null)
+                    foreach (Enemy e2 in encounter)
+                        e.NonAttackDamage(e2, corpse.Intensity, "Corpse Explosion");
+                HealthChecks(hero, encounter, turnNumber);
+            }
         }
         private static void EndOfCombat(Hero hero)
         {

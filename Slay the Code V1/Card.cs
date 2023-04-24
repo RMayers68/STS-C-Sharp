@@ -246,7 +246,11 @@
             if (Name == "Necronomicurse")
                 hero.AddToHand(new(this));
             if (hero.HasRelic("Dead Branch"))
-                hero.AddToHand(Card.RandomCard(hero.Name));
+                hero.AddToHand(new(Card.RandomCard(hero.Name)));
+            if (hero.FindBuff("Dark Embrace") is Buff embrace && embrace != null)
+                hero.DrawCards(embrace.Intensity);
+            if (hero.FindBuff("Feel No Pain") is Buff feel && feel != null)
+                hero.GainBlock(feel.Intensity, encounter);
             Console.WriteLine($"{Name} has been exhausted.");
         }
 
@@ -262,7 +266,7 @@
             if (hero.HasRelic("Tingsha"))
                 hero.NonAttackDamage(encounter[CardRNG.Next(encounter.Count)],3,"Tingsha");
             if (hero.HasRelic("Tough Bandages"))
-                hero.GainBlock(3);
+                hero.GainBlock(3, encounter);
             hero.AddAction("Discard",turnNumber);
             if (hero.HasRelic("Hovering Kite") && hero.Actions.FindAll(x => x == $"{turnNumber}: Discard").Count == 1)
                 hero.Energy++;
@@ -287,6 +291,8 @@
                     amount--;
                 }
             }
+            if (hero.FindBuff("Nirvana") is Buff cobain && cobain != null /*Yikes*/)
+                hero.GainBlock(cobain.Intensity);
             // Weave Check
             if (FindCard("Weave", hero.DiscardPile) is Card weave && weave != null && hero.Hand.Count < 10)
                 weave.MoveCard(hero.DiscardPile, hero.Hand);
@@ -295,11 +301,7 @@
         public static void AddShivs(Hero hero, int amount)
         {
             for (int i = 0; i < amount; i++)
-            {
-                if (hero.Hand.Count < 10)
-                    hero.Hand.Add(new Card(Dict.cardL[296]));
-                else hero.DiscardPile.Add(new Card(Dict.cardL[296]));
-            }
+                hero.AddToHand(new Card(Dict.cardL[296]));
         }
 
         public static List<Card> RandomCards(string name, int count, string typeExclusion = "")
@@ -309,14 +311,27 @@
             {
                 Card referenceCard;
                 if (typeExclusion != "")
-                    referenceCard = SpecificRandomCard(name,typeExclusion);
+                    referenceCard = SpecificTypeRandomCard(name,typeExclusion);
                 else referenceCard = RandomCard(name);
                 cards.Add(new Card(referenceCard));
             }
             return cards;
         }
 
-        public static Card SpecificRandomCard(string name = "All Heroes", string typeExclusion = "")
+        public static Card SpecificTypeRandomCard(string name = "All Heroes", string typeExclusion = "")
+        {
+            Card referenceCard;
+            if (typeExclusion != null)
+            {
+                do
+                    referenceCard = RandomCard(name);
+                while (referenceCard.Type != typeExclusion);
+                return referenceCard;
+            }
+            else return RandomCard(name);
+        }
+
+        public static Card SpecificRarityRandomCard(string name = "All Heroes", string typeExclusion = "")
         {
             Card referenceCard;
             if (typeExclusion != null)
@@ -734,10 +749,20 @@
 
         public void CardAction(Hero hero, List<Enemy> encounter, int turnNumber)
         {
+            if (Type == "Attack" && hero.FindBuff("Free Attack") is Buff free && free != null)
+            {
+                TmpEnergyCost = 0;
+                hero.RemoveCounterCheck(free);
+            }
             // Check to see if the Card is Playable, if not leave function early
             if (TmpEnergyCost > hero.Energy)
             {
                 Console.WriteLine($"You failed to play {Name}. You need {EnergyCost} Energy to play {Name}.");
+                return;
+            }
+            if (Type == "Attack" && hero.FindBuff("Entangled") != null)
+            {
+                Console.WriteLine("You can't play an Attack as you are Entangled this turn.");
                 return;
             }
             if (Name == "Clash" && !hero.Hand.All(x => x.Type == "Attack"))
@@ -769,26 +794,49 @@
             // Moves the Card Played from Hand to Designated Location and check certain relic effects (that can be said in a lot of sections oops)
             if (FindCard(Name, hero.Hand) != null)
             {
+                if (Type == "Skill")
+                {
+                    if (hero.HasBuff("Corruption"))
+                    {
+                        TmpEnergyCost = 0;
+                        Exhaust(hero, encounter, hero.Hand);
+                    }
+                    foreach (Enemy e in encounter)
+                    {
+                        if (e.FindBuff("Enrage") is Buff enrage && enrage != null)
+                            e.AddBuff(4, enrage.Intensity);
+                    }
+                }
                 if (GetDescription().Contains("Exhaust") || Type == "Status" || Type == "Curse")
                 {
                     if (hero.HasRelic("Strange") && CardRNG.Next(2) == 0)
                         MoveCard(hero.Hand, hero.DiscardPile);
-                    Exhaust(hero,encounter, hero.Hand);
-                }                   
+                    Exhaust(hero, encounter, hero.Hand);
+                }
                 else if (Type == "Power")
                 {
-                    foreach (Card forceField in FindAllCardsInCombat(hero,"Force Field"))
+                    foreach (Card forceField in FindAllCardsInCombat(hero, "Force Field"))
                         forceField.EnergyCost--;
                     if (hero.HasRelic("Bird"))
                         hero.CombatHeal(2);
                     hero.Hand.Remove(this);
                     if (hero.HasRelic("Mummified") && hero.Hand.Count != 0)
                         hero.Hand[CardRNG.Next(hero.Hand.Count)].SetTmpEnergyCost(0);
-                }                   
+                    if (hero.FindBuff("Heatsinks") is Buff heat && heat != null)
+                        hero.DrawCards(heat.Intensity);
+                    if (hero.FindBuff("Storm") is Buff storm && storm != null)
+                        for (int i = 0; i < storm.Intensity; i++)
+                            Orb.ChannelOrb(hero, encounter, 0);
+                }
                 else if (Name == "Tantrum")
                 {
                     MoveCard(hero.Hand, hero.DrawPile);
                     hero.ShuffleDrawPile();
+                }
+                else if (hero.FindBuff("Rebound") is Buff rebound && rebound != null)
+                {
+                    MoveCard(hero.Hand, hero.DrawPile);
+                    hero.RemoveCounterCheck(rebound);
                 }
                 else
                     MoveCard(hero.Hand, hero.DiscardPile);
@@ -802,9 +850,53 @@
                 hero.Energy = 0;
             else if (EnergyCost != -2)                
                 hero.Energy -= TmpEnergyCost;
+            TmpEnergyCost = EnergyCost;
+            // Setup Phase 
 
-            // Setup Phase (if target needs to be selected or something happens prior to regular action/action numbers need to be determined
+            // Effects relating to playing an Attack card
+            if (Type == "Attack")
+            {
+                if (hero.HasRelic("Duality"))
+                {
+                    hero.AddBuff(9, 1);
+                    hero.AddBuff(97, 1);
+                }
+                if (hero.FindBuff("Vigor") is Buff vigor && vigor != null)
+                {
+                    extraDamage += vigor.Intensity;
+                    hero.Buffs.Remove(vigor);
+                }
+                if (TmpEnergyCost == 0 && hero.HasRelic("Wrist"))
+                    extraDamage += 4;
+                if (Name.Contains("Strike") && hero.HasRelic("Strike"))
+                    extraDamage += 3;
+                if (Name.Contains("Shiv") && hero.FindBuff("Accuracy") is Buff accuracy && accuracy != null)
+                    extraDamage += accuracy.Intensity;
+                if (hero.FindBuff("Rage") is Buff rage && rage != null)
+                    hero.GainBlock(rage.Intensity, encounter);
+                if (hero.FindRelic("Nunchaku") is Relic nunchaku && nunchaku != null)
+                {
+                    nunchaku.PersistentCounter--;
+                    if (nunchaku.PersistentCounter == 0)
+                    {
+                        hero.GainTurnEnergy(1);
+                        nunchaku.PersistentCounter = nunchaku.EffectAmount;
+                    }
+                }
+                if (hero.FindRelic("Pen Nib") is Relic penNib && penNib != null)
+                {
+                    penNib.PersistentCounter--;
+                    if (penNib.PersistentCounter == 0)
+                    {
+                        extraDamage += extraDamage + AttackDamage;
+                        penNib.PersistentCounter = penNib.EffectAmount;
+                    }
+                }
+                if (hero.HasBuff("Double Damage"))
+                    extraDamage += extraDamage + AttackDamage;
+            }
 
+            // If target needs to be selected or something happens prior to regular action/action numbers need to be determined
             if (Targetable)
                 target = hero.DetermineTarget(encounter);
             if (Name == "Crush Joints" || Name == "Sanctity" || Name == "Follow-Up" || Name == "Sash Whip")
@@ -959,45 +1051,8 @@
                 if (Name == "Auto-Shields" && hero.Block != 0)
                     hero.CardBlock(0);
                 else for (int i = 0; i < BlockLoops; i++)
-                        hero.CardBlock(BlockAmount);
-            }
-
-            // Damage Phase and Attack buff/relic effects
-            if (Type == "Attack")
-            {
-                if (hero.HasRelic("Duality"))
-                {
-                    hero.AddBuff(9, 1);
-                    hero.AddBuff(97,1); 
-                }
-                if (hero.FindBuff("Vigor") is Buff vigor && vigor != null)
-                {
-                    extraDamage += vigor.Intensity;
-                    hero.Buffs.Remove(vigor);
-                }
-                if (TmpEnergyCost == 0 && hero.HasRelic("Wrist"))
-                    extraDamage += 4;
-                if (Name.Contains("Strike") && hero.HasRelic("Strike") )
-                    extraDamage += 3;
-                if (hero.FindRelic("Nunchaku") is Relic nunchaku && nunchaku != null)
-                {
-                    nunchaku.PersistentCounter--;
-                    if (nunchaku.PersistentCounter == 0)
-                    {
-                        hero.GainTurnEnergy(1);
-                        nunchaku.PersistentCounter = nunchaku.EffectAmount;
-                    }
-                }
-                if (hero.FindRelic("Pen Nib") is Relic penNib && penNib != null)
-                {
-                    penNib.PersistentCounter--;
-                    if (penNib.PersistentCounter == 0)
-                    {
-                        extraDamage += extraDamage + AttackDamage;
-                        penNib.PersistentCounter = penNib.EffectAmount;
-                    }
-                }
-            }             
+                        hero.CardBlock(BlockAmount, encounter);
+            }         
 
             if (AttackAll)
             {
@@ -1149,7 +1204,7 @@
                 }                    
                 else hero.DrawCards(CardsDrawn);
                 if (Name == "Escape Plan" && hero.Hand.Last().Type == "Skill" && hero.FindBuff("No Draw") != null)
-                    hero.CardBlock(BlockAmount);
+                    hero.CardBlock(BlockAmount, encounter);
                 break;
             }
 
@@ -1218,7 +1273,7 @@
                     hero.DiscardPile.Add(new Card(Dict.cardL[358]));
                     break;
                 case "Infernal Blade":
-                    hero.Hand.Add(new (SpecificRandomCard(hero.Name,"Attack")) { TmpEnergyCost = 0});
+                    hero.Hand.Add(new (SpecificTypeRandomCard(hero.Name,"Attack")) { TmpEnergyCost = 0});
                     break;
                 case "Limit Break":
                         hero.FindBuff("Strength").Intensity *= MagicNumber;
@@ -1277,7 +1332,7 @@
                     AddShivs(hero, MagicNumber);
                     break;
                 case "Distraction":
-                    hero.AddToHand(new (SpecificRandomCard(hero.Name,"Skill")) { TmpEnergyCost = 0 });
+                    hero.AddToHand(new (SpecificTypeRandomCard(hero.Name,"Skill")) { TmpEnergyCost = 0 });
                     break;
                 case "Glass Knife":
                     AttackDamage -= MagicNumber;
@@ -1362,7 +1417,7 @@
                     hero.DiscardPile.Add(Dict.cardL[359]);
                     break;
                 case "White Noise":
-                    hero.AddToHand(new (SpecificRandomCard(hero.Name,"Power")) { TmpEnergyCost = 0 });
+                    hero.AddToHand(new (SpecificTypeRandomCard(hero.Name,"Power")) { TmpEnergyCost = 0 });
                     break;
                 case "Alpha":
                     hero.DrawPile.Add(new Card(Dict.cardL[334]));
@@ -1420,7 +1475,7 @@
                     break;
                 case "Halt":
                     if (hero.Stance == "Wrath")
-                        hero.CardBlock(MagicNumber);
+                        hero.CardBlock(MagicNumber, encounter);
                     break;
                 case "Judgment":
                     if (encounter[target].Hp <= MagicNumber)
@@ -1458,9 +1513,9 @@
                     hero.ShuffleDrawPile();
                     break;
                 case "Pressure Points":
-                    for (int i = 0; i < encounter.Count; i++)
-                        if (encounter[i].FindBuff("Mark") != null)
-                            hero.NonAttackDamage(encounter[i], encounter[i].FindBuff("Mark").Intensity, "Pressure Points");
+                    foreach( Enemy e in encounter)
+                        if (e.FindBuff("Mark") is Buff mark && mark != null)
+                            hero.NonAttackDamage(e, mark.Intensity, "Pressure Points");
                     break;
                 case "Reach Heaven":
                     hero.DrawPile.Add(new Card(Dict.cardL[340]));
@@ -1477,7 +1532,7 @@
                     break;
                 case "Wallop":
                     wallop -= encounter[target].Hp;
-                    hero.CardBlock(wallop);
+                    hero.CardBlock(wallop, encounter);
                     break;
                 case "Wish":
                     Card wish = PickCard(new() { Dict.cardL[361], Dict.cardL[362], Dict.cardL[363] }, "use");
@@ -1613,9 +1668,6 @@
                         hero.DrawPile.Remove(violence);
                     }
                     break;
-                case "Necronomicurse":
-                    hero.Hand.Add(new Card(Dict.cardL[346]));
-                    break;
                 default:
                     break;
             }
@@ -1677,7 +1729,7 @@
                     if (eviscerate.TmpEnergyCost != 0)
                         eviscerate.TmpEnergyCost--;
             }
-            // End of card action, card action being documented in turn list
+            // End of card action, card action being documented in turn list, check to play card twice
             if (hero.FindRelic("Ink") is Relic ink && ink != null)
             {
                 ink.PersistentCounter--;
@@ -1687,12 +1739,65 @@
                     ink.PersistentCounter = ink.EffectAmount;
                 }
             }
+            hero.AddAction($"{Name}-{Type} Played", turnNumber);
+            if (hero.FindBuff("Panache") is Buff panache && panache != null)
+            {
+                panache.Counter++;
+                if (panache.Counter == 5) 
+                {
+                    panache.Counter = 0;
+                    foreach (Enemy e in encounter)
+                        hero.NonAttackDamage(e, panache.Intensity, panache.Name);
+                }
+            }
             if (hero.FindRelic("Orange") is Relic orange && orange.IsActive && hero.FindTurnActions(1,"Attack").Count > 0 && hero.FindTurnActions(1, "Skill").Count > 0 && hero.FindTurnActions(1, "Power").Count > 0)
             {
                 hero.Buffs.RemoveAll(x => !x.BuffDebuff);
                 orange.IsActive = false;
             }
-            hero.AddAction($"{Name}-{Type} Played",turnNumber);
+            if (hero.FindBuff("Thousand Cuts") is Buff cuts && cuts != null)
+                foreach (Enemy e in encounter)
+                    hero.NonAttackDamage(e, cuts.Intensity, "Thousand Cuts");
+            if (hero.FindBuff("After Image") is Buff image && image != null)
+                hero.GainBlock(image.Intensity, encounter);
+            foreach(Enemy e in encounter)
+                if (e.FindBuff("Choked") is Buff choke && choke != null)
+                    e.HPLoss(choke.Intensity);
+            if (hero.FindBuff("Duplication") is Buff dupe && dupe != null)
+            {
+                TmpEnergyCost = 0;
+                CardAction(hero, encounter, turnNumber);
+                hero.RemoveCounterCheck(dupe);
+            }
+            if (Type == "Attack" && hero.FindRelic("Necro") is Relic necro && necro.IsActive && EnergyCost > 2)
+            {
+                TmpEnergyCost = 0;
+                CardAction(hero, encounter, turnNumber);
+                necro.IsActive = false;
+            }
+            if (hero.FindBuff("Echo Form") is Buff echo && echo != null && echo.Intensity < hero.FindTurnActions(turnNumber).Count)
+            {
+                TmpEnergyCost = 0;
+                CardAction(hero, encounter, turnNumber);
+            }
+            if (Type == "Attack" && hero.FindBuff("Double Tap") is Buff dtap && dtap != null)
+            {
+                TmpEnergyCost = 0;
+                CardAction(hero, encounter, turnNumber);
+                hero.RemoveCounterCheck(dtap);
+            }
+            if (Type == "Skill" && hero.FindBuff("Burst") is Buff burst && burst != null)
+            {
+                TmpEnergyCost = 0;
+                CardAction(hero, encounter, turnNumber);
+                hero.RemoveCounterCheck(burst);
+            }
+            if (Type == "Power" && hero.FindBuff("Amplify") is Buff amplify && amplify != null)
+            {
+                TmpEnergyCost = 0;
+                CardAction(hero, encounter, turnNumber);
+                hero.RemoveCounterCheck(amplify);
+            }
         }
 
         public void UpgradeCard()
