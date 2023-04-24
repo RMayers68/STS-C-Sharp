@@ -1,6 +1,4 @@
-﻿using System.Diagnostics.Metrics;
-
-namespace STV
+﻿namespace STV
 {
     public class Hero : Actor
     {
@@ -391,7 +389,5 @@ namespace STV
             if (buff.CounterAtZero())
                 Buffs.Remove(buff);
         }
-
-
     }
 }

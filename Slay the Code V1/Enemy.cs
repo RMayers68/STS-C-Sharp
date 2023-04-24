@@ -721,7 +721,6 @@
                     break;
 
             }
-
             for (int i = 0; i < encounter.Count; i++)
             {
                 encounter[i].MaxHP = encounter[i].EnemyHealthSet();
