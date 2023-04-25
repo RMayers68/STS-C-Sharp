@@ -32,7 +32,7 @@ namespace STV
                         break;
                     case 2:                                                             // LIBRARY
                         ScreenWipe();
-                        ConsoleTableBuilder.From(CardLibrary.ViewLibrary(true)).ExportAndWriteLine();
+                        ConsoleTableBuilder.From(CardLibrary.ViewLibrary()).ExportAndWriteLine();
                         Pause();
                         break;
                 }

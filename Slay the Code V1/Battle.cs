@@ -111,7 +111,7 @@ namespace STV
                     }
                     // Other menu functions
                     else switch (playerChoice)
-                    {
+                        {
                             default:
                                 Console.WriteLine("Invalid input, enter again:");
                                 break;
@@ -153,7 +153,7 @@ namespace STV
                                     else for (int j = 0; j < encounter[i].Buffs.Count; j++)
                                             Console.WriteLine($"{encounter[i].Buffs[j].Name} - {encounter[i].Buffs[j].Description()}\n");
                                     Console.WriteLine("************************************************************************\n");
-                                }                               
+                                }
                                 break;
                             case "DRAW":
                                 if (hero.HasRelic("Frozen Eye"))
@@ -179,12 +179,12 @@ namespace STV
                                 EndOfPlayerTurn(hero, encounter, turnNumber);
                                 ScreenWipe();
                                 break;
-                    }
+                        }
                     Pause();
                 }
                 // Orbin Time
                 if (hero.HasRelic("Frozen Core") && hero.Orbs.Count < hero.OrbSlots)
-                    Orb.ChannelOrb(hero, encounter,1);
+                    Orb.ChannelOrb(hero, encounter, 1);
                 foreach (var orb in hero.Orbs)
                 {
                     if (orb is null) continue;
@@ -195,7 +195,7 @@ namespace STV
                 Console.WriteLine("Enemy's Turn!\n");
                 for (int i = encounter.Count - 1; i >= 0; i--)
                 {
-                    encounter[i].AddAction(encounter[i].Intent,turnNumber);
+                    encounter[i].AddAction(encounter[i].Intent, turnNumber);
                     encounter[i].EnemyAction(hero, encounter);
                     HealthChecks(hero, encounter, turnNumber);
                 }
@@ -319,7 +319,7 @@ namespace STV
             // Gambling Chip
             if (hero.HasRelic("Gambling"))
                 GamblingIsGood(hero);
-            HealthChecks(hero, encounter,0);
+            HealthChecks(hero, encounter, 0);
         }
 
         //COMBAT METHODS
@@ -330,7 +330,7 @@ namespace STV
             {
                 if (hero.FindBuff("Mayhem") is Buff mayhem && mayhem != null)
                 {
-                    for (int i = 0 ; i < mayhem.Intensity ; i++)
+                    for (int i = 0; i < mayhem.Intensity; i++)
                     {
                         Card topDraw = hero.DrawPile.Last();
                         topDraw.SetEnergyCost(0);
@@ -338,7 +338,7 @@ namespace STV
                         topDraw.MoveCard(hero.DrawPile, hero.DiscardPile);
                     }
                 }
-                if (hero.FindBuff("Simmering Fury") is Buff fury &&  fury != null)
+                if (hero.FindBuff("Simmering Fury") is Buff fury && fury != null)
                 {
                     hero.SwitchStance("Wrath");
                     hero.DrawCards(fury.Intensity);
@@ -383,12 +383,12 @@ namespace STV
                 }
                 if (hero.FindBuff("Phantasmal") is Buff phantasmal && phantasmal != null)
                 {
-                    hero.AddBuff(100, phantasmal.Intensity+1);
+                    hero.AddBuff(100, phantasmal.Intensity + 1);
                     hero.Buffs.Remove(phantasmal);
                 }
                 if (hero.FindBuff("Strength Down") is Buff flex && flex != null)
                 {
-                    hero.AddBuff(4,flex.Intensity * -1);
+                    hero.AddBuff(4, flex.Intensity * -1);
                     hero.Buffs.Remove(flex);
                 }
                 if (hero.FindBuff("Dexterity Down") is Buff speed && speed != null)
@@ -420,7 +420,7 @@ namespace STV
                             for (int i = 0; i < loop.Intensity; i++)
                                 o.PassiveEffect(hero, encounter);
                         o.PassiveEffect(hero, encounter);
-                    }  
+                    }
                     emotion.IsActive = false;
                 }
                 // Duration buff decrease for hero
@@ -449,7 +449,7 @@ namespace STV
                     break;
             }
             // Start of turn that applies to all turns
-            if (hero.FindRelic("Happy") is Relic happyFlower &&  happyFlower != null)
+            if (hero.FindRelic("Happy") is Relic happyFlower && happyFlower != null)
             {
                 happyFlower.PersistentCounter--;
                 if (happyFlower.PersistentCounter == 0)
@@ -514,12 +514,12 @@ namespace STV
             {
                 hero.SelfDamage(combust.Intensity / 5);
                 foreach (Enemy e in encounter)
-                    hero.NonAttackDamage(e,combust.Intensity, "Combust");
+                    hero.NonAttackDamage(e, combust.Intensity, "Combust");
             }
             if (hero.FindBuff("Tools of the Trade") is Buff tools && tools != null)
             {
                 hero.DrawCards(tools.Intensity);
-                for (int i = 0;i < tools.Intensity; i++)
+                for (int i = 0; i < tools.Intensity; i++)
                     Card.PickCard(hero.Hand, "discard").Discard(hero, encounter, turnNumber);
             }
             if (hero.FindBuff("Blasphemy") is Buff blas && blas != null)
@@ -537,7 +537,7 @@ namespace STV
             }
             if (hero.FindBuff("Omega") is Buff omega && omega != null)
                 foreach (Enemy e in encounter)
-                    hero.NonAttackDamage(e,omega.Intensity, omega.Name);
+                    hero.NonAttackDamage(e, omega.Intensity, omega.Name);
             if (!hero.HasRelic("Ice"))
                 hero.Energy = 0;
             if (hero.HasRelic("Orichalcum") && hero.Block == 0)
@@ -545,14 +545,14 @@ namespace STV
             if (hero.FindBuff("Plated Armor") is Buff armor && armor != null)
                 hero.GainBlock(armor.Intensity);
             if (hero.HasRelic("Cloak"))
-                hero.GainBlock(hero.Hand.Count,encounter);
+                hero.GainBlock(hero.Hand.Count, encounter);
             if (hero.FindBuff("Metallicize") is Buff metal && metal != null)
                 hero.GainBlock(metal.Intensity, encounter);
             if (hero.FindBuff("Like Water") is Buff water && water != null)
                 hero.GainBlock(water.Intensity, encounter);
             if (hero.FindBuff("Panache") is Buff panache && panache != null)
                 panache.Counter = 0;
-            if( hero.FindBuff("Regen") is Buff regen && regen != null)
+            if (hero.FindBuff("Regen") is Buff regen && regen != null)
             {
                 hero.CombatHeal(regen.Intensity);
                 regen.Intensity--;
@@ -578,7 +578,7 @@ namespace STV
                     if (hero.Hand[i].Name == "Perserverance")
                         hero.Hand[i].SetBlockAmount(hero.Hand[i].GetMagicNumber());
                     if (hero.FindBuff("Establishment") is Buff establish && establish != null)
-                        hero.Hand[i].SetEnergyCost(hero.Hand[i].EnergyCost-1);
+                        hero.Hand[i].SetEnergyCost(hero.Hand[i].EnergyCost - 1);
                     continue;
                 }
                 else if (hero.Hand[i].GetDescription().Contains("Ethereal"))
@@ -591,14 +591,15 @@ namespace STV
                         hero.Hand[i].SetEnergyCost(hero.Hand[i].EnergyCost - 1);
                 }
                 else hero.Hand[i].MoveCard(hero.Hand, hero.DiscardPile);  //Discard at end of turn (Comment to find easy for disabling)
-                hero.Hand[i].DescriptionModifier = ""; // Resetting temp Retain effects
                 if (hero.HasBuff("Retain Hand"))
                     hero.Buffs.Remove(hero.FindBuff("Retain Hand"));
             }
+            foreach (Card c in hero.Hand)
+                c.DescriptionModifier = ""; // Resetting temp Retain effects
             if (hero.HasRelic("Nilry's"))
-                hero.AddToDrawPile(new(Card.PickCard(Card.RandomCards(hero.Name, 3), "add to your drawpile")),true);
+                hero.AddToDrawPile(new(Card.PickCard(Card.RandomCards(hero.Name, 3), "add to your drawpile")), true);
             if (hero.FindBuff("Study") is Buff study && study != null)
-                for (int i = 0; i < study.Intensity; i++) 
+                for (int i = 0; i < study.Intensity; i++)
                     hero.AddToDrawPile(new(Dict.cardL[335]), true);
             foreach (Enemy e in encounter)
             {
@@ -606,7 +607,7 @@ namespace STV
                 if (e.Hp <= 0 && e.FindBuff("Corpse Explosion") is Buff corpse && corpse != null)
                     foreach (Enemy e2 in encounter)
                         e.NonAttackDamage(e2, corpse.Intensity, "Corpse Explosion");
-                HealthChecks(hero, encounter, turnNumber);
+                HealthChecks(hero, encounter, turnNumber); // need solution to foreach crashing
             }
         }
         private static void EndOfCombat(Hero hero)
@@ -648,13 +649,15 @@ namespace STV
                         hero.GainTurnEnergy(1);
                         hero.DrawCards(1);
                     }
+                    if (encounter[i].Name == "Looter")
+                        hero.GoldChange(encounter[i].Gold);
                     encounter.RemoveAt(i);
                 }
             if (hero.Hp <= 0)
             {
                 if (hero.Potions.Find(x => x.Name.Contains("Fairy")) is Potion fairy && fairy != null)
                 {
-                    fairy.UsePotion(hero, encounter,turnNumber);
+                    fairy.UsePotion(hero, encounter, turnNumber);
                 }
                 else if (hero.FindRelic("Lizard") is Relic lizard && lizard.IsActive)
                 {
@@ -663,7 +666,7 @@ namespace STV
                 }
                 else hero.Hp = 0;
             }
-            if (hero.FindRelic("Red Skull") is Relic inactiveSkull && !inactiveSkull.IsActive && hero.Hp <= hero.MaxHP / 2 )
+            if (hero.FindRelic("Red Skull") is Relic inactiveSkull && !inactiveSkull.IsActive && hero.Hp <= hero.MaxHP / 2)
             {
                 hero.AddBuff(4, 3);
                 inactiveSkull.IsActive = true;

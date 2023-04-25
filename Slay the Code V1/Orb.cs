@@ -21,6 +21,7 @@
             this.Effect = orb.Effect;
         }
 
+        // Orb methods
         public void PassiveEffect(Hero hero, List<Enemy> encounter)
         {
             int add = 0;

@@ -523,14 +523,6 @@
                 }
         }
 
-        // Randomizes Enemy Health based on a range at start of encounter
-        public int EnemyHealthSet()
-        {
-            Random r = new();
-            int maxHP = r.Next(BottomHP, TopHP);
-            return maxHP;
-        }
-
         //enemy attack intents list
         public static List<string> AttackIntents()
         {
@@ -723,19 +715,21 @@
             }
             for (int i = 0; i < encounter.Count; i++)
             {
-                encounter[i].MaxHP = encounter[i].EnemyHealthSet();
+                // Set Max HP and HP values based on ranges
+                encounter[i].MaxHP = EnemyRNG.Next(encounter[i].BottomHP, encounter[i].TopHP);
                 encounter[i].Hp = encounter[i].MaxHP;
+
+                // Special case basis for certain enemies
                 switch (encounter[i].EnemyID)
                 {
                     default:
                         break;
                     case 2 or 7:
-                        encounter[i].AddBuff(5, EnemyRNG.Next(3, 8));
+                        encounter[i].AddBuff(5, EnemyRNG.Next(3,8));
                         break;
                     case 11:
                         encounter[i].AddBuff(18, 15);
                         break;
-
                 }
             }
             return encounter;

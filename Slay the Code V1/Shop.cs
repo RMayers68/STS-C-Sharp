@@ -77,7 +77,7 @@ namespace STV
                             hero.Gold = newHeroGold;
                             hero.AddToDeck(shopCard);
                             Console.WriteLine($"You have purchased {shopCard.Name}");
-                            shopCards[shopChoice - 1] = new Card(hero.HasRelic("Courier") ? Card.RandomCards(hero.Name, 1)[0] : null);
+                            shopCards[shopChoice - 1] = new Card(hero.HasRelic("Courier") ? Card.RandomCards(hero.Name, 1)[0] : new());
                         }
                         else Console.WriteLine("You don't have enough Gold to buy this card.");
                     }

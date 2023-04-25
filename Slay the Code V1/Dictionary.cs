@@ -483,6 +483,7 @@
              * 3: Constant Intensity effect
              * 4: Counter
             */
+           
         };
         public static Dictionary<int, Buff> buffL = buffs;
 

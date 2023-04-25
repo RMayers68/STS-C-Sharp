@@ -1750,7 +1750,7 @@
                         hero.NonAttackDamage(e, panache.Intensity, panache.Name);
                 }
             }
-            if (hero.FindRelic("Orange") is Relic orange && orange.IsActive && hero.FindTurnActions(1,"Attack").Count > 0 && hero.FindTurnActions(1, "Skill").Count > 0 && hero.FindTurnActions(1, "Power").Count > 0)
+            if (hero.FindRelic("Orange") is Relic orange && orange.IsActive && hero.FindTurnActions(turnNumber,"Attack").Count > 0 && hero.FindTurnActions(1, "Skill").Count > 0 && hero.FindTurnActions(1, "Power").Count > 0)
             {
                 hero.Buffs.RemoveAll(x => !x.BuffDebuff);
                 orange.IsActive = false;
