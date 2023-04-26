@@ -1,6 +1,6 @@
 ﻿namespace STV
 {
-	public class Actor // base class
+	public abstract class Actor // base class
 	{
 		//public string Type { get; set; }
 		public string Name { get; set; }

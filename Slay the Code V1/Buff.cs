@@ -132,6 +132,9 @@
                 "Regen" => $"At the end of your turn, heal {Intensity} HP and reduce Regen by 1.",
                 "Duplication" => $"Your next {Counter} cards are played twice.",
                 "Double Damage" => $"Attacks deal double damage for {Duration} turns.",
+                "Split" => $"When its HP is at or below 50%, will split into 2 smaller Slimes with its current HP.",
+                "Spore Cloud" => $"On death, applies {Intensity} Vulnerable to the Hero.",
+                "Angry" => $"Increases Strength by {Intensity} when attacked.",
                 _ => "",
             };
         }

@@ -3,7 +3,6 @@ namespace STV
 {
     public class Shop
     {
-        public Shop() { }
 
         public static void VisitShop(Hero hero)
         {
@@ -96,7 +95,7 @@ namespace STV
                                 hero.Gold = newHeroGold;
                                 hero.Potions.Add(shopPotion);
                                 Console.WriteLine($"You have purchased {shopPotion.Name}");
-                                shopPotions[shopChoice - 8] = new Potion(hero.HasRelic("Courier") ? Potion.RandomPotion(hero) : null);
+                                shopPotions[shopChoice - 8] = new Potion(hero.HasRelic("Courier") ? Potion.RandomPotion(hero) : new());
                             }
                             else Console.WriteLine("You don't have enough Gold to buy this potion.");
                         }
@@ -115,7 +114,7 @@ namespace STV
                             hero.Gold = newHeroGold;
                             hero.AddToRelics(shopRelic);
                             Console.WriteLine($"You have purchased {shopRelic.Name}");
-                            shopRelics[shopChoice - 8] = new Relic(hero.HasRelic("Courier") ? shopChoice < 13 ? Relic.RandomRelic(hero.Name) : Relic.ShopRelic(hero.Name) : null);
+                            shopRelics[shopChoice - 8] = new Relic(hero.HasRelic("Courier") ? shopChoice < 13 ? Relic.RandomRelic(hero.Name) : Relic.ShopRelic(hero.Name) : new());
                         }
                         else Console.WriteLine("You don't have enough Gold to buy this relic.");
                     }
