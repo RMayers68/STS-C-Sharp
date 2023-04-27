@@ -1,34 +1,32 @@
 ﻿namespace STV
 {
-    public class RedLouse : Enemy
+    public class Repulsor : Enemy
     {
-        int D { get; set; }
-        public RedLouse()
+        public Repulsor()
         {
-            Name = "Red Louse";
-            MaxHP = EnemyRNG.Next(10, 15);
+            Name = "Repulsor";
+            MaxHP = EnemyRNG.Next(29, 36);
             Hp = MaxHP;
             Block = 0;
             Buffs = new();
-            AddBuff(3, EnemyRNG.Next(3, 8));
             Actions = new();
             Relics = new();
-            D = EnemyRNG.Next(5,8);
         }
 
         public override void EnemyAction(Hero hero, List<Enemy> encounter)
         {
-            if (Intent == "Bite")
-                Attack(hero, D, encounter);
-            else AddBuff(4, 3);
+            if (Intent == "Repulse")
+                for (int i = 0; i < 2; i++)
+                    hero.AddToDrawPile(new(Dict.cardL[356]), true);
+            else Attack(hero,11,encounter);
         }
 
         public override void SetEnemyIntent(int turnNumber, List<Enemy> encounter)
         {
             Intent = EnemyRNG.Next(0, 20) switch
             {
-                int i when i >= 0 && i <= 4 => "Grow",
-                _ => "Bite",
+                int i when i >= 0 && i <= 15 => "Repulse",
+                _ => "Bash",
             };
         }
     }

@@ -377,7 +377,7 @@
             { 0, new Buff("",false, 0) },
             { 1, new Buff("Vulnerable", false, 1) },
             { 2, new Buff("Weak", false, 1) },
-            { 3, new Buff("Ritual", true, 2) },
+            { 3, new Buff("Ritual", true, 3) },
             { 4, new Buff("Strength", true, 3) },
             { 5, new Buff("Curl Up", true, 3) },
             { 6, new Buff("Frail", false, 1)},
@@ -395,8 +395,8 @@
             { 18, new Buff("Thievery",true,3)},
             { 19, new Buff("Enrage",true,3)},
             { 20, new Buff("Barricade",true,3)},
-            { 21, new Buff("No Draw",false,2) },
-            { 22, new Buff("Energized",true,2) },
+            { 21, new Buff("No Draw",false,3) },
+            { 22, new Buff("Energized",true,3) },
             { 23, new Buff("Brutality",true,3) },
             { 24, new Buff("Combust",true,3) },
             { 25, new Buff("Corruption",true,3) },
@@ -418,8 +418,8 @@
             { 41, new Buff("Thorns", true,3) },
             { 42, new Buff("Choked", true,3) },
             { 43, new Buff("Corpse Explosion", true,3) },
-            { 44, new Buff("Block Next Turn", true, 2) },
-            { 45, new Buff("Draw Card", true, 2) },
+            { 44, new Buff("Block Next Turn", true, 3) },
+            { 45, new Buff("Draw Card", true, 3) },
             { 46, new Buff("Envenom", true, 3) },
             { 47, new Buff("Infinite Blades", true, 3) },
             { 48, new Buff("Noxious Fumes", true, 3) },
@@ -445,7 +445,7 @@
             { 68, new Buff("Electrodynamics", true, 3) },
             { 69, new Buff("Retain Hand", true, 3) },
             { 70, new Buff("Battle Hymn", true, 3) },
-            { 71, new Buff("Blasphemy", true, 2) },
+            { 71, new Buff("Blasphemy", true, 3) },
             { 72, new Buff("Collect", true, 1) },
             { 73, new Buff("Deva Form", true, 3) },
             { 74, new Buff("Devotion", true, 3) },
@@ -478,47 +478,23 @@
             { 101, new Buff("Split",true,3) },
             { 102, new Buff("Spore Cloud", true, 3) },
             { 103, new Buff("Angry",true,3 )},
+            { 104, new Buff("Flying",true,3 )},
+            { 105, new Buff("Hex",false,3 )},
+            { 106, new Buff("Malleable",true,3) },
+            { 107, new Buff("Painful Stabs", true,3) },
+            { 108, new Buff("Life Link", true, 3) },
+            { 109, new Buff("Explode", true, 1) },
 
             /*
              * Buff types:
              * 1: Duration effect
-             * 2: Next Turn Intensity effect
              * 3: Constant Intensity effect
              * 4: Counter
+             * Why is there no 2? Because nothing's perfect baby!
             */
            
         };
         public static Dictionary<int, Buff> buffL = buffs;
-
-        private static readonly Dictionary<int, Enemy> enemies = new()                                            // Enemies Reference Dictionary
-        {
-            { 0, new JawWorm() },
-            { 1, new Cultist() },
-            { 2, new RedLouse() },
-            { 3, new GreenLouse() },
-            { 4, new SmallAcidSlime() },
-            { 5, new MediumAcidSlime() },
-            { 6, new LargeAcidSlime() },
-            { 7, new SmallSpikeSlime() },
-            { 8, new MediumSpikeSlime() },
-            { 9, new LargeSpikeSlime()},
-            { 10, new BlueSlaver()},
-            { 11, new RedSlaver()},
-            { 12, new Looter() },
-            { 13, new FungiBeast() },
-            { 14, new SneakyGremlin() },
-            { 15, new MadGremlin() },
-            { 16, new GremlinWizard() },
-            { 17, new FatGremlin() },
-            { 18, new ShieldGremlin() },
-            { 19, new GremlinNob() },
-            { 20, new Lagavulin() },
-            { 21, new Sentry() },
-            { 22, new SlimeBoss() },
-            { 23, new Guardian() },
-            { 24, new Hexaghost() },
-        };
-        public static Dictionary<int, Enemy> enemyL = enemies;
 
         private static readonly Dictionary<int, Relic> relics = new()                                            // Relics Reference Dictionary
         {

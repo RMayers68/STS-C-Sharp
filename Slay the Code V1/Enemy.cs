@@ -15,36 +15,8 @@ namespace STV
         {
         }
 
-        public Enemy(string name, int bottomHP, int topHP, string intent)
-        {
-            this.Name = name;
-            this.MaxHP = topHP;
-            this.Hp = this.MaxHP;
-            this.TopHP = topHP + 1;
-            this.BottomHP = bottomHP;
-            this.Block = 0;
-            this.Intent = intent;
-            this.Buffs = new();
-            this.Actions = new();
-        }
-
-        public Enemy(Enemy enemy)
-        {
-            this.Name = enemy.Name;
-            this.MaxHP = enemy.TopHP;
-            this.Hp = this.MaxHP;
-            this.TopHP = enemy.TopHP;
-            this.BottomHP = enemy.BottomHP;
-            this.Block = 0;
-            this.Intent = enemy.Intent;
-            this.Buffs = new();
-            this.Actions = new();
-            this.Relics = new();
-        }
-
         public abstract void EnemyAction(Hero hero, List<Enemy> encounter);
 
-        // Enemy Exclusive methods
         public abstract void SetEnemyIntent(int turnNumber, List<Enemy> encounter);
 
         //enemy attack intents list
@@ -55,7 +27,6 @@ namespace STV
                 "Bite",
                 "Chomp",
                 "Corrosive Spit",
-                "Bite",
                 "Dark Strike",
                 "Flame Tackle",
                 "Tackle",
@@ -68,9 +39,6 @@ namespace STV
 
         public static List<Enemy> CreateEncounter(int list)
         {
-            List<Enemy> encounter = new();
-            int encounterChoice;
-
             /* Looks at specific list (Encounter Type plus Act Modifier )
              * Encounter Types:
              * 1. Debut (first 3 normal combats each floor)
@@ -87,162 +55,158 @@ namespace STV
              * Example(Act 3 Elites): 10+3 = Case 13
              */
 
-            switch (list)
+            return list switch
             {
-                default:
-                    encounterChoice = EnemyRNG.Next(4);
-                    switch (encounterChoice)
-                    {
-                        default:    
-                            encounter.Add(new JawWorm(Dict.enemyL[0]));
-                            break;
-                        case 1:     
-                            encounter.Add(new Cultist(Dict.enemyL[1]));
-                            break;
-                        case 2:     // 2 Louses (Red or Green)
-                            for (int i = 0; i < 2; i++)
-                            {
-                                if (EnemyRNG.Next(2) == 0)
-                                    encounter.Add(new RedLouse(Dict.enemyL[2]));
-                                else encounter.Add(new GreenLouse(Dict.enemyL[3]));
-                            }
-                            break;
-                        case 3:     // Small Slimes
-                            if (EnemyRNG.Next(2) == 0)
-                            {
-                                encounter.Add(new MediumSpikeSlime(Dict.enemyL[8]));
-                                encounter.Add(new SmallAcidSlime(Dict.enemyL[4]));
-                            }
-                            else
-                            {
-                                encounter.Add(new MediumAcidSlime(Dict.enemyL[5]));
-                                encounter.Add(new SmallSpikeSlime(Dict.enemyL[7]));
-                            }
-                            break;
-                    }
-                    break;
-                /*case 2:
-                    encounterChoice = EnemyRNG.Next(0, 10);
-                    switch (encounterChoice)
-                    {
-                        default:        // Gremlin Gang
-                            for (int i = 0; i < 4; i++)
-                            {
-                                encounter.Add(new Enemy(Dict.enemyL[12 + EnemyRNG.Next(5)]));
-                            }
-                            break;
-                        case 1:         // Large Slime
-                            if (EnemyRNG.Next(2) == 0)
-                                encounter.Add(new Enemy(Dict.enemyL[21]));
-                            else
-                                encounter.Add(new Enemy(Dict.enemyL[22]));
-                            break;
-                        case 2:         // Lots of Slimes
-                            for (int i = 0; i < 3; i++)
-                                encounter.Add(new Enemy(Dict.enemyL[6]));
-                            for (int i = 0; i < 2; i++)
-                                encounter.Add(new SmallAcidSlime(Dict.enemyL[5]));
-                            break;
-                        case 3:         // Blue Slaver
-                            encounter.Add(new Enemy(Dict.enemyL[8]));
-                            break;
-                        case 4:         // Red Slaver
-                            encounter.Add(new Enemy(Dict.enemyL[9]));
-                            break;
-                        case 5:         // 3 Louses
-                            for (int i = 0; i < 3; i++)
-                            {
-                                encounter.Add(new Enemy(Dict.enemyL[2 + EnemyRNG.Next(2)]));
-                            }
-                            break;
-                        case 6:         // Fungi Beasts
-                            for (int i = 0; i < 2; i++)
-                                encounter.Add(new Enemy(Dict.enemyL[10]));
-                            break;
-                        case 7:         // Exordium Thugs
-                            encounter.Add(new Enemy(Dict.enemyL[2 + EnemyRNG.Next(4)]));
-                            switch (EnemyRNG.Next(4))
-                            {
-                                default:
-                                    encounter.Add(new Enemy(Dict.enemyL[11]));
-                                    break;
-                                case 1:
-                                    encounter.Add(new Enemy(Dict.enemyL[1]));
-                                    break;
-                                case 2:
-                                    encounter.Add(new Enemy(Dict.enemyL[8]));
-                                    break;
-                                case 3:
-                                    encounter.Add(new Enemy(Dict.enemyL[9]));
-                                    break;
-                            }
-                            break;
-                        case 8:         // Exordium Wildlife
-                            if (EnemyRNG.Next(2) == 0)
-                                encounter.Add(new Enemy(Dict.enemyL[0]));
-                            else encounter.Add(new Enemy(Dict.enemyL[10]));
-                            encounter.Add(new Enemy(Dict.enemyL[2 + EnemyRNG.Next(4)]));
-                            break;
-                        case 9:         //Looter
-                            encounter.Add(new Enemy(Dict.enemyL[11]));
-                            break;
-                    }
-                    break;
-                case 3:
-                    encounterChoice = EnemyRNG.Next(3);
-                    switch (encounterChoice)
-                    {
-                        default:     // Lagavulin
-                            encounter.Add(new Enemy(Dict.enemyL[18]));
-                            break;
-                        case 1:     // Gremlin Nob
-                            encounter.Add(new Enemy(Dict.enemyL[17]));
-                            break;
-                        case 2:     // 3 Sentries
-                            for (int i = 0; i < 3; i++)
-                                encounter.Add(new Enemy(Dict.enemyL[19]));
-                            break;
-                    }
-                    break;
-                case 4:
-                    encounterChoice = EnemyRNG.Next(3);
-                    switch (encounterChoice)
-                    {
-                        default:     // Slime Boss
-                            encounter.Add(new Enemy(Dict.enemyL[20]));
-                            break;
-                        case 1:     // The Guardian
-                            encounter.Add(new Enemy(Dict.enemyL[23]));
-                            break;
-                        case 2:     // Hexaghost
-                            encounter.Add(new Enemy(Dict.enemyL[24]));
-                            break;
-                    }
-                    break;
-                case 5:
-                    break;
-                case 6:
-                    break;
-                case 7:
-                    break;
-                case 8:
-                    break;
-                case 9:
-                    break;
-                case 10:
-                    break;
-                case 11:
-                    break;
-                case 12:
-                    break;
-                case 13:
-                    break;
-                case 14:
-                    break;
-                case 15:
-                    break;*/
-            }
-            return encounter;
+                1 => EnemyRNG.Next(4) switch
+                {
+                    0 => new() { new JawWorm() },
+                    1 => new() { new Cultist() },
+                    2 => new() { RandomLouse(), RandomLouse() },
+                    _ => new() { RandomMedSlime(), RandomSmallSlime() },
+                },
+                2 => EnemyRNG.Next(10) switch
+                {
+                    0 => new() { RandomGremlin(),RandomGremlin(), RandomGremlin(), RandomGremlin() },
+                    1 => new() { RandomLargeSlime() },
+                    2 => new() { new SmallSpikeSlime(), new SmallAcidSlime(), new SmallSpikeSlime(), new SmallSpikeSlime(), new SmallAcidSlime() },
+                    3 => new() { new BlueSlaver() },
+                    4 => new() { new RedSlaver() },
+                    5 => new() { new FungiBeast(), new FungiBeast() },
+                    6 => new() { RandomLouse(), RandomLouse(), RandomLouse() },
+                    7 => new() { RandomExordium(), RandomThug() },
+                    8 => new() { RandomWildlife(), RandomExordium() },
+                    _ => new() { new Looter() },
+                },
+                3 => EnemyRNG.Next(3) switch
+                {
+                    0 => new() { new Lagavulin() },
+                    1 => new() { new GremlinNob() },
+                    _ => new() { new Sentry(), new Sentry(), new Sentry() },
+                },
+                4 => EnemyRNG.Next(3) switch
+                {
+                    0 => new() { new SlimeBoss() },
+                    1 => new() { new Guardian() },
+                    _ => new() { new Hexaghost() },
+                },
+                5 => EnemyRNG.Next(3) switch
+                {
+                    _ => new() { new SmallAcidSlime(), },
+                },
+                6 => EnemyRNG.Next(5) switch
+                {
+                    0 => new() { new SphericGuardian() },
+                    1 => new() { new Chosen() },
+                    2 => new() { new Byrd(), new Byrd(), new Byrd() },
+                    3 => new() { new ShelledParasite() },
+                    _ => new() { new Looter(), new Mugger() },
+                },
+                7 => EnemyRNG.Next(15) switch
+                {
+                    0 => new() { new Chosen(), new Byrd() },
+                    1 => new() { new Chosen(), new Cultist() },
+                    2 => new() { new Sentry(), new SphericGuardian() },
+                    3 or 4 or 5 => new() { new SnakePlant() },
+                    6 or 7 => new() { new Snecko() },
+                    8 or 9 => new() { new Cultist(), new Cultist(), new Cultist() },
+                    9 or 10 => new() { new ShelledParasite(), new FungiBeast()},
+                    _ => new() { new Centurion(), new Mystic() },
+                },
+                8 => EnemyRNG.Next(3) switch
+                {
+                    0 => new() { new BookOfStabbing() },
+                    1 => new() { new GremlinLeader(), RandomGremlin(), RandomGremlin() },
+                    _ => new() { new BlueSlaver(), new Taskmaster(), new RedSlaver() },
+                },
+                9 => EnemyRNG.Next(3) switch
+                {
+                    0 => new() { new BronzeAutomaton() },
+                    1 => new() { new Champ() },
+                    _ => new() { new Collector() },
+                },
+                10 => EnemyRNG.Next(3) switch
+                {
+                    _ => new() { new SmallAcidSlime(), },
+                },
+            };
+        }
+
+        private static Enemy RandomLouse()
+        {
+            return EnemyRNG.Next(2) switch
+            {
+                0 => new RedLouse(),
+                _ => new GreenLouse(),
+            };
+        }
+
+        private static Enemy RandomLargeSlime()
+        {
+            return EnemyRNG.Next(2) switch
+            {
+                0 => new LargeAcidSlime(),
+                _ => new LargeSpikeSlime(),
+            };
+        }
+
+        private static Enemy RandomMedSlime()
+        {
+            return EnemyRNG.Next(2) switch
+            {
+                0 => new MediumAcidSlime(),
+                _ => new MediumSpikeSlime(),
+            };
+        }
+
+        private static Enemy RandomSmallSlime()
+        {
+            return EnemyRNG.Next(2) switch
+            {
+                0 => new SmallAcidSlime(),
+                _ => new SmallSpikeSlime(),
+            };
+        }
+
+        private static Enemy RandomExordium()
+        {
+            return EnemyRNG.Next(3) switch
+            {
+                0 => RandomLouse(),
+                1 => new MediumAcidSlime(),
+                _ => new MediumSpikeSlime(),
+            };
+        }
+
+        private static Enemy RandomThug()
+        {
+            return EnemyRNG.Next(4) switch
+            {
+                0 => new Looter(),
+                1 => new Cultist(),
+                2 => new RedSlaver(),
+                _ => new BlueSlaver(),
+            };
+        }
+
+        private static Enemy RandomWildlife()
+        {
+            return EnemyRNG.Next(2) switch
+            {
+                0 => new FungiBeast(),
+                _ => new JawWorm(),
+            };
+        }
+
+        public static Enemy RandomGremlin()
+        {
+            return EnemyRNG.Next(5) switch
+            {
+                0 => new SneakyGremlin(),
+                1 => new MadGremlin(),
+                2 => new GremlinWizard(),
+                3 => new FatGremlin(),
+                _ => new ShieldGremlin(),
+            };
         }
     }
 }

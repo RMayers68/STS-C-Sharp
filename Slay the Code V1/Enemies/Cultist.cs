@@ -4,24 +4,17 @@
     {
         public Cultist()
         {
-            this.Name = "Cultist";
-            this.TopHP = 55;
-            this.BottomHP = 48;
-            this.Intents = new() { "Incantation", "Dark Strike" };
+            Name = "Cultist";
+            TopHP = 55;
+            BottomHP = 48;
+            Intents = new() { "Incantation", "Dark Strike" };
+            MaxHP = EnemyRNG.Next(BottomHP, TopHP);
+            Hp = MaxHP;
+            Block = 0;
+            Buffs = new();
+            Actions = new();
+            Relics = new();
         }
-
-        public Cultist(Enemy e)
-        {
-            this.Name = e.Name;
-            this.MaxHP = EnemyRNG.Next(e.BottomHP, e.TopHP);
-            this.Hp = this.MaxHP;
-            this.Block = 0;
-            this.Intents = e.Intents;
-            this.Buffs = new();
-            this.Actions = new();
-            this.Relics = new();
-        }
-
         public override void EnemyAction(Hero hero, List<Enemy> encounter)
         {
             if (Intent == "Dark Strike")

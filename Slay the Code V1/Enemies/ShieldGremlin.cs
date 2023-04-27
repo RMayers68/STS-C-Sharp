@@ -4,22 +4,16 @@
     {
         public ShieldGremlin()
         {
-            this.Name = "Shield Gremlin";
-            this.TopHP = 16;
-            this.BottomHP = 12;
-            this.Intents = new() { "Protect" , "Shield Bash" };
-        }
-
-        public ShieldGremlin(Enemy e)
-        {
-            this.Name = e.Name;
-            this.MaxHP = EnemyRNG.Next(e.BottomHP, e.TopHP);
-            this.Hp = this.MaxHP;
-            this.Block = 0;
-            this.Intents = e.Intents;
-            this.Buffs = new();
-            this.Actions = new();
-            this.Relics = new();
+            Name = "Shield Gremlin";
+            TopHP = 16;
+            BottomHP = 12;
+            Intents = new() { "Protect" , "Shield Bash" };
+            MaxHP = EnemyRNG.Next(BottomHP, TopHP);
+            Hp = MaxHP;
+            Block = 0;
+            Buffs = new();
+            Actions = new();
+            Relics = new();
         }
 
         public override void EnemyAction(Hero hero, List<Enemy> encounter)

@@ -4,22 +4,16 @@
     {
         public FatGremlin()
         {
-            this.Name = "Fat Gremlin";
-            this.TopHP = 18;
-            this.BottomHP = 13;
-            this.Intents = new() { "Smash" };
-        }
-
-        public FatGremlin(Enemy e)
-        {
-            this.Name = e.Name;
-            this.MaxHP = EnemyRNG.Next(e.BottomHP, e.TopHP);
-            this.Hp = this.MaxHP;
-            this.Block = 0;
-            this.Intents = e.Intents;
-            this.Buffs = new();
-            this.Actions = new();
-            this.Relics = new();
+            Name = "Fat Gremlin";
+            TopHP = 18;
+            BottomHP = 13;
+            Intents = new() { "Smash" };
+            MaxHP = EnemyRNG.Next(BottomHP, TopHP);
+            Hp = MaxHP;
+            Block = 0;
+            Buffs = new();
+            Actions = new();
+            Relics = new();
         }
 
         public override void EnemyAction(Hero hero, List<Enemy> encounter)

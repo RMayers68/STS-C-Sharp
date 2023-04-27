@@ -4,22 +4,13 @@
     {
         public MediumSpikeSlime()
         {
-            this.Name = "Spike Slime (M)";
-            this.TopHP = 33;
-            this.BottomHP = 28;
-            this.Intents = new() { "Lick", " Flame Tackle" };
-        }
-
-        public MediumSpikeSlime(Enemy e)
-        {
-            this.Name = e.Name;
-            this.MaxHP = EnemyRNG.Next(e.BottomHP, e.TopHP);
-            this.Hp = this.MaxHP;
-            this.Block = 0;
-            this.Intents = e.Intents;
-            this.Buffs = new();
-            this.Actions = new();
-            this.Relics = new();
+            Name = "Spike Slime (M)";
+            MaxHP = EnemyRNG.Next(28, 33);
+            Hp = MaxHP;
+            Block = 0;
+            Buffs = new();
+            Actions = new();
+            Relics = new();
         }
 
         public override void EnemyAction(Hero hero, List<Enemy> encounter)

@@ -1,30 +1,29 @@
 ﻿namespace STV
 {
-    public class MadGremlin : Enemy
+    public class Taskmaster : Enemy
     {
-        public MadGremlin()
+        public Taskmaster()
         {
-            Name = "Mad Gremlin";
-            TopHP = 25;
-            BottomHP = 20;
-            Intents = new() { "Scratch" };
+            Name = "Taskmaster";
+            TopHP = 61;
+            BottomHP = 54;
+            Intents = new() { "Scouring Whip" };
             MaxHP = EnemyRNG.Next(BottomHP, TopHP);
             Hp = MaxHP;
             Block = 0;
             Buffs = new();
-            AddBuff(103, 1);
             Actions = new();
             Relics = new();
         }
-
         public override void EnemyAction(Hero hero, List<Enemy> encounter)
         {
-            Attack(hero, 4, encounter);
+            Attack(hero, 7, encounter);
+            hero.DiscardPile.Add(new(Dict.cardL[357]));
         }
 
         public override void SetEnemyIntent(int turnNumber, List<Enemy> encounter)
         {
-            Intent = Intents.First();
+            Intent = "Scouring Whip";
         }
     }
 }

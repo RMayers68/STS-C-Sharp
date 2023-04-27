@@ -4,23 +4,17 @@
     {
         public LargeSpikeSlime()
         {
-            this.Name = "Spike Slime (L)";
-            this.TopHP = 71;
-            this.BottomHP = 64;
-            this.Intents = new() { "Split", "Lick", "Flame Tackle" };
-        }
-
-        public LargeSpikeSlime(Enemy e)
-        {
-            this.Name = e.Name;
-            this.MaxHP = EnemyRNG.Next(e.BottomHP, e.TopHP);
-            this.Hp = this.MaxHP;
-            this.Block = 0;
-            this.Intents = e.Intents;
-            this.Buffs = new();
+            Name = "Spike Slime (L)";
+            TopHP = 71;
+            BottomHP = 64;
+            Intents = new() { "Split", "Lick", "Flame Tackle" };
+            MaxHP = EnemyRNG.Next(BottomHP, TopHP);
+            Hp = MaxHP;
+            Block = 0;
+            Buffs = new();
             AddBuff(101, 1);
-            this.Actions = new();
-            this.Relics = new();
+            Actions = new();
+            Relics = new();
         }
 
         public override void EnemyAction(Hero hero, List<Enemy> encounter)

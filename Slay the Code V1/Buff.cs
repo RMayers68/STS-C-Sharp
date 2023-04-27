@@ -125,7 +125,7 @@
                 "Flame Barrier" => $"When attacked this turn, deals {Intensity} damage back.",
                 "Free Attack" => $"The next {Counter} Attacks you play costs 0.",
                 "Fire Breathing" => $"Whenever you draw a Status or Curse card, deal {Intensity} damage to ALL enemies.",
-                "Panache" => $"If you play {5-Counter} more cards this turn, deal {Intensity} damage to all enemies.",
+                "Panache" => $"If you play {5 - Counter} more cards this turn, deal {Intensity} damage to all enemies.",
                 "Omega" => $"At the end of your turn, deal {Intensity} damage to ALL enemies.",
                 "Plated Armor" => $"At the end of your turn, gain {Intensity} Block. Receiving unblocked attack damage reduces Plated Armor by 1.",
                 "Dexterity Down" => $"Lose {Intensity} Dexterity at the end of the turn.",
@@ -135,6 +135,12 @@
                 "Split" => $"When its HP is at or below 50%, will split into 2 smaller Slimes with its current HP.",
                 "Spore Cloud" => $"On death, applies {Intensity} Vulnerable to the Hero.",
                 "Angry" => $"Increases Strength by {Intensity} when attacked.",
+                "Flying" => $"Takes 50% less damage on the next {Intensity} attacks. Removed when attacked {Intensity} times in a single turn.",
+                "Hex" => $"Whenever you play a non-Attack card, add {Intensity} Dazed to your draw pile.",
+                "Malleable" => $"Upon receiving attack damage, gains {Intensity} Block. Block increments each time Malleable is triggered. Resets every turn.",
+                "Painful Stabs" => $"Shuffle 1 Wound into your Discard Pile each time you receive unblocked attack damage.",
+                "Life Link" => $"On its second turn after its HP reaches 0, revives with half HP if other Darklings are alive.",
+                "Explode" => $"Dies and deals 30 damage in {Duration} turns.",
                 _ => "",
             };
         }
@@ -171,6 +177,7 @@
 
         public bool IntensityAtZero()
         {
+            Intensity--;
             if (Intensity == 0)
                 return true;
             else return false;

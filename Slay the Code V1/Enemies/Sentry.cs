@@ -2,25 +2,18 @@
 {
     public class Sentry : Enemy
     {
-        public Sentry()
+        bool MiddleSentry { get; set; }
+        public Sentry(bool Middle = false)
         {
-            this.Name = "Sentry";
-            this.TopHP = 43;
-            this.BottomHP = 38;
-            this.Intents = new() { "Beam", "Bolt" };
-        }
-
-        public Sentry(Enemy e)
-        {
-            this.Name = e.Name;
-            this.MaxHP = EnemyRNG.Next(e.BottomHP, e.TopHP);
-            this.Hp = this.MaxHP;
-            this.Block = 0;
-            this.Intents = e.Intents;
-            this.Buffs = new();
+            Name = "Sentry";
+            MaxHP = EnemyRNG.Next(38, 43);
+            Hp = MaxHP;
+            Block = 0;
+            Buffs = new();
             AddBuff(8, 1);
-            this.Actions = new();
-            this.Relics = new();
+            Actions = new();
+            Relics = new();
+            MiddleSentry = Middle;
         }
 
         public override void EnemyAction(Hero hero, List<Enemy> encounter)
@@ -36,17 +29,18 @@
 
         public override void SetEnemyIntent(int turnNumber, List<Enemy> encounter)
         {
-            if (turnNumber == 0 && encounter.Count == 3)
+            if (turnNumber == 0)
             {
-                encounter[0].Intent = "Bolt";
-                encounter[1].Intent = "Beam";
-                encounter[2].Intent = "Bolt";
+                if (MiddleSentry)
+                    Intent = "Beam";
+                else Intent = "Bolt";
             }
-            else if (turnNumber == 1)
-                Intent = "Bolt";
-            if (Intent == "Bolt")
-                Intent = "Beam";
-            else Intent = "Bolt";
+            else
+            {
+                if (Intent == "Bolt")
+                    Intent = "Beam";
+                else Intent = "Bolt";
+            }
         }
     }
 }

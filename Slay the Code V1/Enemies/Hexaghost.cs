@@ -4,20 +4,14 @@
     {
         public Hexaghost()
         {
-            this.Name = "Hexaghost";
-            this.Intents = new() { "Activate", "Tackle", "Sear", "Inflame", "Inferno" };
-        }
-
-        public Hexaghost(Enemy e)
-        {
-            this.Name = e.Name;
-            this.MaxHP = 250;
-            this.Hp = this.MaxHP;
-            this.Block = 0;
-            this.Intents = e.Intents;
-            this.Buffs = new();
-            this.Actions = new();
-            this.Relics = new();
+            Name = "Hexaghost";
+            Intents = new() { "Activate", "Tackle", "Sear", "Inflame", "Inferno" };
+            MaxHP = 250;
+            Hp = MaxHP;
+            Block = 0;
+            Buffs = new();
+            Actions = new();
+            Relics = new();
         }
 
         public override void EnemyAction(Hero hero, List<Enemy> encounter)

@@ -2,31 +2,24 @@
 {
     public class GreenLouse : Enemy
     {
+        int D { get; set; }
         public GreenLouse()
         {
-            this.Name = "Green Louse";
-            this.TopHP = 18;
-            this.BottomHP = 11;
-            this.Intents = new() { "Bite", "Spit Web" };
-        }
-
-        public GreenLouse(Enemy e)
-        {
-            this.Name = e.Name;
-            this.MaxHP = EnemyRNG.Next(e.BottomHP, e.TopHP);
-            this.Hp = this.MaxHP;
-            this.Block = 0;
-            this.Intents = e.Intents;
-            this.Buffs = new();
+            Name = "Green Louse";
+            MaxHP = EnemyRNG.Next(11, 18);
+            Hp = MaxHP;
+            Block = 0;
+            Buffs = new();
             AddBuff(3, EnemyRNG.Next(3, 8));
-            this.Actions = new();
-            this.Relics = new();
+            Actions = new();
+            Relics = new();
+            D = EnemyRNG.Next(5, 8);
         }
 
         public override void EnemyAction(Hero hero, List<Enemy> encounter)
         {
             if (Intent == "Bite")
-                Attack(hero, EnemyRNG.Next(5, 8), encounter);
+                Attack(hero, D, encounter);
             else AddBuff(4, 3);
         }
 

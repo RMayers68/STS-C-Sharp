@@ -4,22 +4,15 @@
     {
         public SlimeBoss()
         {
-            this.Name = "Slime Boss";
-
-            this.Intents = new() { "Goop Spray", "Preparing", "Slam", "Split" };
-        }
-
-        public SlimeBoss(Enemy e)
-        {
-            this.Name = e.Name;
-            this.MaxHP = 140;
-            this.Hp = this.MaxHP;
-            this.Block = 0;
-            this.Intents = e.Intents;
-            this.Buffs = new();
+            Name = "Slime Boss";
+            Intents = new() { "Goop Spray", "Preparing", "Slam", "Split" };
+            MaxHP = 140;
+            Hp = MaxHP;
+            Block = 0;
+            Buffs = new();
             AddBuff(101, 1);
-            this.Actions = new();
-            this.Relics = new();
+            Actions = new();
+            Relics = new();
         }
 
         public override void EnemyAction(Hero hero, List<Enemy> encounter)

@@ -4,22 +4,16 @@
     {
         public GremlinWizard()
         {
-            this.Name = "Gremlin Wizard";
-            this.TopHP = 26;
-            this.BottomHP = 23;
-            this.Intents = new() { "Charging" , "Ultimate Blast" };
-        }
-
-        public GremlinWizard(Enemy e)
-        {
-            this.Name = e.Name;
-            this.MaxHP = EnemyRNG.Next(e.BottomHP, e.TopHP);
-            this.Hp = this.MaxHP;
-            this.Block = 0;
-            this.Intents = e.Intents;
-            this.Buffs = new();
-            this.Actions = new();
-            this.Relics = new();
+            Name = "Gremlin Wizard";
+            TopHP = 26;
+            BottomHP = 23;
+            Intents = new() { "Charging" , "Ultimate Blast" };
+            MaxHP = EnemyRNG.Next(BottomHP, TopHP);
+            Hp = MaxHP;
+            Block = 0;
+            Buffs = new();
+            Actions = new();
+            Relics = new();
         }
 
         public override void EnemyAction(Hero hero, List<Enemy> encounter)

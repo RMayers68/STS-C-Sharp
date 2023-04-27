@@ -4,22 +4,16 @@
     {
         public GremlinNob()
         {
-            this.Name = "Gremlin Nob";
-            this.TopHP = 87;
-            this.BottomHP = 82;
-            this.Intents = new() { "Bellow", "Rush", "Skull Bash" };
-        }
-
-        public GremlinNob(Enemy e)
-        {
-            this.Name = e.Name;
-            this.MaxHP = EnemyRNG.Next(e.BottomHP, e.TopHP);
-            this.Hp = this.MaxHP;
-            this.Block = 0;
-            this.Intents = e.Intents;
-            this.Buffs = new();
-            this.Actions = new();
-            this.Relics = new();
+            Name = "Gremlin Nob";
+            TopHP = 87;
+            BottomHP = 82;
+            Intents = new() { "Bellow", "Rush", "Skull Bash" };
+            MaxHP = EnemyRNG.Next(BottomHP, TopHP);
+            Hp = MaxHP;
+            Block = 0;
+            Buffs = new();
+            Actions = new();
+            Relics = new();
         }
 
         public override void EnemyAction(Hero hero, List<Enemy> encounter)

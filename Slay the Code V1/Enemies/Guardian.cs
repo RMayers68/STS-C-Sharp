@@ -4,21 +4,15 @@
     {
         public Guardian()
         {
-            this.Name = "Guardian";
-            this.Intents = new() { "Charging Up", "Fierce Bash", "Vent Steam", "Whirlwind", "Defensive Mode", "Roll Attack", "Twin Slam" };
-        }
-
-        public Guardian(Enemy e)
-        {
-            this.Name = e.Name;
-            this.MaxHP = 250;
-            this.Hp = this.MaxHP;
-            this.Block = 0;
-            this.Intents = e.Intents;
-            this.Buffs = new();
+            Name = "Guardian";
+            Intents = new() { "Charging Up", "Fierce Bash", "Vent Steam", "Whirlwind", "Defensive Mode", "Roll Attack", "Twin Slam" };
+            MaxHP = 250;
+            Hp = MaxHP;
+            Block = 0;
+            Buffs = new();
             AddBuff(16, 30);
-            this.Actions = new();
-            this.Relics = new();
+            Actions = new();
+            Relics = new();
         }
 
         public override void EnemyAction(Hero hero, List<Enemy> encounter)

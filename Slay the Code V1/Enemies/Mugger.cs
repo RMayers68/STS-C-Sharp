@@ -1,12 +1,12 @@
 ﻿namespace STV
 {
-    public class Looter : Enemy
+    public class Mugger : Enemy
     {
-        public Looter()
+        public Mugger()
         {
-            Name = "Looter";
-            TopHP = 49;
-            BottomHP = 44;
+            Name = "Mugger";
+            TopHP = 53;
+            BottomHP = 48;
             Intents = new() { "Lunge", "Mug" };
             MaxHP = EnemyRNG.Next(BottomHP, TopHP);
             Hp = MaxHP;
@@ -20,11 +20,11 @@
         public override void EnemyAction(Hero hero, List<Enemy> encounter)
         {
             if (Intent == "Lunge")
-                Attack(hero, 12, encounter);
+                Attack(hero, 16, encounter);
             else if (Intent == "Mug")
                 Attack(hero, 10, encounter);
             else if (Intent == "Smoke Bomb")
-                GainBlock(6);
+                GainBlock(11);
             if (Intent == "Lunge" || Intent == "Mug")
             {
                 hero.GoldChange(-15);

@@ -4,23 +4,17 @@
     {
         public FungiBeast()
         {
-            this.Name = "Fungi Beast";
-            this.TopHP = 29;
-            this.BottomHP = 24;
-            this.Intents = new() { "Bite", "Grow" };
-        }
-
-        public FungiBeast(Enemy e)
-        {
-            this.Name = e.Name;
-            this.MaxHP = EnemyRNG.Next(e.BottomHP, e.TopHP);
-            this.Hp = this.MaxHP;
-            this.Block = 0;
-            this.Intents = e.Intents;
-            this.Buffs = new();
+            Name = "Fungi Beast";
+            TopHP = 29;
+            BottomHP = 24;
+            Intents = new() { "Bite", "Grow" };
+            MaxHP = EnemyRNG.Next(BottomHP, TopHP);
+            Hp = MaxHP;
+            Block = 0;
+            Buffs = new();
             AddBuff(102, 2);
-            this.Actions = new();
-            this.Relics = new();
+            Actions = new();
+            Relics = new();
         }
 
         public override void EnemyAction(Hero hero, List<Enemy> encounter)

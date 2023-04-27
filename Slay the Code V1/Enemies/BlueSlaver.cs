@@ -4,22 +4,16 @@
     {
         public BlueSlaver()
         {
-            this.Name = "Blue Slaver";
-            this.TopHP = 51;
-            this.BottomHP = 46;
-            this.Intents = new() { "Stab", "Rake" };
-        }
-
-        public BlueSlaver(Enemy e)
-        {
-            this.Name = e.Name;
-            this.MaxHP = EnemyRNG.Next(e.BottomHP, e.TopHP);
-            this.Hp = this.MaxHP;
-            this.Block = 0;
-            this.Intents = e.Intents;
-            this.Buffs = new();
-            this.Actions = new();
-            this.Relics = new();
+            Name = "Blue Slaver";
+            TopHP = 51;
+            BottomHP = 46;
+            Intents = new() { "Stab", "Rake" };
+            MaxHP = EnemyRNG.Next(BottomHP, TopHP);
+            Hp = MaxHP;
+            Block = 0;
+            Buffs = new();
+            Actions = new();
+            Relics = new();
         }
 
         public override void EnemyAction(Hero hero, List<Enemy> encounter)

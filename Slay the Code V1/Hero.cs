@@ -120,22 +120,6 @@
             HealHP(heal);
         }
 
-        public void HealHP(int heal)
-        {
-            if (Relics.Find(x => x.Name == "Mark of the Bloom") != null)
-                Console.WriteLine("Your attempt at healing failed due to the Mark of the Bloom.");
-            else
-            {
-                Hp += heal;
-                if (Hp > MaxHP)
-                {
-                    heal = Hp + heal - MaxHP;
-                    Hp = MaxHP;
-                }                   
-                Console.WriteLine($"You have healed {heal} HP and are now at {Hp}/{MaxHP} HP!");
-            }
-        }
-
         public int DetermineTarget(List<Enemy> encounter)
         {
             int x = 0;

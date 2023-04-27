@@ -4,22 +4,16 @@
     {
         public JawWorm()
         {
-            this.Name = "Jaw Worm";
-            this.TopHP = 45;
-            this.BottomHP = 40;
-            this.Intents = new() { "Chomp", "Thrash", "Bellow" };
-        }
-
-        public JawWorm(Enemy e)
-        {
-            this.Name = e.Name;
-            this.MaxHP = EnemyRNG.Next(e.BottomHP, e.TopHP);
-            this.Hp = this.MaxHP;
-            this.Block = 0;
-            this.Intents = e.Intents;
-            this.Buffs = new();
-            this.Actions = new();
-            this.Relics = new();
+            Name = "Jaw Worm";
+            TopHP = 45;
+            BottomHP = 40;
+            MaxHP = EnemyRNG.Next(BottomHP, TopHP);
+            Hp = MaxHP;
+            Intents = new() { "Chomp", "Thrash", "Bellow" };
+            Block = 0;
+            Buffs = new();
+            Actions = new();
+            Relics = new();
         }
 
         public override void EnemyAction(Hero hero, List<Enemy> encounter)

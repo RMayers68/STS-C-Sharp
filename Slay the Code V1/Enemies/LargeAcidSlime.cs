@@ -4,23 +4,17 @@
     {
         public LargeAcidSlime()
         {
-            this.Name = "Acid Slime (L)";
-            this.TopHP = 70;
-            this.BottomHP = 65;
-            this.Intents = new() { "Corrosive Spit", "Lick", "Tackle" };
-        }
-
-        public LargeAcidSlime(Enemy e)
-        {
-            this.Name = e.Name;
-            this.MaxHP = EnemyRNG.Next(e.BottomHP, e.TopHP);
-            this.Hp = this.MaxHP;
-            this.Block = 0;
-            this.Intents = e.Intents;
-            this.Buffs = new();
+            Name = "Acid Slime (L)";
+            TopHP = 70;
+            BottomHP = 65;
+            Intents = new() { "Corrosive Spit", "Lick", "Tackle" };
+            MaxHP = EnemyRNG.Next(BottomHP, TopHP);
+            Hp = MaxHP;
+            Block = 0;
+            Buffs = new();
             AddBuff(101, 1);
-            this.Actions = new();
-            this.Relics = new();
+            Actions = new();
+            Relics = new();
         }
 
         public override void EnemyAction(Hero hero, List<Enemy> encounter)
