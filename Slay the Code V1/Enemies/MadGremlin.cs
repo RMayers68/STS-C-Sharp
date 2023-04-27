@@ -2,7 +2,7 @@
 {
     public class MadGremlin : Enemy
     {
-        public MadGremlin()
+        public MadGremlin(bool minion = false)
         {
             Name = "Mad Gremlin";
             MaxHP = EnemyRNG.Next(20, 25);
@@ -10,6 +10,8 @@
             Block = 0;
             Buffs = new();
             AddBuff(103, 1);
+            if (minion)
+                AddBuff(118, 1);
             Actions = new();
             Relics = new();
         }

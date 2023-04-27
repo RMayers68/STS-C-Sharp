@@ -18,7 +18,7 @@
         {
             if (Intent == "Rally!")
                 for (int i = 0; i < 2; i++)
-                    encounter.Add(RandomGremlin());
+                    encounter.Add(RandomGremlin(true));
             else if (Intent == "Encourage")
                 foreach (Enemy e in encounter)
                 {

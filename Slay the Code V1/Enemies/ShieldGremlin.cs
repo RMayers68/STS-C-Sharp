@@ -2,13 +2,15 @@
 {
     public class ShieldGremlin : Enemy
     {
-        public ShieldGremlin()
+        public ShieldGremlin(bool minion = false)
         {
             Name = "Shield Gremlin";
             MaxHP = EnemyRNG.Next(12, 16);
             Hp = MaxHP;
             Block = 0;
             Buffs = new();
+            if (minion)
+                AddBuff(118, 1);
             Actions = new();
             Relics = new();
         }

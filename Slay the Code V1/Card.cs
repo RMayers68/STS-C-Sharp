@@ -1256,8 +1256,8 @@
                     hero.ExhaustPile.Remove(exhume);
                     hero.AddToHand(exhume);
                     break;
-                case "Feed":                                                //minion buff add
-                    if (encounter[target].Hp <= 0)
+                case "Feed":                                            
+                    if (encounter[target].Hp <= 0 && !encounter[target].HasBuff("Minion"))
                         hero.SetMaxHP(MagicNumber);
                     break;
                 case "Havoc":
@@ -1379,8 +1379,11 @@
                     hero.Orbs[0].Evoke(hero, encounter);
                     hero.Orbs.RemoveAt(0);
                     break;
-                case "Genetic Algorithm":                               // This card requires updates to combat Deck vs perma Deck to function properly
-                    BlockAmount += MagicNumber;
+                case "Genetic Algorithm":
+                    {
+                        hero.Deck.FindAll(x => x.Name == Name).Find(x => x.BlockAmount == BlockAmount).BlockAmount += MagicNumber;
+                        BlockAmount += MagicNumber;
+                    }                    
                     break;
                 case "Hologram":
                     Card hologram = PickCard(hero.DiscardPile, "add into your hand");
@@ -1612,7 +1615,7 @@
                         hero.AddToHand(new(RandomCard("Colorless")));              
                     break;
                 case "Hand of Greed":
-                    if (encounter[target].Hp <= 0)
+                    if (encounter[target].Hp <= 0 && !encounter[target].HasBuff("Minion"))
                         hero.GoldChange(MagicNumber);
                     break;
                 case "Madness":
@@ -1630,9 +1633,12 @@
                     for (int i = 0; i < 3; i++)
                         PickCard(hero.Hand, "exhaust").Exhaust(hero, encounter, hero.Hand);
                     break;
-                case "Ritual Dagger":                                                       // This card requires updates to combat Deck vs perma Deck to function properly
-                    if (encounter[target].Hp <= 0)
-                        AttackDamage += 3;
+                case "Ritual Dagger":                                              
+                    if (encounter[target].Hp <= 0 && !encounter[target].HasBuff("Minion"))
+                    {
+                        hero.Deck.FindAll(x => x.Name == Name).Find(x => x.AttackDamage == AttackDamage).AttackDamage += MagicNumber;
+                        AttackDamage += MagicNumber;
+                    }                       
                     break;
                 case "Secret Technique":
                     List<Card> secretSkill = new();

@@ -2,13 +2,15 @@
 {
     public class Cultist : Enemy
     {
-        public Cultist()
+        public Cultist(bool minion = false)
         {
             Name = "Cultist";
             MaxHP = EnemyRNG.Next(48, 55);
             Hp = MaxHP;
             Block = 0;
             Buffs = new();
+            if (minion)
+                AddBuff(118, 1);
             Actions = new();
             Relics = new();
         }

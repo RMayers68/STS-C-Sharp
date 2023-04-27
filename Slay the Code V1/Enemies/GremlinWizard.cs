@@ -2,13 +2,15 @@
 {
     public class GremlinWizard : Enemy
     {
-        public GremlinWizard()
+        public GremlinWizard(bool minion = false)
         {
             Name = "Gremlin Wizard";
             MaxHP = EnemyRNG.Next(23, 26);
             Hp = MaxHP;
             Block = 0;
             Buffs = new();
+            if (minion)
+                AddBuff(118, 1);
             Actions = new();
             Relics = new();
         }

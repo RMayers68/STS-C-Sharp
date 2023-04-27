@@ -9,6 +9,7 @@
             Hp = MaxHP;
             Block = 0;
             Buffs = new();
+            AddBuff(118, 1);
             Actions = new();
             Relics = new();
         }

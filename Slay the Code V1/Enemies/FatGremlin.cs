@@ -2,13 +2,15 @@
 {
     public class FatGremlin : Enemy
     {
-        public FatGremlin()
+        public FatGremlin(bool minion = false)
         {
             Name = "Fat Gremlin";
             MaxHP = EnemyRNG.Next(13, 18);
             Hp = MaxHP;
             Block = 0;
             Buffs = new();
+            if (minion)
+                AddBuff(118, 1);
             Actions = new();
             Relics = new();
         }

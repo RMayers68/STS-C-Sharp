@@ -90,7 +90,7 @@
                     {
                         if (e.HasBuff("Lock-On"))
                             hero.NonAttackDamage(e, Convert.ToInt32((effect+5) * 1.5), "Evoked Lightning Orb");
-                        hero.NonAttackDamage(e, effect, "Evoked Lightning Orb");
+                        hero.NonAttackDamage(e, effect+5, "Evoked Lightning Orb");
                     }
                 }
                 else
@@ -98,7 +98,7 @@
                     int target = OrbRNG.Next(0, encounter.Count);
                     if (encounter[target].HasBuff("Lock-On"))
                         effect = Convert.ToInt32((effect + 5) * 1.5);
-                    hero.NonAttackDamage(encounter[target], effect, "Evoked Lightning Orb");
+                    hero.NonAttackDamage(encounter[target], effect+5, "Evoked Lightning Orb");
                 }
             }
             else if (Name == "Frost")

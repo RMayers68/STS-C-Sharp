@@ -249,11 +249,14 @@
         {
             Buffs.Clear();
             Energy = 0;
+            if (Stance != "None")
+                SwitchStance("None");
             DrawPile.Clear();
             Hand.Clear();
             DiscardPile.Clear();
             ExhaustPile.Clear();
-            Encounter.Clear();
+            Encounter.Clear();  
+            Orbs.Clear();
             if (Name == "Defect")
                 OrbSlots = 3;
             else OrbSlots = 1;
@@ -262,7 +265,7 @@
             if (HasRelic("Emotion"))
                 FindRelic("Emotion").IsActive = false;
             if (HasRelic("Centennial"))
-                FindRelic("Centennial").IsActive = true;
+                FindRelic("Centennial").IsActive = true;         
         }
 
         public void CombatRewards(string roomLocation)

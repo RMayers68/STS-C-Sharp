@@ -2,13 +2,15 @@
 {
     public class SneakyGremlin : Enemy
     {
-        public SneakyGremlin()
+        public SneakyGremlin(bool minion = false)
         {
             Name = "Sneaky Gremlin";
             MaxHP = EnemyRNG.Next(10, 15);
             Hp = MaxHP;
             Block = 0;
             Buffs = new();
+            if (minion)
+                AddBuff(118, 1);
             Actions = new();
             Relics = new();
         }

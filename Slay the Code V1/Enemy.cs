@@ -153,7 +153,7 @@ namespace STV
                 },
                 14 => EnemyRNG.Next(3) switch
                 {
-                    0 => new() { new AwakenedOne(), new Cultist(), new Cultist() },
+                    0 => new() { new AwakenedOne(), new Cultist(true), new Cultist(true) },
                     1 => new() { new TimeEater() },
                     _ => new() { new Donu(), new Deca() },
                 },
@@ -241,15 +241,15 @@ namespace STV
             };
         }
 
-        public static Enemy RandomGremlin()
+        public static Enemy RandomGremlin(bool minion = false)
         {
             return EnemyRNG.Next(5) switch
             {
-                0 => new SneakyGremlin(),
-                1 => new MadGremlin(),
-                2 => new GremlinWizard(),
-                3 => new FatGremlin(),
-                _ => new ShieldGremlin(),
+                0 => new SneakyGremlin(minion),
+                1 => new MadGremlin(minion),
+                2 => new GremlinWizard(minion),
+                3 => new FatGremlin(minion),
+                _ => new ShieldGremlin(minion),
             };
         }
     }
