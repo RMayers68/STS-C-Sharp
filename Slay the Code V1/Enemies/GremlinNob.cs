@@ -5,10 +5,7 @@
         public GremlinNob()
         {
             Name = "Gremlin Nob";
-            TopHP = 87;
-            BottomHP = 82;
-            Intents = new() { "Bellow", "Rush", "Skull Bash" };
-            MaxHP = EnemyRNG.Next(BottomHP, TopHP);
+            MaxHP = EnemyRNG.Next(82, 87);
             Hp = MaxHP;
             Block = 0;
             Buffs = new();

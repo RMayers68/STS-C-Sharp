@@ -5,10 +5,7 @@
         public SnakePlant()
         {
             Name = "Snake Plant";
-            TopHP = 80;
-            BottomHP = 75;
-            Intents = new() { "Chomp", "Enfeebling Spores" };
-            MaxHP = EnemyRNG.Next(BottomHP, TopHP);
+            MaxHP = EnemyRNG.Next(75, 80);
             Hp = MaxHP;
             Block = 0;
             Buffs = new();

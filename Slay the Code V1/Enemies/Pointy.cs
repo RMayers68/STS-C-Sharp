@@ -1,11 +1,11 @@
 ﻿namespace STV
 {
-    public class FatGremlin : Enemy
+    public class Pointy : Enemy
     {
-        public FatGremlin()
+        public Pointy()
         {
-            Name = "Fat Gremlin";
-            MaxHP = EnemyRNG.Next(13, 18);
+            Name = "Pointy";
+            MaxHP = 30;
             Hp = MaxHP;
             Block = 0;
             Buffs = new();
@@ -15,13 +15,13 @@
 
         public override void EnemyAction(Hero hero, List<Enemy> encounter)
         {
-            Attack(hero, 4, encounter);
-            hero.AddBuff(2, 1);
+            for (int i = 0; i < 2; i++)
+                Attack(hero, 5, encounter);
         }
 
         public override void SetEnemyIntent(int turnNumber, List<Enemy> encounter)
         {
-            Intent = "Smash";
+            Intent = "Attack";
         }
     }
 }

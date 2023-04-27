@@ -16,19 +16,37 @@
 
         public override void EnemyAction(Hero hero, List<Enemy> encounter)
         {
-            if (Intent == "Repulse")
-                for (int i = 0; i < 2; i++)
-                    hero.AddToDrawPile(new(Dict.cardL[356]), true);
-            else Attack(hero, 11, encounter);
+            if (Intent == "Roar")
+            {
+                hero.AddBuff(2, 3);
+                hero.AddBuff(6, 3);
+            }
+            else if (Intent == "Nom")
+                for (int i = 0; i < T; i++)
+                    Attack(hero, 5, encounter);
+            else if (Intent == "Slam")
+                Attack(hero, 25, encounter);
+            else AddBuff(4, 3);
         }
 
         public override void SetEnemyIntent(int turnNumber, List<Enemy> encounter)
         {
-            Intent = EnemyRNG.Next(0, 20) switch
-            {
-                int i when i >= 0 && i <= 15 => "Repulse",
-                _ => "Bash",
-            };
+            if (turnNumber == 0)
+                Intent = "Roar";
+            else if (Intent == "Roar" || Intent == "Drool")
+                Intent = EnemyRNG.Next(0, 2) switch
+                {
+                    1 => "Slam",
+                    _ => "Nom",
+                };
+            else if (Intent == "Slam")
+                Intent = EnemyRNG.Next(0, 2) switch
+                {
+                    1 => "Roar",
+                    _ => "Drool",
+                };
+            else Intent = "Drool";
+            T = Convert.ToInt32(Math.Ceiling(turnNumber / 2.0));
         }
     }
 }

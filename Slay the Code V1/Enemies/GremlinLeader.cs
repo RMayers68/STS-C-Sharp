@@ -6,10 +6,7 @@
         public GremlinLeader()
         {
             Name = "Gremlin Leader";
-            TopHP = 149;
-            BottomHP = 140;
-            Intents = new() { "Encourage", "Rally!", "Stab" };
-            MaxHP = EnemyRNG.Next(BottomHP, TopHP);
+            MaxHP = EnemyRNG.Next(140, 149);
             Hp = MaxHP;
             Block = 0;
             Buffs = new();

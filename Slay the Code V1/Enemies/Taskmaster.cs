@@ -5,10 +5,7 @@
         public Taskmaster()
         {
             Name = "Taskmaster";
-            TopHP = 61;
-            BottomHP = 54;
-            Intents = new() { "Scouring Whip" };
-            MaxHP = EnemyRNG.Next(BottomHP, TopHP);
+            MaxHP = EnemyRNG.Next(54, 61);
             Hp = MaxHP;
             Block = 0;
             Buffs = new();

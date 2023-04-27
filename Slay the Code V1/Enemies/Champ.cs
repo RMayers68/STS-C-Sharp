@@ -5,7 +5,6 @@
         public Champ()
         {
             Name = "The Champ";
-            Intents = new() { "Defensive Stance", "Face Slap", "Taunt", "Heavy Slash", "Gloat", "Execute", "Anger" };
             MaxHP = 420;
             Hp = MaxHP;
             Block = 0;

@@ -5,10 +5,7 @@
         public Centurion()
         {
             Name = "Centurion";
-            TopHP = 81;
-            BottomHP = 76;
-            Intents = new() { "Slash", "Fury", "Defend" };
-            MaxHP = EnemyRNG.Next(BottomHP, TopHP);
+            MaxHP = EnemyRNG.Next(76, 81);
             Hp = MaxHP;
             Block = 0;
             Buffs = new();

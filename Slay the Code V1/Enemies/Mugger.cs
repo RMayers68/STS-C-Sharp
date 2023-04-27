@@ -5,10 +5,7 @@
         public Mugger()
         {
             Name = "Mugger";
-            TopHP = 53;
-            BottomHP = 48;
-            Intents = new() { "Lunge", "Mug" };
-            MaxHP = EnemyRNG.Next(BottomHP, TopHP);
+            MaxHP = EnemyRNG.Next(48, 53);
             Hp = MaxHP;
             Block = 0;
             Buffs = new();

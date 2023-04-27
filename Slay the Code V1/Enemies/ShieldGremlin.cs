@@ -5,10 +5,7 @@
         public ShieldGremlin()
         {
             Name = "Shield Gremlin";
-            TopHP = 16;
-            BottomHP = 12;
-            Intents = new() { "Protect" , "Shield Bash" };
-            MaxHP = EnemyRNG.Next(BottomHP, TopHP);
+            MaxHP = EnemyRNG.Next(12, 16);
             Hp = MaxHP;
             Block = 0;
             Buffs = new();

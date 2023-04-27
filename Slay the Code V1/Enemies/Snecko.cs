@@ -5,10 +5,7 @@
         public Snecko()
         {
             Name = "Snecko";
-            TopHP = 121;
-            BottomHP = 114;
-            Intents = new() { "Bite", "Tail Whip", "Perplexing Glare" };
-            MaxHP = EnemyRNG.Next(BottomHP, TopHP);
+            MaxHP = EnemyRNG.Next(114, 121);
             Hp = MaxHP;
             Block = 0;
             Buffs = new();

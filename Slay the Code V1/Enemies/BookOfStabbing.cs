@@ -7,10 +7,7 @@
         public BookOfStabbing()
         {
             Name = "Book of Stabbing";
-            TopHP = 163;
-            BottomHP = 160;
-            Intents = new() { "Stab Stab Stab", "Stab" };
-            MaxHP = EnemyRNG.Next(BottomHP, TopHP);
+            MaxHP = EnemyRNG.Next(160, 163);
             Hp = MaxHP;
             Block = 0;
             Buffs = new();

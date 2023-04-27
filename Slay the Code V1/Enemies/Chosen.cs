@@ -5,10 +5,7 @@
         public Chosen()
         {
             Name = "Chosen";
-            TopHP = 100;
-            BottomHP = 95;
-            Intents = new() { "Zap", "Poke", "Debilitate", "Drain", "Hex" };
-            MaxHP = EnemyRNG.Next(BottomHP, TopHP);
+            MaxHP = EnemyRNG.Next(95, 100);
             Hp = MaxHP;
             Block = 0;
             Buffs = new();

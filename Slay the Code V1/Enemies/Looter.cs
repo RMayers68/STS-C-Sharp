@@ -5,10 +5,7 @@
         public Looter()
         {
             Name = "Looter";
-            TopHP = 49;
-            BottomHP = 44;
-            Intents = new() { "Lunge", "Mug" };
-            MaxHP = EnemyRNG.Next(BottomHP, TopHP);
+            MaxHP = EnemyRNG.Next(44, 49);
             Hp = MaxHP;
             Block = 0;
             Buffs = new();

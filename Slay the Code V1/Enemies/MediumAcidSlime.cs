@@ -5,10 +5,7 @@
         public MediumAcidSlime()
         {
             Name = "Acid Slime (M)";
-            TopHP = 33;
-            BottomHP = 28;
-            Intents = new() {"Corrosive Spit", "Lick", "Tackle" };
-            MaxHP = EnemyRNG.Next(BottomHP, TopHP);
+            MaxHP = EnemyRNG.Next(28, 33);
             Hp = MaxHP;
             Block = 0;
             Buffs = new();

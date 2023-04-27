@@ -5,7 +5,6 @@
         public SlimeBoss()
         {
             Name = "Slime Boss";
-            Intents = new() { "Goop Spray", "Preparing", "Slam", "Split" };
             MaxHP = 140;
             Hp = MaxHP;
             Block = 0;

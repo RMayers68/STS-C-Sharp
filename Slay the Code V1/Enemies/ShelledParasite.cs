@@ -5,10 +5,7 @@
         public ShelledParasite()
         {
             Name = "Shelled Parasite";
-            TopHP = 73;
-            BottomHP = 68;
-            Intents = new() { "Double Strike", "Suck", "Fell" };
-            MaxHP = EnemyRNG.Next(BottomHP, TopHP);
+            MaxHP = EnemyRNG.Next(68, 73);
             Hp = MaxHP;
             Block = 0;
             Buffs = new();

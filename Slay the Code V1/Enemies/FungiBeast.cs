@@ -5,10 +5,7 @@
         public FungiBeast()
         {
             Name = "Fungi Beast";
-            TopHP = 29;
-            BottomHP = 24;
-            Intents = new() { "Bite", "Grow" };
-            MaxHP = EnemyRNG.Next(BottomHP, TopHP);
+            MaxHP = EnemyRNG.Next(24, 29);
             Hp = MaxHP;
             Block = 0;
             Buffs = new();

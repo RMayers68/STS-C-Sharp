@@ -484,6 +484,15 @@
             { 107, new Buff("Painful Stabs", true,3) },
             { 108, new Buff("Life Link", true, 3) },
             { 109, new Buff("Explode", true, 1) },
+            { 110, new Buff("Constricted",false,3) },
+            { 111, new Buff("Fading", true, 1) },
+            { 112, new Buff("Shifting",false,3) },
+            { 113, new Buff("Reactive",true,3) },
+            { 114, new Buff("Slow",false,3) },
+            { 115, new Buff("Draw Reduction", false,1) },
+            { 116, new Buff("Time Warp", true,4) },
+            { 117, new Buff("Curiosity", true,3) },
+            { 118, new Buff("Minion", true, 3) },
 
             /*
              * Buff types:

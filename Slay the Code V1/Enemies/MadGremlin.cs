@@ -5,10 +5,7 @@
         public MadGremlin()
         {
             Name = "Mad Gremlin";
-            TopHP = 25;
-            BottomHP = 20;
-            Intents = new() { "Scratch" };
-            MaxHP = EnemyRNG.Next(BottomHP, TopHP);
+            MaxHP = EnemyRNG.Next(20, 25);
             Hp = MaxHP;
             Block = 0;
             Buffs = new();
@@ -24,7 +21,7 @@
 
         public override void SetEnemyIntent(int turnNumber, List<Enemy> encounter)
         {
-            Intent = Intents.First();
+            Intent = "Scratch";
         }
     }
 }

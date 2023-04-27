@@ -5,7 +5,6 @@
         public Hexaghost()
         {
             Name = "Hexaghost";
-            Intents = new() { "Activate", "Tackle", "Sear", "Inflame", "Inferno" };
             MaxHP = 250;
             Hp = MaxHP;
             Block = 0;

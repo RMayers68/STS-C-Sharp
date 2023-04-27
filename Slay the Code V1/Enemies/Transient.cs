@@ -1,27 +1,32 @@
 ﻿namespace STV
 {
-    public class FatGremlin : Enemy
+    public class Transient : Enemy
     {
-        public FatGremlin()
+        int X {  get; set; }
+        public Transient()
         {
-            Name = "Fat Gremlin";
-            MaxHP = EnemyRNG.Next(13, 18);
+            Name = "Transient";
+            MaxHP = 999;
             Hp = MaxHP;
             Block = 0;
             Buffs = new();
+            AddBuff(111, 6);
+            AddBuff(112, 1);
             Actions = new();
             Relics = new();
         }
 
         public override void EnemyAction(Hero hero, List<Enemy> encounter)
         {
-            Attack(hero, 4, encounter);
-            hero.AddBuff(2, 1);
+            Attack(hero, 30+(X*10), encounter);
         }
 
         public override void SetEnemyIntent(int turnNumber, List<Enemy> encounter)
         {
-            Intent = "Smash";
+            if (turnNumber == 0)
+            {
+
+            }
         }
     }
 }

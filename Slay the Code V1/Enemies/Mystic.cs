@@ -5,10 +5,7 @@
         public Mystic()
         {
             Name = "Mystic";
-            TopHP = 57;
-            BottomHP = 48;
-            Intents = new() { "Heal", "Buff", "Attack/Debuff" };
-            MaxHP = EnemyRNG.Next(BottomHP, TopHP);
+            MaxHP = EnemyRNG.Next(48, 57);
             Hp = MaxHP;
             Block = 0;
             Buffs = new();

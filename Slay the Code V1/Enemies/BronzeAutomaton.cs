@@ -5,7 +5,6 @@
         public BronzeAutomaton()
         {
             Name = "Bronze Automaton";
-            Intents = new() { "Spawn Orbs", "Boost", "Flail", "HYPER BEAM" };
             MaxHP = 300;
             Hp = MaxHP;
             Block = 0;

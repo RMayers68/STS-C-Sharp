@@ -5,10 +5,7 @@
         public GremlinWizard()
         {
             Name = "Gremlin Wizard";
-            TopHP = 26;
-            BottomHP = 23;
-            Intents = new() { "Charging" , "Ultimate Blast" };
-            MaxHP = EnemyRNG.Next(BottomHP, TopHP);
+            MaxHP = EnemyRNG.Next(23, 26);
             Hp = MaxHP;
             Block = 0;
             Buffs = new();

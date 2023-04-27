@@ -5,7 +5,6 @@
         public Guardian()
         {
             Name = "Guardian";
-            Intents = new() { "Charging Up", "Fierce Bash", "Vent Steam", "Whirlwind", "Defensive Mode", "Roll Attack", "Twin Slam" };
             MaxHP = 250;
             Hp = MaxHP;
             Block = 0;
@@ -57,9 +56,9 @@
             {
                 Intent = (Actions.Count % 4) switch
                 {
-                    int i when i == 0 => "Charging Up",
-                    int i when i == 1 => "Fierce Bash",
-                    int i when i == 2 => "Vent Steam",
+                    0 => "Charging Up",
+                    1 => "Fierce Bash",
+                    2 => "Vent Steam",
                     _ => "Whirlwind",
                 };
             }

@@ -7,10 +7,7 @@
         public BronzeOrb()
         {
             Name = "Bronze Orb";
-            TopHP = 59;
-            BottomHP = 52;
-            Intents = new() { "Stasis","Beam","Support Beam" };
-            MaxHP = EnemyRNG.Next(BottomHP, TopHP);
+            MaxHP = EnemyRNG.Next(52, 59);
             Hp = MaxHP;
             Block = 0;
             Buffs = new();

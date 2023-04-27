@@ -5,10 +5,7 @@
         public LargeSpikeSlime()
         {
             Name = "Spike Slime (L)";
-            TopHP = 71;
-            BottomHP = 64;
-            Intents = new() { "Split", "Lick", "Flame Tackle" };
-            MaxHP = EnemyRNG.Next(BottomHP, TopHP);
+            MaxHP = EnemyRNG.Next(64, 71);
             Hp = MaxHP;
             Block = 0;
             Buffs = new();

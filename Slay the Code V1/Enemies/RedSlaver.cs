@@ -5,10 +5,7 @@
         public RedSlaver()
         {
             Name = "Red Slaver";
-            TopHP = 51;
-            BottomHP = 46;
-            Intents = new() { "Stab", "Scrape", "Entangle" };
-            MaxHP = EnemyRNG.Next(BottomHP, TopHP);
+            MaxHP = EnemyRNG.Next(46, 51);
             Hp = MaxHP;
             Block = 0;
             Buffs = new();

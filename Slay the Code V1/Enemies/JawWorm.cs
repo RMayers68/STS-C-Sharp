@@ -2,16 +2,18 @@
 {
     public class JawWorm : Enemy
     {
-        public JawWorm()
+        public JawWorm(bool act3 = false)
         {
             Name = "Jaw Worm";
-            TopHP = 45;
-            BottomHP = 40;
-            MaxHP = EnemyRNG.Next(BottomHP, TopHP);
+            MaxHP = EnemyRNG.Next(40, 45);
             Hp = MaxHP;
-            Intents = new() { "Chomp", "Thrash", "Bellow" };
             Block = 0;
             Buffs = new();
+            if (act3)
+            {
+                AddBuff(4, 3);
+                GainBlock(6);
+            }
             Actions = new();
             Relics = new();
         }

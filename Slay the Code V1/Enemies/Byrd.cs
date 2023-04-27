@@ -5,10 +5,7 @@
         public Byrd()
         {
             Name = "Byrd";
-            TopHP = 32;
-            BottomHP = 25;
-            Intents = new() { "Caw", "Peck", "Swoop", "Fly", "Headbutt" };
-            MaxHP = EnemyRNG.Next(BottomHP, TopHP);
+            MaxHP = EnemyRNG.Next(25, 32);
             Hp = MaxHP;
             Block = 0;
             Buffs = new();

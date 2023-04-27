@@ -5,7 +5,6 @@
         public SphericGuardian()
         {
             Name = "Spheric Guardian";
-            Intents = new() { "Slam", "Activate", "Harden", "Attack/Debuff" };
             Hp = 20;
             Block = 40;
             Buffs = new();

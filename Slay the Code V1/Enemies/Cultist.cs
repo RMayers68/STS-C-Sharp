@@ -5,10 +5,7 @@
         public Cultist()
         {
             Name = "Cultist";
-            TopHP = 55;
-            BottomHP = 48;
-            Intents = new() { "Incantation", "Dark Strike" };
-            MaxHP = EnemyRNG.Next(BottomHP, TopHP);
+            MaxHP = EnemyRNG.Next(48, 55);
             Hp = MaxHP;
             Block = 0;
             Buffs = new();

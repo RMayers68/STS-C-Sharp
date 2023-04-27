@@ -5,10 +5,7 @@
         public BlueSlaver()
         {
             Name = "Blue Slaver";
-            TopHP = 51;
-            BottomHP = 46;
-            Intents = new() { "Stab", "Rake" };
-            MaxHP = EnemyRNG.Next(BottomHP, TopHP);
+            MaxHP = EnemyRNG.Next(46, 51);
             Hp = MaxHP;
             Block = 0;
             Buffs = new();

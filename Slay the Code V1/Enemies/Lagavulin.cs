@@ -5,10 +5,7 @@
         public Lagavulin()
         {
             Name = "Lagavulin";
-            TopHP = 112;
-            BottomHP = 109;
-            Intents = new() { "Sleeping", "Attack", "Siphon Soul" };
-            MaxHP = EnemyRNG.Next(BottomHP, TopHP);
+            MaxHP = EnemyRNG.Next(109, 112);
             Hp = MaxHP;
             Block = 0;
             Buffs = new();
