@@ -404,7 +404,7 @@
             { 27, new Buff("Double Tap", true, 4)},
             { 28, new Buff("Evolve", true, 3)},
             { 29, new Buff("Feel No Pain", true, 3)},
-            { 30, new Buff("Strength Down", true, 3)},
+            { 30, new Buff("Strength Next Turn", true, 3)},
             { 31, new Buff("Juggernaut", true, 3)},
             { 32, new Buff("Metallicize", true, 3)},
             { 33, new Buff("Rage", true, 3)},

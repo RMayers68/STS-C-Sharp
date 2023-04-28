@@ -2,10 +2,12 @@
 {
     public class MediumSpikeSlime : Enemy
     {
-        public MediumSpikeSlime()
+        public MediumSpikeSlime(int LargeSlimeHP = 0)
         {
             Name = "Spike Slime (M)";
-            MaxHP = EnemyRNG.Next(28, 33);
+            if (LargeSlimeHP > 0)
+                MaxHP = LargeSlimeHP;
+            else MaxHP = EnemyRNG.Next(28, 33);
             Hp = MaxHP;
             Block = 0;
             Buffs = new();

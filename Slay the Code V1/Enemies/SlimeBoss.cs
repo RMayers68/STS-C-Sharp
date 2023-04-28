@@ -28,13 +28,17 @@
                 Console.WriteLine("This enemy is preparing a huge attack!");
             else
             {
-                //Split function here
+                encounter.Remove(this);
+                encounter.Add(new LargeSpikeSlime(Hp));
+                encounter.Add(new LargeAcidSlime(Hp));
             }
         }
 
         public override void SetEnemyIntent(int turnNumber, List<Enemy> encounter)
         {
-            Intent = (Actions.Count % 3) switch
+            if (Hp <= MaxHP / 2)
+                Intent = "Split";
+            else Intent = (Actions.Count % 3) switch
             {
                 int i when i == 0 => "Goop Spray",
                 int i when i == 1 => "Charging",

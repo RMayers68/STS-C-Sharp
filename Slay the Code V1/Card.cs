@@ -827,6 +827,8 @@
                     if (hero.FindBuff("Storm") is Buff storm && storm != null)
                         for (int i = 0; i < storm.Intensity; i++)
                             Orb.ChannelOrb(hero, encounter, 0);
+                    if (encounter[0] is AwakenedOne aW && aW.HasBuff("Curiosity"))
+                        aW.AddBuff(4, 1);
                 }
                 else if (Name == "Tantrum")
                 {
@@ -851,7 +853,16 @@
             else if (EnergyCost != -2)                
                 hero.Energy -= TmpEnergyCost;
             TmpEnergyCost = EnergyCost;
-            // Setup Phase 
+
+            foreach (Enemy e in encounter)
+            {
+                if (e.FindBuff("Slow") is Buff slow && slow != null)
+                    slow.Intensity++;
+                if (e.FindBuff("Time Warp") is Buff warp && warp != null)
+                    warp.Counter--;
+            }
+
+
 
             // Effects relating to playing an Attack card
             if (Type == "Attack")
@@ -895,6 +906,8 @@
                 if (hero.HasBuff("Double Damage"))
                     extraDamage += extraDamage + AttackDamage;
             }
+            else if (hero.HasBuff("Hex"))
+                hero.AddToDrawPile(new(Dict.cardL[356]),true);
 
             // If target needs to be selected or something happens prior to regular action/action numbers need to be determined
             if (Targetable)
@@ -1432,9 +1445,6 @@
                 case "Carve Reality":
                     hero.Hand.Add(new Card(Dict.cardL[339]));
                     break;
-                case "Conclude":
-                    //End Turn
-                    break;
                 case "Conjure Blade":
                     hero.DrawPile.Add(new Card(Dict.cardL[360]));
                     hero.DrawPile.Last().AttackLoops = xEnergy + MagicNumber;
@@ -1499,6 +1509,7 @@
                         if (hero.Hand.Count == 10) break;
                         Card meditate = PickCard(hero.DiscardPile, "add to your hand");
                         meditate.MoveCard(hero.DiscardPile, hero.Hand);
+                        meditate.DescriptionModifier += "Retain.";
                     }                   
                     hero.SwitchStance("Calm");
                     break;
@@ -1526,9 +1537,6 @@
                     break;
                 case "Tranquility":
                     hero.SwitchStance("Calm");
-                    break;
-                case "Vault":
-                    // Have to code how to end turn early
                     break;
                 case "Vigilance":
                     hero.SwitchStance("Calm");

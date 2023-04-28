@@ -67,9 +67,6 @@ namespace STV
             }
             ScreenWipe();
             Console.WriteLine($"You have chosen the {hero.Name}! Here is the {hero.Name} Deck.\n");
-            hero.AddToDeck(Dict.cardL[327]);
-            hero.AddToDeck(Dict.cardL[333]);
-            hero.AddToDeck(Dict.cardL[176]);
             ConsoleTableExt.ConsoleTableBuilder.From(hero.Deck).ExportAndWriteLine(TableAligntment.Center);
             Pause();
             for (int act = 1; act <= 3; act++)

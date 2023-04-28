@@ -39,13 +39,13 @@
         {
             if (turnNumber == 0 || turnNumber == 1)
                 Intent = "Mug";
-            else if (turnNumber == 3)
+            else if (turnNumber == 2)
                 Intent = EnemyRNG.Next(0, 20) switch
                 {
                     int i when i >= 0 && i <= 7 => "Lunge",
                     _ => "Smoke Bomb",
                 };
-            if (Actions != null && Actions.Count >= 3)
+            else if (Actions != null && Actions.Count >= 3)
                 if (Actions[^1] == "Lunge")
                     Intent = "Smoke Bomb";
                 else Intent = "Escape";

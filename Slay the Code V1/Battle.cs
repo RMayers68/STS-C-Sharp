@@ -1,11 +1,11 @@
 ﻿using ConsoleTableExt;
+using System.Diagnostics.Metrics;
 using static Global.Functions;
 namespace STV
 {
     public class Battle
     {
         private static readonly Random CombatRNG = new();
-        public Battle() { }
 
         public static void Combat(Hero hero, List<Enemy> encounter)
         {
@@ -24,174 +24,10 @@ namespace STV
                 StartOfPlayerTurn(hero, encounter, turnNumber);
                 turnNumber++;
                 Pause();
-
                 // PLAYER TURN MENU PLUS ALL ACTIONS DETAILS                
-                string playerChoice = "";
-                while (playerChoice != "E" && (!encounter.All(x => x.Hp == 0)) && hero.Hp != 0)
-                {
-                    ScreenWipe();
-                    if (hero.DrawPile.Count == 0 && hero.HasRelic("Unceasing"))
-                        hero.DrawCards(1);
-                    //Menu creation
-                    Console.WriteLine($"\tActions:{Tab(5)}TURN {turnNumber}{Tab(5)}Hand:\n********************{Tab(9)}********************\n");
-                    for (int i = 1; i < 11; i++)
-                    {
-                        switch (i)
-                        {
-                            case 1:
-                                Console.WriteLine($"(R)ead Card's Effects {(hero.Hand.Count >= i ? Tab(9) + i + ":" + hero.Hand[i - 1].GetName() : "")}\n");
-                                break;
-                            case 2:
-                                Console.WriteLine($"View Your (B)uffs/Debuffs {(hero.Hand.Count >= i ? Tab(8) + i + ":" + hero.Hand[i - 1].GetName() : "")}\n");
-                                break;
-                            case 3:
-                                Console.WriteLine($"Use (P)otion {(hero.Hand.Count >= i ? Tab(10) + i + ":" + hero.Hand[i - 1].GetName() : "")}\n");
-                                break;
-                            case 4:
-                                Console.WriteLine($"View Enemy (I)nformation {(hero.Hand.Count >= i ? Tab(8) + i + ":" + hero.Hand[i - 1].GetName() : "")}\n");
-                                break;
-                            case 5:
-                                Console.WriteLine($"(E)nd Turn {(hero.Hand.Count >= i ? Tab(10) + i + ":" + hero.Hand[i - 1].GetName() : "")}\n");
-                                break;
-                            case 6:
-                                Console.WriteLine($"******************** {(hero.Hand.Count >= i ? Tab(9) + i + ":" + hero.Hand[i - 1].GetName() : "")}\n");
-                                break;
-                            case 7:
-                                Console.WriteLine($"{hero.Name} Information: {(hero.Hand.Count >= i ? Tab(9) + i + ":" + hero.Hand[i - 1].GetName() : "")}\n");
-                                break;
-                            case 8:
-                                Console.WriteLine($"(Draw) Pile:{hero.DrawPile.Count}\t(Discard) Pile:{hero.DiscardPile.Count}{Tab(1)}(Exhaust)ed:{hero.ExhaustPile.Count} {(hero.Hand.Count >= i ? Tab(5) + i + ":" + hero.Hand[i - 1].GetName() : "")}\n");
-                                break;
-                            case 9:
-                                Console.WriteLine($"HP:{hero.Hp}/{hero.MaxHP} + {hero.Block} Block\tEnergy:{hero.Energy}/{hero.MaxEnergy} {(hero.Hand.Count >= i ? Tab(7) + i + ":" + hero.Hand[i - 1].GetName() : "")}\n");
-                                break;
-                            case 10:
-                                Console.WriteLine($"{(hero.Hand.Count >= i ? Tab(11) + i + ":" + hero.Hand[i - 1].GetName() : "")}\n");
-                                break;
-                        }
-                    }
-                    if (hero.Stance != null)
-                        Console.WriteLine($"{hero.Name}'s Stance: {hero.Stance}");
-                    if (hero.Orbs.Count > 0)
-                    {
-                        int orbNumber = 0;
-                        Console.Write($"{hero.Name}'s Orbs:\n");
-                        foreach (var orb in hero.Orbs)
-                            Console.Write($"{orbNumber++}: {orb.Name} - {orb.Effect}{Tab(2)}");
-                    }
-                    if (hero.HasRelic("Cultist"))
-                        Console.WriteLine($"{(CombatRNG.Next(2) == 0 ? "CCCAAAWWWWWWWWW" : "CAW CAW CAWWW")}");
-                    // Waiting for correct player choice
-                    playerChoice = Console.ReadLine().ToUpper();
-
-                    // Play Card function
-                    if (Int32.TryParse(playerChoice, out int cardChoice) && cardChoice > 0 && cardChoice <= hero.Hand.Count)
-                    {
-                        int cardsPlayed = hero.Actions.FindAll(x => x.Contains($"{turnNumber}:")).Count;
-                        if ((hero.HasRelic("Velvet") && cardsPlayed > 6) || (Card.FindCard("Normality", hero.Hand) != null && cardsPlayed > 3))
-                            Console.WriteLine("You have already played too many cards this turn.");
-                        else
-                        {
-                            Card playCard = hero.Hand[cardChoice - 1];
-                            playCard.CardAction(hero, encounter, turnNumber);
-                            if (hero.FindTurnActions(turnNumber, "Attack").Count % 3 == 0)
-                            {
-                                if (hero.HasRelic("Kunai"))
-                                    hero.AddBuff(9, 1);
-                                if (hero.HasRelic("Shuriken"))
-                                    hero.AddBuff(4, 1);
-                                if (hero.HasRelic("Ornamental Fan"))
-                                    hero.GainBlock(4, encounter);
-                            }
-                            if (hero.HasRelic("Letter Opener") && hero.FindTurnActions(turnNumber, "Skill").Count % 3 == 0)
-                                foreach (Enemy e in encounter)
-                                    hero.NonAttackDamage(e, 5, "Letter Opener");
-                        }
-                        HealthChecks(hero, encounter, turnNumber);
-                    }
-                    // Other menu functions
-                    else switch (playerChoice)
-                        {
-                            default:
-                                Console.WriteLine("Invalid input, enter again:");
-                                break;
-                            case "R":
-                                //ConsoleTableBuilder.From(hand).ExportAndWriteLine(TableAligntment.Center);
-                                foreach (Card c in hero.Hand)
-                                    Console.WriteLine(c.ToString());
-                                break;
-                            case "B":
-                                foreach (var buff in hero.Buffs)
-                                {
-                                    Console.WriteLine($"{buff.Name} - {buff.Description()}\n");
-                                }
-                                break;
-                            case "P":
-                                int usePotion = 0;
-                                for (int i = 0; i < hero.Potions.Count; i++)
-                                    Console.WriteLine($"{i + 1}: {hero.Potions[i]}");
-                                Console.WriteLine($"\nWhat potion would you like to use? Enter the number or enter 0 to choose another option.");
-                                while (!Int32.TryParse(Console.ReadLine(), out usePotion) || usePotion < 0 || usePotion > hero.Potions.Count)
-                                    Console.WriteLine("Invalid input, enter again:");
-                                if (usePotion == 0)
-                                    break;
-                                hero.Potions[usePotion - 1].UsePotion(hero, encounter, turnNumber);
-                                HealthChecks(hero, encounter, turnNumber);
-                                break;
-                            case "I":                                                                             // Enemy Info Menu
-                                ScreenWipe();
-                                for (int i = 0; i < encounter.Count; i++)
-                                {
-                                    if (encounter[i].Hp == 0)
-                                        continue;
-                                    Console.WriteLine("************************************************************************\n");
-                                    Console.WriteLine($"Enemy {i + 1}: {encounter[i].Name}{Tab(2)}HP:{encounter[i].Hp}/{encounter[i].MaxHP}{Tab(2)}Block:{encounter[i].Block}\n");
-                                    Console.WriteLine($"Intent: {(hero.HasRelic("Runic Dome") ? "Intent hidden." : $"{encounter[i].Intent}")}\n");
-                                    Console.Write($"Buffs/Debuffs: ");
-                                    if (encounter[i].Buffs.Count == 0)
-                                        Console.Write("None\n");
-                                    else for (int j = 0; j < encounter[i].Buffs.Count; j++)
-                                            Console.WriteLine($"{encounter[i].Buffs[j].Name} - {encounter[i].Buffs[j].Description()}\n");
-                                    Console.WriteLine("************************************************************************\n");
-                                }
-                                break;
-                            case "DRAW":
-                                if (hero.HasRelic("Frozen Eye"))
-                                {
-                                    hero.DrawPile.Reverse();
-                                    ConsoleTableExt.ConsoleTableBuilder.From(hero.DrawPile).ExportAndWriteLine(TableAligntment.Center);
-                                    hero.DrawPile.Reverse();
-                                }
-                                else
-                                {
-                                    ConsoleTableExt.ConsoleTableBuilder.From(hero.DrawPile).ExportAndWriteLine(TableAligntment.Center);
-                                    hero.ShuffleDrawPile();
-                                }
-                                break;
-                            case "DISCARD":
-                                ConsoleTableExt.ConsoleTableBuilder.From(hero.DiscardPile).ExportAndWriteLine(TableAligntment.Center);
-                                break;
-                            case "EXHAUST":
-                                ConsoleTableExt.ConsoleTableBuilder.From(hero.ExhaustPile).ExportAndWriteLine(TableAligntment.Center);
-                                break;
-                            // END OF PLAYER AND START OF ENEMY TURN
-                            case "E":
-                                EndOfPlayerTurn(hero, encounter, turnNumber);
-                                ScreenWipe();
-                                break;
-                        }
-                    Pause();
-                }
+                PlayerTurn(hero,encounter,turnNumber);
                 // Orbin Time
-                if (hero.HasRelic("Frozen Core") && hero.Orbs.Count < hero.OrbSlots)
-                    Orb.ChannelOrb(hero, encounter, 1);
-                foreach (var orb in hero.Orbs)
-                {
-                    if (orb is null) continue;
-                    if (orb == hero.Orbs[0] && hero.HasRelic("Cables"))
-                        orb.PassiveEffect(hero, encounter);
-                    orb.PassiveEffect(hero, encounter);
-                }
+                OrbinTime(hero, encounter);
                 Console.WriteLine("Enemy's Turn!\n");
                 for (int i = encounter.Count - 1; i >= 0; i--)
                 {
@@ -211,9 +47,7 @@ namespace STV
             if (hero.Hp <= 0)
                 Console.WriteLine("\nYou were Defeated!\n");
             else
-            {
                 EndOfCombat(hero);
-            }
             Pause();
         }
 
@@ -222,6 +56,8 @@ namespace STV
             if (hero.HasRelic("Mark of Pain"))
                 for (int i = 0; i < 2; i++)
                     hero.DrawPile.Add(new(Dict.cardL[357]));
+            // Init Shuffle
+            hero.ShuffleDrawPile();
             if (hero.HasRelic("Ench"))
             {
                 Card enchiridion = new(Card.RandomCards(hero.Name, 1, "Power")[0]);
@@ -296,10 +132,6 @@ namespace STV
                 if (neow.PersistentCounter == neow.EffectAmount)
                     neow.IsActive = false;
             }
-            // Enemy Check
-
-            // Init Shuffle
-            hero.ShuffleDrawPile();
             // Draw cards
             if (hero.HasRelic("Snecko Eye"))
                 hero.AddBuff(96, 1);
@@ -374,7 +206,9 @@ namespace STV
                         hero.AddToHand(new(Card.SpecificRarityRandomCard(hero.Name, "Common")));
                 if (hero.FindBuff("Machine Learning") is Buff machine && machine != null)
                     hero.DrawCards(machine.Intensity);
-                hero.DrawCards(5);
+                if (hero.HasBuff("Draw Reduction"))
+                    hero.DrawCards(4);
+                else hero.DrawCards(5);
                 // Checking for "Next turn" buffs/debuffs, activating their effects, then removing them
                 if (hero.FindBuff("Energized") is Buff energized && energized != null)
                 {
@@ -386,7 +220,7 @@ namespace STV
                     hero.AddBuff(100, phantasmal.Intensity + 1);
                     hero.Buffs.Remove(phantasmal);
                 }
-                if (hero.FindBuff("Strength Down") is Buff flex && flex != null)
+                if (hero.FindBuff("Strength Next Turn") is Buff flex && flex != null)
                 {
                     hero.AddBuff(4, flex.Intensity * -1);
                     hero.Buffs.Remove(flex);
@@ -433,20 +267,26 @@ namespace STV
                     e.Buffs.RemoveAll(x => x.DurationEnded());
                     if (e.FindBuff("Ritual") is Buff ritual && ritual != null)
                         e.AddBuff(4, ritual.Intensity);
+                    if (e.FindBuff("Flying") is Buff fly && fly != null)
+                        fly.Intensity = 3;
+                    if (e.FindBuff("Malleable") is Buff mall && mall != null)
+                        mall.Intensity = 3;
+                    if (e.FindBuff("Slow") is Buff slow && slow != null)
+                        slow.Intensity = 0;
+                    if (e.FindBuff("Strength Next Turn") is Buff shackle && shackle != null)
+                        e.AddBuff(4, shackle.Intensity * -1);
                 }
             }
             // Start of Turn effects that happen on select turns
-            switch (turnNumber)
+            if (turnNumber == 1)
             {
-                default: break;
-                case 2:
-                    if (hero.HasRelic("Horn Cleat"))
-                        hero.GainBlock(14, encounter);
-                    break;
-                case 3:
-                    if (hero.HasRelic("Captain's Wheel"))
-                        hero.GainBlock(18, encounter);
-                    break;
+                if (hero.HasRelic("Horn Cleat"))
+                    hero.GainBlock(14, encounter);
+            }
+            else if (turnNumber == 2)
+            {
+                if (hero.HasRelic("Captain's Wheel"))
+                    hero.GainBlock(18, encounter);
             }
             // Start of turn that applies to all turns
             if (hero.FindRelic("Happy") is Relic happyFlower && happyFlower != null)
@@ -529,6 +369,205 @@ namespace STV
             }
         }
 
+        private static void PlayerTurn(Hero hero, List<Enemy> encounter, int turnNumber)
+        {
+            string playerChoice = "";
+            while (playerChoice != "E" && (!encounter.All(x => x.Hp == 0)) && hero.Hp != 0)
+            {
+                ScreenWipe();
+                if (hero.Hand.Count == 0 && hero.HasRelic("Unceasing"))
+                    hero.DrawCards(1);
+                //Menu creation
+                Console.WriteLine($"\tActions:{Tab(5)}TURN {turnNumber}{Tab(5)}Hand:\n********************{Tab(9)}********************\n");
+                for (int i = 1; i < 11; i++)
+                {
+                    switch (i)
+                    {
+                        case 1:
+                            Console.WriteLine($"(R)ead Card's Effects {(hero.Hand.Count >= i ? Tab(9) + i + ":" + hero.Hand[i - 1].GetName() : "")}\n");
+                            break;
+                        case 2:
+                            Console.WriteLine($"View Your (B)uffs/Debuffs {(hero.Hand.Count >= i ? Tab(8) + i + ":" + hero.Hand[i - 1].GetName() : "")}\n");
+                            break;
+                        case 3:
+                            Console.WriteLine($"Use (P)otion {(hero.Hand.Count >= i ? Tab(10) + i + ":" + hero.Hand[i - 1].GetName() : "")}\n");
+                            break;
+                        case 4:
+                            Console.WriteLine($"View Enemy (I)nformation {(hero.Hand.Count >= i ? Tab(8) + i + ":" + hero.Hand[i - 1].GetName() : "")}\n");
+                            break;
+                        case 5:
+                            Console.WriteLine($"(E)nd Turn {(hero.Hand.Count >= i ? Tab(10) + i + ":" + hero.Hand[i - 1].GetName() : "")}\n");
+                            break;
+                        case 6:
+                            Console.WriteLine($"******************** {(hero.Hand.Count >= i ? Tab(9) + i + ":" + hero.Hand[i - 1].GetName() : "")}\n");
+                            break;
+                        case 7:
+                            Console.WriteLine($"{hero.Name} Information: {(hero.Hand.Count >= i ? Tab(9) + i + ":" + hero.Hand[i - 1].GetName() : "")}\n");
+                            break;
+                        case 8:
+                            Console.WriteLine($"(Draw) Pile:{hero.DrawPile.Count}\t(Discard) Pile:{hero.DiscardPile.Count}{Tab(1)}(Exhaust)ed:{hero.ExhaustPile.Count} {(hero.Hand.Count >= i ? Tab(5) + i + ":" + hero.Hand[i - 1].GetName() : "")}\n");
+                            break;
+                        case 9:
+                            Console.WriteLine($"HP:{hero.Hp}/{hero.MaxHP} + {hero.Block} Block\tEnergy:{hero.Energy}/{hero.MaxEnergy} {(hero.Hand.Count >= i ? Tab(7) + i + ":" + hero.Hand[i - 1].GetName() : "")}\n");
+                            break;
+                        case 10:
+                            Console.WriteLine($"{(hero.Hand.Count >= i ? Tab(11) + i + ":" + hero.Hand[i - 1].GetName() : "")}\n");
+                            break;
+                    }
+                }
+                if (hero.Stance != null)
+                    Console.WriteLine($"{hero.Name}'s Stance: {hero.Stance}");
+                if (hero.Orbs.Count > 0)
+                {
+                    int orbNumber = 0;
+                    Console.Write($"{hero.Name}'s Orbs:\n");
+                    foreach (var orb in hero.Orbs)
+                        Console.Write($"{orbNumber++}: {orb.Name} - {orb.Effect}{Tab(2)}");
+                }
+                if (hero.HasRelic("Cultist"))
+                    Console.WriteLine($"{(CombatRNG.Next(2) == 0 ? "CCCAAAWWWWWWWWW" : "CAW CAW CAWWW")}");
+                // Waiting for correct player choice
+                playerChoice = Console.ReadLine().ToUpper();
+
+                // Play Card function
+                if (Int32.TryParse(playerChoice, out int cardChoice) && cardChoice > 0 && cardChoice <= hero.Hand.Count)
+                {
+                    int cardsPlayed = hero.Actions.FindAll(x => x.Contains($"{turnNumber}:")).Count;
+                    if ((hero.HasRelic("Velvet") && cardsPlayed > 6) || (Card.FindCard("Normality", hero.Hand) != null && cardsPlayed > 3))
+                        Console.WriteLine("You have already played too many cards this turn.");
+                    else
+                    {
+                        Card playCard = hero.Hand[cardChoice - 1];
+                        playCard.CardAction(hero, encounter, turnNumber);
+                        if (hero.FindTurnActions(turnNumber, "Attack").Count % 3 == 0)
+                        {
+                            if (hero.HasRelic("Kunai"))
+                                hero.AddBuff(9, 1);
+                            if (hero.HasRelic("Shuriken"))
+                                hero.AddBuff(4, 1);
+                            if (hero.HasRelic("Ornamental Fan"))
+                                hero.GainBlock(4, encounter);
+                        }
+                        if (hero.HasRelic("Letter Opener") && hero.FindTurnActions(turnNumber, "Skill").Count % 3 == 0)
+                            foreach (Enemy e in encounter)
+                                hero.NonAttackDamage(e, 5, "Letter Opener");
+                    }
+                    HealthChecks(hero, encounter, turnNumber);
+                }
+                // Other menu functions
+                else switch (playerChoice)
+                    {
+                        default:
+                            Console.WriteLine("Invalid input, enter again:");
+                            break;
+                        case "R":
+                            //ConsoleTableBuilder.From(hand).ExportAndWriteLine(TableAligntment.Center);
+                            foreach (Card c in hero.Hand)
+                                Console.WriteLine(c.ToString());
+                            break;
+                        case "B":
+                            foreach (var buff in hero.Buffs)
+                            {
+                                Console.WriteLine($"{buff.Name} - {buff.Description()}\n");
+                            }
+                            break;
+                        case "P":
+                            int usePotion = 0;
+                            for (int i = 0; i < hero.Potions.Count; i++)
+                                Console.WriteLine($"{i + 1}: {hero.Potions[i]}");
+                            Console.WriteLine($"\nWhat potion would you like to use? Enter the number or enter 0 to choose another option.");
+                            while (!Int32.TryParse(Console.ReadLine(), out usePotion) || usePotion < 0 || usePotion > hero.Potions.Count)
+                                Console.WriteLine("Invalid input, enter again:");
+                            if (usePotion == 0)
+                                break;
+                            hero.Potions[usePotion - 1].UsePotion(hero, encounter, turnNumber);
+                            HealthChecks(hero, encounter, turnNumber);
+                            break;
+                        case "I":                                                                             // Enemy Info Menu
+                            ScreenWipe();
+                            for (int i = 0; i < encounter.Count; i++)
+                            {
+                                if (encounter[i].Hp == 0)
+                                    continue;
+                                Console.WriteLine("************************************************************************\n");
+                                Console.WriteLine($"Enemy {i + 1}: {encounter[i].Name}{Tab(2)}HP:{encounter[i].Hp}/{encounter[i].MaxHP}{Tab(2)}Block:{encounter[i].Block}\n");
+                                Console.WriteLine($"Intent: {(hero.HasRelic("Runic Dome") ? "Intent hidden." : $"{encounter[i].Intent}")}\n");
+                                Console.Write($"Buffs/Debuffs: ");
+                                if (encounter[i].Buffs.Count == 0)
+                                    Console.Write("None\n");
+                                else for (int j = 0; j < encounter[i].Buffs.Count; j++)
+                                        Console.WriteLine($"{encounter[i].Buffs[j].Name} - {encounter[i].Buffs[j].Description()}\n");
+                                Console.WriteLine("************************************************************************\n");
+                            }
+                            break;
+                        case "DRAW":
+                            if (hero.HasRelic("Frozen Eye"))
+                            {
+                                hero.DrawPile.Reverse();
+                                ConsoleTableExt.ConsoleTableBuilder.From(hero.DrawPile).ExportAndWriteLine(TableAligntment.Center);
+                                hero.DrawPile.Reverse();
+                            }
+                            else
+                            {
+                                ConsoleTableExt.ConsoleTableBuilder.From(hero.DrawPile).ExportAndWriteLine(TableAligntment.Center);
+                                hero.ShuffleDrawPile();
+                            }
+                            break;
+                        case "DISCARD":
+                            ConsoleTableExt.ConsoleTableBuilder.From(hero.DiscardPile).ExportAndWriteLine(TableAligntment.Center);
+                            break;
+                        case "EXHAUST":
+                            ConsoleTableExt.ConsoleTableBuilder.From(hero.ExhaustPile).ExportAndWriteLine(TableAligntment.Center);
+                            break;
+                        // END OF PLAYER AND START OF ENEMY TURN
+                        case "E":
+                            EndOfPlayerTurn(hero, encounter, turnNumber);
+                            ScreenWipe();
+                            break;
+                    }
+                if (encounter.Count == 0)
+                    break;
+                if (encounter[0].FindBuff("Time Warp") is Buff warp && warp != null && warp.Counter == 0)
+                {
+                    warp.Counter = 12;
+                    Console.WriteLine("The Time Eater has warped time to end your turn early. Yikes.");
+                    playerChoice = "E";
+                    Pause();
+                    EndOfPlayerTurn(hero, encounter, turnNumber);
+                    ScreenWipe();
+                }
+                if (hero.Actions.Last() is string s && (s.Contains("Conclude") || s.Contains("Meditate") || s.Contains("Vault")))
+                {
+                    if (s.Contains("Vault"))
+                    {
+                        StartOfPlayerTurn(hero, encounter, turnNumber);
+                        turnNumber++;
+                        Pause();             
+                        PlayerTurn(hero, encounter, turnNumber);
+                        OrbinTime(hero, encounter);
+                    }
+                    playerChoice = "E";
+                    EndOfPlayerTurn(hero, encounter, turnNumber);
+                    ScreenWipe();
+                }
+                if (playerChoice != "E")
+                    Pause();
+            }
+        }
+
+        private static void OrbinTime(Hero hero, List<Enemy> encounter)
+        {
+            if (hero.HasRelic("Frozen Core") && hero.Orbs.Count < hero.OrbSlots)
+                Orb.ChannelOrb(hero, encounter, 1);
+            foreach (var orb in hero.Orbs)
+            {
+                if (orb is null) continue;
+                if (orb == hero.Orbs[0] && hero.HasRelic("Cables"))
+                    orb.PassiveEffect(hero, encounter);
+                orb.PassiveEffect(hero, encounter);
+            }
+        }
+
         private static void EndOfPlayerTurn(Hero hero, List<Enemy> encounter, int turnNumber)
         {
             for (int i = 0; i < encounter.Count; i++)
@@ -601,13 +640,15 @@ namespace STV
             if (hero.FindBuff("Study") is Buff study && study != null)
                 for (int i = 0; i < study.Intensity; i++)
                     hero.AddToDrawPile(new(Dict.cardL[335]), true);
+            if (hero.FindBuff("Constricted") is Buff constrict && constrict != null)
+                encounter[0].NonAttackDamage(hero, constrict.Intensity, "Constrict");
             foreach (Enemy e in encounter)
             {
                 e.PoisonDamage();
                 if (e.Hp <= 0 && e.FindBuff("Corpse Explosion") is Buff corpse && corpse != null)
                     foreach (Enemy e2 in encounter)
                         e.NonAttackDamage(e2, corpse.Intensity, "Corpse Explosion");
-                HealthChecks(hero, encounter, turnNumber); // need solution to foreach crashing
+                HealthChecks(hero, encounter, turnNumber);
             }
         }
         private static void EndOfCombat(Hero hero)
@@ -634,6 +675,7 @@ namespace STV
         public static void HealthChecks(Hero hero, List<Enemy> encounter, int turnNumber)
         {
             for (int i = encounter.Count - 1; i >= 0; i--)
+            {
                 if (encounter[i].Hp <= 0)
                 {
                     encounter[i].Hp = 0;
@@ -649,10 +691,17 @@ namespace STV
                         hero.GainTurnEnergy(1);
                         hero.DrawCards(1);
                     }
-                    if (encounter[i].Name == "Looter")
+                    if (encounter[i] is Looter)
                         hero.GoldChange(encounter[i].Gold);
-                    encounter.RemoveAt(i);
+                    if (encounter[i] is FungiBeast)
+                        hero.AddBuff(1, 2);
+                    if ((encounter[i] is Darkling && !encounter.All(x => x.Hp <= 0)) || (encounter[i] is AwakenedOne aW && !aW.Revived))
+                        encounter[i].SetEnemyIntent(turnNumber, encounter);
+                    else encounter.RemoveAt(i);
                 }
+                else if (encounter[i].HasBuff("Split") && encounter[i].Hp <= encounter[i].MaxHP / 2)
+                    encounter[i].SetEnemyIntent(turnNumber, encounter);
+            }
             if (hero.Hp <= 0)
             {
                 if (hero.Potions.Find(x => x.Name.Contains("Fairy")) is Potion fairy && fairy != null)
@@ -699,6 +748,17 @@ namespace STV
                 }
             }
             hero.DrawCards(gamble);
+        }
+
+        public static List<string> EndTurnCards()
+        {
+            List<string> list = new()
+            {
+                "Conclude",
+                "Meditate",
+                "Vault",
+            };
+            return list;
         }
     }
 }

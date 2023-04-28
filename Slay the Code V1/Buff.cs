@@ -62,7 +62,7 @@
                 "Double Tap" => $"This turn, your next {Counter} Attack is played twice.",
                 "Evolve" => $"Whenever you draw a Status, draw {Intensity} card.",
                 "Feel No Pain" => $"Whenever a card is Exhausted, gain {Intensity} Block.",
-                "Strength Down" => $"Lose {Intensity} Strength at the end of the turn.",
+                "Strength Next Turn" => $"{(Intensity < 0 ? $"Gain {Intensity * -1}" : $"Lose {Intensity}" )} Strength at the end of the turn.",
                 "Juggernaut" => $"Whenever you gain Block, deal {Intensity} damage to a random enemy.",
                 "Metallicize" => $"At the end of your turn, gain {Intensity} Block.",
                 "Rage" => $"Whenever you play an attack this turn, gain {Intensity} Block.",

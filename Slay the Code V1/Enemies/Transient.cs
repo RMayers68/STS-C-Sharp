@@ -23,10 +23,9 @@
 
         public override void SetEnemyIntent(int turnNumber, List<Enemy> encounter)
         {
-            if (turnNumber == 0)
-            {
-
-            }
+            Intent = "Attack";
+            if (!HasBuff("Fading"))
+                Hp = 0;
         }
     }
 }

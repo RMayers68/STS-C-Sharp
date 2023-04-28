@@ -2,10 +2,12 @@
 {
     public class LargeSpikeSlime : Enemy
     {
-        public LargeSpikeSlime()
+        public LargeSpikeSlime(int SlimeBossHP = 0)
         {
             Name = "Spike Slime (L)";
-            MaxHP = EnemyRNG.Next(64, 71);
+            if (SlimeBossHP > 0)
+                MaxHP = SlimeBossHP;
+            else MaxHP = EnemyRNG.Next(64, 71);
             Hp = MaxHP;
             Block = 0;
             Buffs = new();
@@ -26,13 +28,17 @@
                 hero.AddBuff(6, 2);
             else
             {
-                // Split Function
+                encounter.Remove(this);
+                encounter.Add(new MediumSpikeSlime(Hp));
+                encounter.Add(new MediumSpikeSlime(Hp));
             }
         }
 
         public override void SetEnemyIntent(int turnNumber, List<Enemy> encounter)
         {
-            Intent = EnemyRNG.Next(0, 20) switch
+            if (Hp <= MaxHP / 2)
+                Intent = "Split";
+            else Intent = EnemyRNG.Next(0, 20) switch
             {
                 int i when i >= 0 && i <= 5 => "Flame Tackle",
                 _ => "Lick",

@@ -59,7 +59,7 @@
 			// Misc checks
 			if (buff.Name == "Poison" && hero.HasRelic("Snecko Skull"))
 				effect++;
-			if (buff.Name == "Vulnerable" && hero.HasRelic("Champion"))
+			if (buff.Name == "Vulnerable" && hero != null && hero.HasRelic("Champion"))
 				AddBuff(2, 1);
 			// Add attributes based on type of Buff
 			byte b = Dict.buffL[ID].Type switch
@@ -121,10 +121,18 @@
 					damage = Convert.ToInt32(damage * 1.25);
 				else damage = Convert.ToInt32(damage * 1.50);
             }
+			if (target.FindBuff("Slow") is Buff slow && slow != null)
+				damage *= Convert.ToInt32(slow.Intensity * 0.1);
             Console.Write($"\n{Name} dealt {damage} from their attack to the {target.Name}");
             damage = ReduceDamageByBlock(target, damage);
 			if (damage > 0)
 			{
+				if (target.FindBuff("Flying") is Buff fly && fly != null)
+				{
+					damage /= 2;
+					if (fly.IntensityAtZero())
+						target.Buffs.Remove(fly);
+				}
 				if (HasRelic("Boot") && damage < 5)
 					damage = 5;
 				if (damage < 5 && target.HasRelic("Torii"))
@@ -137,11 +145,22 @@
 				if (damage > 0 && FindBuff("Static Discharge") is Buff discharge && discharge != null)
 					for (int i = 0; i < discharge.Intensity; i++)
 						Orb.ChannelOrb((Hero)target, encounter, 0);
+				if (target.FindBuff("Angry") is Buff angry && angry != null)
+					target.AddBuff(4, angry.Intensity);
+				if (HasBuff("Painful Stabs"))
+					((Hero)target).DiscardPile.Add(new(Dict.cardL[357]));
+				if (target.HasBuff("Reactive"))
+					((Enemy)target).SetEnemyIntent(1, encounter);
+				if (target.FindBuff("Malleable") is Buff mall && mall != null)
+				{
+					target.GainBlock(mall.Intensity);
+					mall.Intensity++;
+				}
             }
 			Console.Write("!\n");
             if (target.FindBuff("Curl Up") is Buff curlUp && curlUp != null)      // Louse Curl Up Effect
             {
-                Console.WriteLine($"The Louse has curled up and gained {curlUp.Intensity} Block!");
+                Console.WriteLine($"{target.Name} has curled up and gained {curlUp.Intensity} Block!");
                 target.Block += curlUp.Intensity;
                 target.Buffs.Remove(curlUp);
             }
@@ -216,6 +235,11 @@
 			}
 			Hp -= damage;
             Console.Write($", reducing their HP to {(Hp < 0 ? "0" : Hp)}/{MaxHP}");
+			if (HasBuff("Shifting"))
+			{
+				AddBuff(4, -1 * damage);
+				AddBuff(30, -1 * damage);
+			}
 			return damage;
         }
 

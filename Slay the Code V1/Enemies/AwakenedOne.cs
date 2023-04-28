@@ -2,7 +2,7 @@
 {
     public class AwakenedOne : Enemy
     {
-        bool Revived { get; set; }
+        public bool Revived { get; set; }
         public AwakenedOne()
         {
             Name = "Awakened One";
