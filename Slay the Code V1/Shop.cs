@@ -16,7 +16,7 @@ namespace STV
             List<Relic> shopRelics = new();
             for (int i = 0; i < 7; i++)
             {
-                Card shopCard = new();
+                Card shopCard = new Anger();
                 while (shopCard.Type != "Attack" && i < 2)
                     shopCard = Card.RandomCards(hero.Name, 1)[0];
                 while (shopCard.Type != "Skill" && i >= 2 && i < 4)
@@ -76,7 +76,7 @@ namespace STV
                             hero.Gold = newHeroGold;
                             hero.AddToDeck(shopCard);
                             Console.WriteLine($"You have purchased {shopCard.Name}");
-                            shopCards[shopChoice - 1] = new Card(hero.HasRelic("Courier") ? Card.RandomCards(hero.Name, 1)[0] : new());
+                            //shopCards[shopChoice - 1] = new Card(hero.HasRelic("Courier") ? Card.RandomCards(hero.Name, 1)[0] : new());
                         }
                         else Console.WriteLine("You don't have enough Gold to buy this card.");
                     }

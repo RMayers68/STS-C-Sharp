@@ -20,7 +20,7 @@
                 for (int i = 0; i < 6; i++)
                     Attack(hero, 2, encounter);
                 for (int i = 0;i < 3; i++)
-                    hero.DiscardPile.Add(new Card(Dict.cardL[355]));
+                    //hero.DiscardPile.Add(new Card(Dict.cardL[355]));
                 Console.WriteLine($"{Name} has added 3 Burns to your Deck!");
             }
             else if (Intent == "Divider")
@@ -32,7 +32,7 @@
             else if (Intent == "Sear")
             {
                 Attack(hero, 6, encounter);
-                hero.DiscardPile.Add(new Card(Dict.cardL[355]));
+                //hero.DiscardPile.Add(new Card(Dict.cardL[355]));
                 Console.WriteLine($"{Name} has added a Burn to your Deck!");
             }
             else if (Intent == "Inflame")

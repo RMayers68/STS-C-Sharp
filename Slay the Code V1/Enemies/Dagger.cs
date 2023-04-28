@@ -19,7 +19,7 @@
             if (Intent == "Stab")
             {
                 Attack(hero, 9, encounter);
-                hero.DiscardPile.Add(new(Dict.cardL[357]));
+                //hero.DiscardPile.Add(new(Dict.cardL[357]));
             }               
             else
             {

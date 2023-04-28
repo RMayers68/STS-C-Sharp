@@ -23,7 +23,7 @@
             List<CardLibrary> list = new();
             foreach (Card c in Dict.cardL.Values)
             {
-                Card card = new(c);
+                Card card = new Anger();
                 if (Upgraded)
                     card.UpgradeCard();
                 list.Add(new(card));               

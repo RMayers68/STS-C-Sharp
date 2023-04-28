@@ -51,6 +51,8 @@ namespace STV
             Hero hero = new(Dict.heroL[heroChoice]);
             hero.AddToRelics(Dict.relicL[heroChoice - 1]);
             hero.StartingDeck();
+            foreach(Card c in hero.Deck)
+                c.UpgradeCard();
             if (hero.Name == "Ironclad")
                 Console.BackgroundColor = ConsoleColor.DarkRed;
             else if (hero.Name == "Silent")

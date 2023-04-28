@@ -19,7 +19,7 @@
             if (Intent == "Goop Spray")
             {
                 for (int i = 0; i < 3; i++)
-                    hero.DiscardPile.Add(new Card(Dict.cardL[358]));
+                    //hero.DiscardPile.Add(new Card(Dict.cardL[358]));
                 Console.WriteLine($"{Name} has added 3 Slimed cards into your Deck! Ewww!");
             }
             else if (Intent == "Slam")

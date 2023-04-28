@@ -19,8 +19,8 @@
             if (Intent == "Laser")
             {
                 Attack(hero, 10, encounter);
-                hero.AddToDrawPile(new(Dict.cardL[355]), true);
-                hero.DiscardPile.Add(new(Dict.cardL[355]));
+                //hero.AddToDrawPile(new(Dict.cardL[355]), true);
+                //hero.DiscardPile.Add(new(Dict.cardL[355]));
             }        
             else Attack(hero, 15, encounter);
         }

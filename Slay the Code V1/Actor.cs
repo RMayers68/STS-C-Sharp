@@ -148,7 +148,7 @@
 				if (target.FindBuff("Angry") is Buff angry && angry != null)
 					target.AddBuff(4, angry.Intensity);
 				if (HasBuff("Painful Stabs"))
-					((Hero)target).DiscardPile.Add(new(Dict.cardL[357]));
+					//((Hero)target).DiscardPile.Add(new(Dict.cardL[357]));
 				if (target.HasBuff("Reactive"))
 					((Enemy)target).SetEnemyIntent(1, encounter);
 				if (target.FindBuff("Malleable") is Buff mall && mall != null)

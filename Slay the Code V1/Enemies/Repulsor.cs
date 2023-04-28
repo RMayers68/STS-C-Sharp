@@ -16,9 +16,9 @@
         public override void EnemyAction(Hero hero, List<Enemy> encounter)
         {
             if (Intent == "Repulse")
-                for (int i = 0; i < 2; i++)
-                    hero.AddToDrawPile(new(Dict.cardL[356]), true);
-            else Attack(hero,11,encounter);
+                for (int i = 0; i < 2; i++) ;
+            //hero.AddToDrawPile(new(Dict.cardL[356]), true);
+            else Attack(hero, 11, encounter);
         }
 
         public override void SetEnemyIntent(int turnNumber, List<Enemy> encounter)

@@ -15,7 +15,7 @@
         public override void EnemyAction(Hero hero, List<Enemy> encounter)
         {
             Attack(hero, 7, encounter);
-            hero.DiscardPile.Add(new(Dict.cardL[357]));
+            //hero.DiscardPile.Add(new(Dict.cardL[357]));
         }
 
         public override void SetEnemyIntent(int turnNumber, List<Enemy> encounter)

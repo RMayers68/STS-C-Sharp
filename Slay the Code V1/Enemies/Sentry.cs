@@ -21,7 +21,7 @@
             if (Intent == "Bolt")
             {
                 for (int i = 0; i < 2; i++)
-                    hero.DiscardPile.Add(new Card(Dict.cardL[356]));
+                    //hero.DiscardPile.Add(new Card(Dict.cardL[356]));
                 Console.WriteLine($"{Name} has added 2 Dazed cards to your deck!");
             }
             else Attack(hero, 9, encounter);

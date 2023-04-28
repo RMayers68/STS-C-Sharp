@@ -1,5 +1,6 @@
 ﻿using ConsoleTableExt;
 using System.Diagnostics.Metrics;
+using System.Xml.Linq;
 using static Global.Functions;
 namespace STV
 {
@@ -14,7 +15,7 @@ namespace STV
             foreach (Enemy e in encounter)
                 Console.WriteLine(e.Name);
             foreach (Card c in hero.Deck)
-                hero.DrawPile.Add(new Card(c));
+                hero.DrawPile.Add(new Anger(true));
             int turnNumber = 0;
             StartOfCombat(hero, encounter);
             //Check HP values to end encounter when one group is reduced to 0
@@ -55,14 +56,14 @@ namespace STV
         {
             if (hero.HasRelic("Mark of Pain"))
                 for (int i = 0; i < 2; i++)
-                    hero.DrawPile.Add(new(Dict.cardL[357]));
+                    //hero.DrawPile.Add(new(Dict.cardL[357]));
             // Init Shuffle
             hero.ShuffleDrawPile();
             if (hero.HasRelic("Ench"))
             {
-                Card enchiridion = new(Card.RandomCards(hero.Name, 1, "Power")[0]);
-                enchiridion.SetTmpEnergyCost(0);
-                hero.AddToHand(enchiridion);
+                //Card enchiridion = new(Card.RandomCards(hero.Name, 1, "Power")[0]);
+                //enchiridion.SetTmpEnergyCost(0);
+                //hero.AddToHand(enchiridion);
             }
             if (hero.HasRelic("Runic Capacitor"))
                 hero.OrbSlots += 2;
@@ -141,13 +142,13 @@ namespace STV
             hero.DrawCards(5 - hero.Hand.Count);
             if (hero.FindRelic("Water") is Relic water && water != null)
                 for (int i = 0; i < water.EffectAmount; i++)
-                    hero.AddToHand(new Card(Dict.cardL[336]));
+                    //hero.AddToHand(new Card(Dict.cardL[336]));
             if (hero.HasRelic("Snake"))
                 hero.DrawCards(2);
             if (hero.HasRelic("Preparation"))
                 hero.DrawCards(2);
             if (hero.HasRelic("Toolbox"))
-                hero.AddToHand(new(Card.PickCard(Card.RandomCards("Colorless", 3), "add to your hand")));
+                //hero.AddToHand(new(Card.PickCard(Card.RandomCards("Colorless", 3), "add to your hand")));
             // Gambling Chip
             if (hero.HasRelic("Gambling"))
                 GamblingIsGood(hero);
@@ -185,7 +186,7 @@ namespace STV
                         hero.AddToHand(Card.RandomCard("Colorless"));
                 if (hero.HasBuff("Collect"))
                 {
-                    hero.AddToHand(new(Dict.cardL[336]));
+                    //hero.AddToHand(new(Dict.cardL[336]));
                     hero.Hand.Last().UpgradeCard();
                 }
                 if (hero.FindBuff("Deva Form") is Buff deva && deva != null)
@@ -197,13 +198,13 @@ namespace STV
                     hero.AddBuff(10, devote.Intensity);
                 if (hero.FindBuff("Creative AI") is Buff creative && creative != null)
                     for (int i = 0; i < creative.Intensity; i++)
-                        hero.AddToHand(new(Card.SpecificTypeRandomCard(hero.Name, "Power")));
+                        //hero.AddToHand(new(Card.SpecificTypeRandomCard(hero.Name, "Power")));
                 if (hero.FindBuff("Battle Hymn") is Buff hymn && hymn != null)
-                    for (int i = 0; i < hymn.Intensity; i++)
-                        hero.AddToHand(new(Dict.cardL[339]));
+                    //for (int i = 0; i < hymn.Intensity; i++)
+                        //hero.AddToHand(new(Dict.cardL[339]));
                 if (hero.FindBuff("Hello") is Buff hello && hello != null)
-                    for (int i = 0; i < hello.Intensity; i++)
-                        hero.AddToHand(new(Card.SpecificRarityRandomCard(hero.Name, "Common")));
+                    //for (int i = 0; i < hello.Intensity; i++)
+                        //hero.AddToHand(new(Card.SpecificRarityRandomCard(hero.Name, "Common")));
                 if (hero.FindBuff("Machine Learning") is Buff machine && machine != null)
                     hero.DrawCards(machine.Intensity);
                 if (hero.HasBuff("Draw Reduction"))
@@ -536,7 +537,7 @@ namespace STV
                     EndOfPlayerTurn(hero, encounter, turnNumber);
                     ScreenWipe();
                 }
-                if (hero.Actions.Last() is string s && (s.Contains("Conclude") || s.Contains("Meditate") || s.Contains("Vault")))
+                if (hero.Actions.Count > 0 && hero.Actions.Last() is string s && (s.Contains("Conclude") || s.Contains("Meditate") || s.Contains("Vault")))
                 {
                     if (s.Contains("Vault"))
                     {
@@ -636,10 +637,10 @@ namespace STV
             foreach (Card c in hero.Hand)
                 c.DescriptionModifier = ""; // Resetting temp Retain effects
             if (hero.HasRelic("Nilry's"))
-                hero.AddToDrawPile(new(Card.PickCard(Card.RandomCards(hero.Name, 3), "add to your drawpile")), true);
+                //hero.AddToDrawPile(new(Card.PickCard(Card.RandomCards(hero.Name, 3), "add to your drawpile")), true);
             if (hero.FindBuff("Study") is Buff study && study != null)
                 for (int i = 0; i < study.Intensity; i++)
-                    hero.AddToDrawPile(new(Dict.cardL[335]), true);
+                    //hero.AddToDrawPile(new(Dict.cardL[335]), true);
             if (hero.FindBuff("Constricted") is Buff constrict && constrict != null)
                 encounter[0].NonAttackDamage(hero, constrict.Intensity, "Constrict");
             foreach (Enemy e in encounter)
@@ -748,17 +749,6 @@ namespace STV
                 }
             }
             hero.DrawCards(gamble);
-        }
-
-        public static List<string> EndTurnCards()
-        {
-            List<string> list = new()
-            {
-                "Conclude",
-                "Meditate",
-                "Vault",
-            };
-            return list;
-        }
+        }       
     }
 }

@@ -62,20 +62,20 @@
             {
                 while (i < 4)
                 {
-                    AddToDeck(Dict.cardL[220]);
+                    AddToDeck(Dict.cardL[0]);
                     i++;
                 }
                 while (i < 8)
                 {
-                    AddToDeck(Dict.cardL[219]);
+                    AddToDeck(Dict.cardL[0]);
                     i++;
                 }
             }
             switch (Name)
             {
                 case "Ironclad":
-                    AddToDeck(Dict.cardL[3]);
-                    AddToDeck(Dict.cardL[220]);
+                    AddToDeck(Dict.cardL[0]);
+                    AddToDeck(Dict.cardL[0]);
                     break;
                 case "Silent":
                     AddToDeck(Dict.cardL[220]);
@@ -123,7 +123,7 @@
         public int DetermineTarget(List<Enemy> encounter)
         {
             int x = 0;
-            if (encounter.Count == 1 || Hp == 0)
+            if (encounter.Count == 1)
                 return x;
             Console.WriteLine("What enemy would you like to target?\n");
             for (int i = 0; i < encounter.Count; i++)
@@ -205,8 +205,8 @@
                     else if (drawCard.Name == "Deus Ex Machina")
                     {
                         drawCard.MoveCard(Hand, ExhaustPile);
-                        for (int j = 0; j < drawCard.GetMagicNumber(); i++)
-                            AddToHand(new Card(Dict.cardL[336]));
+                        for (int j = 0; j < drawCard.GetMagicNumber(); i++) ;
+                            //AddToHand(new Card(Dict.cardL[336]));
                     }
                 }
             }
@@ -355,7 +355,7 @@
                 card.UpgradeCard();
             if (HasRelic("Ceramic"))
                 GoldChange(9);
-            Deck.Add(new(card));
+            Deck.Add(new Anger());
             Console.WriteLine(card != null ? $"You have added {card.Name} to your Deck!" : "This was a check, remove now.\n");
         }
 

@@ -77,11 +77,11 @@
                 case "Attack Potion" or "Skill Potion" or "Power Potion" or "Colorless Potion":
                     Card cardPotion;
                     if (Name == "Colorless Potion")
-                        cardPotion = new(Card.PickCard(Card.RandomCards("Colorless", 3), "add to your hand"));
-                    else cardPotion = new(Card.PickCard(Card.RandomCards(hero.Name, 3, Name.Split(" ")[0]),"add to your hand"));
-                    cardPotion.SetTmpEnergyCost(0);
-                    for (int i = 0; i < EffectAmount; i++)
-                        hero.AddToHand(cardPotion);                   
+                        //cardPotion = new(Card.PickCard(Card.RandomCards("Colorless", 3), "add to your hand"));
+                        //else cardPotion = new(Card.PickCard(Card.RandomCards(hero.Name, 3, Name.Split(" ")[0]),"add to your hand"));
+                        //cardPotion.SetTmpEnergyCost(0);
+                        for (int i = 0; i < EffectAmount; i++) ;
+                        //hero.AddToHand(cardPotion);                   
                     break;
                 case "Blessing of the Forge":
                     foreach (Card c in hero.Hand)
@@ -112,9 +112,9 @@
                 case "Bottled Miracle":
                     for (int i = 0; i < EffectAmount; i++)
                     {
-                        if (hero.Hand.Count < 10)
-                            hero.Hand.Add(new Card(Dict.cardL[336]));
-                        else hero.DiscardPile.Add(new Card(Dict.cardL[336]));
+                        if (hero.Hand.Count < 10) ;
+                            //hero.Hand.Add(new Card(Dict.cardL[336]));
+                        //else hero.DiscardPile.Add(new Card(Dict.cardL[336]));
                     }
                     break;
                 case "Liquid Bronze":

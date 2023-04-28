@@ -20,7 +20,7 @@
                 for (int i = 0; i < 2; i++)
                 {
                     Attack(hero, 10, encounter);
-                    hero.DiscardPile.Add(new(Dict.cardL[356]));
+                    //hero.DiscardPile.Add(new(Dict.cardL[356]));
                 }
             else foreach (Enemy e in encounter)
                     e.GainBlock(16);
