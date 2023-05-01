@@ -9,35 +9,35 @@ namespace STV
             Type = "Skill";
             Rarity = "Rare";
             DescriptionModifier = "";
-            EnergyCost = ;
+            EnergyCost = 1;
             if (EnergyCost >= 0)
                 SetTmpEnergyCost(EnergyCost);
             GoldCost = CardRNG.Next(45, 56);
             BuffID = 71;
             BuffAmount = 1;
-            HeroBuff = true;
             if (Upgraded)
                 UpgradeCard();
         }
 
         public override void CardEffect(Hero hero, List<Enemy> encounter, int turnNumber, int extraDamage = 0)
         {
+            hero.SwitchStance("Divinity");
+            hero.AddBuff(BuffID, BuffAmount);
         }
 
         public override void UpgradeCard()
         {
-            if (!Upgraded) ;
             base.UpgradeCard();
         }
 
         public override string GetDescription()
         {
-            return DescriptionModifier + $"{(Upgraded ? ";
-                }
-
-                public override Card AddCard()
-                {
-                        return new Blasphemy();
-                }
+            return DescriptionModifier + $"{(Upgraded ? $"Retain. " : "")}Enter Divinity. Die next turn. Exhaust.";
         }
+
+        public override Card AddCard()
+        {
+            return new Blasphemy();
+        }
+    }
 }

@@ -9,7 +9,7 @@ namespace STV
             Type = "Skill";
             Rarity = "Rare";
             DescriptionModifier = "";
-            EnergyCost = ;
+            EnergyCost = 0;
             if (EnergyCost >= 0)
                 SetTmpEnergyCost(EnergyCost);
             GoldCost = CardRNG.Next(45, 56);
@@ -20,11 +20,18 @@ namespace STV
 
         public override void CardEffect(Hero hero, List<Enemy> encounter, int turnNumber, int extraDamage = 0)
         {
+            foreach (Card c in hero.DiscardPile)
+                c.MoveCard(hero.DiscardPile, hero.DrawPile);
+            foreach (Card c in hero.Hand)
+                c.MoveCard(hero.Hand, hero.DrawPile);
+            hero.ShuffleDrawPile();
+            hero.DrawCards(CardsDrawn);
         }
 
         public override void UpgradeCard()
         {
-            if (!Upgraded) ;
+            if (!Upgraded) 
+                CardsDrawn += 2;
             base.UpgradeCard();
         }
 

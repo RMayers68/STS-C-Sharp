@@ -9,7 +9,7 @@ namespace STV
             Type = "Skill";
             Rarity = "Uncommon";
             DescriptionModifier = "";
-            EnergyCost = ;
+            EnergyCost = 1;
             if (EnergyCost >= 0)
                 SetTmpEnergyCost(EnergyCost);
             GoldCost = CardRNG.Next(45, 56);
@@ -20,17 +20,21 @@ namespace STV
 
         public override void CardEffect(Hero hero, List<Enemy> encounter, int turnNumber, int extraDamage = 0)
         {
+            if (hero.Stance != "Calm")
+                hero.SwitchStance("Calm");
+            else hero.DrawCards(CardsDrawn);
         }
 
         public override void UpgradeCard()
         {
-            if (!Upgraded) ;
+            if (!Upgraded) 
+                CardsDrawn++;
             base.UpgradeCard();
         }
 
         public override string GetDescription()
         {
-            return DescriptionModifier + $"If you are in Calm, draw{CardsDrawn} cards. Otherwise, enter Calm.";
+            return DescriptionModifier + $"If you are in Calm, draw {CardsDrawn} cards. Otherwise, enter Calm.";
         }
 
         public override Card AddCard()

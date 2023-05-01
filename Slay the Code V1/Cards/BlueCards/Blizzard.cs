@@ -9,24 +9,28 @@ namespace STV
             Type = "Attack";
             Rarity = "Uncommon";
             DescriptionModifier = "";
-            EnergyCost = ;
+            EnergyCost = 1;
             if (EnergyCost >= 0)
                 SetTmpEnergyCost(EnergyCost);
             GoldCost = CardRNG.Next(45, 56);
-            AttackLoops = 1;
             MagicNumber = 2;
-            AttackAll = true;
             if (Upgraded)
                 UpgradeCard();
         }
 
         public override void CardEffect(Hero hero, List<Enemy> encounter, int turnNumber, int extraDamage = 0)
         {
+            foreach (string s in hero.Actions)
+                if (s.Contains("Channel Frost"))
+                    extraDamage += MagicNumber;
+            foreach (Enemy e in encounter)
+                hero.Attack(e, AttackDamage+extraDamage, encounter);
         }
 
         public override void UpgradeCard()
         {
-            if (!Upgraded) ;
+            if (!Upgraded) 
+                MagicNumber++;
             base.UpgradeCard();
         }
 

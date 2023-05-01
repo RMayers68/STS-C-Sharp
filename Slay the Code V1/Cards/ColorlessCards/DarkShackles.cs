@@ -9,24 +9,27 @@ namespace STV
             Type = "Skill";
             Rarity = "Uncommon";
             DescriptionModifier = "";
-            EnergyCost = ;
+            EnergyCost = 0;
             if (EnergyCost >= 0)
                 SetTmpEnergyCost(EnergyCost);
             GoldCost = CardRNG.Next(45, 56);
             BuffID = 4;
-            Targetable = true;
-            EnemyBuff = true;
+            BuffAmount = -9;
             if (Upgraded)
                 UpgradeCard();
         }
 
         public override void CardEffect(Hero hero, List<Enemy> encounter, int turnNumber, int extraDamage = 0)
         {
+            int target = hero.DetermineTarget(encounter);
+            encounter[target].AddBuff(BuffID, BuffAmount, hero);
+            encounter[target].AddBuff(30, BuffAmount, hero);
         }
 
         public override void UpgradeCard()
         {
-            if (!Upgraded) ;
+            if (!Upgraded) 
+                BuffAmount -= 6;
             base.UpgradeCard();
         }
 

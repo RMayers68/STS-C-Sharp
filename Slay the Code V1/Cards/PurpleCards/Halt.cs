@@ -9,12 +9,11 @@ namespace STV
             Type = "Skill";
             Rarity = "Common";
             DescriptionModifier = "";
-            EnergyCost = ;
+            EnergyCost = 0;
             if (EnergyCost >= 0)
                 SetTmpEnergyCost(EnergyCost);
             GoldCost = CardRNG.Next(45, 56);
             BlockAmount = 3;
-            BlockLoops = 1;
             MagicNumber = 9;
             if (Upgraded)
                 UpgradeCard();
@@ -22,11 +21,18 @@ namespace STV
 
         public override void CardEffect(Hero hero, List<Enemy> encounter, int turnNumber, int extraDamage = 0)
         {
+            hero.CardBlock(BlockAmount, encounter);
+            if (hero.Stance == "Wrath")
+                hero.CardBlock(MagicNumber, encounter);
         }
 
         public override void UpgradeCard()
         {
-            if (!Upgraded) ;
+            if (!Upgraded)
+            {
+                BlockAmount++;
+                MagicNumber += 5;
+            }
             base.UpgradeCard();
         }
 

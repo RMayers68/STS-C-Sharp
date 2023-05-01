@@ -22,7 +22,7 @@ namespace STV
         {
             for (int i = 0; i < hero.Energy; i++)
                 foreach (Enemy e in encounter)
-                    hero.Attack(e, AttackDamage, encounter);
+                    hero.Attack(e, AttackDamage+extraDamage, encounter);
             hero.Energy = 0;
         }
 

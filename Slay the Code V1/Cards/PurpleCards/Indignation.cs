@@ -9,24 +9,28 @@ namespace STV
             Type = "Skill";
             Rarity = "Uncommon";
             DescriptionModifier = "";
-            EnergyCost = ;
+            EnergyCost = 1;
             if (EnergyCost >= 0)
                 SetTmpEnergyCost(EnergyCost);
             GoldCost = CardRNG.Next(45, 56);
             BuffID = 1;
             BuffAmount = 3;
-            EnemyBuff = true;
             if (Upgraded)
                 UpgradeCard();
         }
 
         public override void CardEffect(Hero hero, List<Enemy> encounter, int turnNumber, int extraDamage = 0)
         {
+            if (hero.Stance != "Wrath")
+                hero.SwitchStance("Wrath");
+            else foreach (Enemy e in encounter)
+                    e.AddBuff(BuffID, BuffAmount, hero);
         }
 
         public override void UpgradeCard()
         {
-            if (!Upgraded) ;
+            if (!Upgraded) 
+                BuffAmount += 2;
             base.UpgradeCard();
         }
 

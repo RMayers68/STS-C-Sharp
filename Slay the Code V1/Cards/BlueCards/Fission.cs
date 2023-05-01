@@ -9,34 +9,42 @@ namespace STV
             Type = "Skill";
             Rarity = "Rare";
             DescriptionModifier = "";
-            EnergyCost = ;
+            EnergyCost = 0;
             if (EnergyCost >= 0)
                 SetTmpEnergyCost(EnergyCost);
             GoldCost = CardRNG.Next(45, 56);
-            CardsDrawn = 1;
-            EnergyGained = 1;
             if (Upgraded)
                 UpgradeCard();
         }
 
         public override void CardEffect(Hero hero, List<Enemy> encounter, int turnNumber, int extraDamage = 0)
         {
+            int fission = 0;
+            foreach (Orb o in hero.Orbs)
+            {
+                if (Upgraded)
+                    o.Evoke(hero, encounter);
+                hero.Orbs.Remove(o);
+                fission++;
+            }
+            hero.DrawCards(fission);
+            hero.GainTurnEnergy(fission);
         }
 
         public override void UpgradeCard()
         {
-            if (!Upgraded) ;
             base.UpgradeCard();
         }
 
         public override string GetDescription()
         {
-            return DescriptionModifier + $"{(Upgraded ? ";
-                }
+            return DescriptionModifier + $"{(Upgraded ? $"Evoke" : "Remove")}  ALL of your Orbs. Gain 1 Energy and draw 1 card for each Orb. Exhaust.";
 
-                public override Card AddCard()
-                {
-                        return new Fission();
-                }
         }
+
+        public override Card AddCard()
+        {
+            return new Fission();
+        }
+    }
 }

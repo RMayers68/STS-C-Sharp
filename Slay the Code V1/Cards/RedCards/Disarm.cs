@@ -14,8 +14,6 @@
             GoldCost = CardRNG.Next(45, 56);
             BuffID = 4;
             BuffAmount = -2;
-            Targetable = true;
-            EnemyBuff = true;
             if (Upgraded)
                 UpgradeCard();
         }

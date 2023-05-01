@@ -1,8 +1,8 @@
 ﻿namespace STV
 {
-    public class Well_LaidPlans : Card
+    public class WellLaidPlans : Card
     {
-        public Well_LaidPlans(bool Upgraded = false)
+        public WellLaidPlans(bool Upgraded = false)
         {
         Name = "Well-Laid Plans";
         Type = "Power";
@@ -37,7 +37,7 @@
 
         public override Card AddCard()
         {
-            return new Well_LaidPlans();
+            return new WellLaidPlans();
         }
     }
 }

@@ -9,24 +9,26 @@ namespace STV
             Type = "Attack";
             Rarity = "Common";
             DescriptionModifier = "";
-            EnergyCost = ;
+            EnergyCost = 1;
             if (EnergyCost >= 0)
                 SetTmpEnergyCost(EnergyCost);
             GoldCost = CardRNG.Next(45, 56);
             AttackDamage = 4;
-            Targetable = true;
-            SingleAttack = true;
             if (Upgraded)
                 UpgradeCard();
         }
 
         public override void CardEffect(Hero hero, List<Enemy> encounter, int turnNumber, int extraDamage = 0)
         {
+            int target = hero.DetermineTarget(encounter);           
+            for (int i = 0; i < hero.Orbs.Count; i++)
+                hero.Attack(encounter[target], AttackDamage + extraDamage);
         }
 
         public override void UpgradeCard()
         {
-            if (!Upgraded) ;
+            if (!Upgraded) 
+                AttackDamage += 2;
             base.UpgradeCard();
         }
 

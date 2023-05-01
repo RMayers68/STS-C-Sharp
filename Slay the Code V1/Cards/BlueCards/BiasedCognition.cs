@@ -9,24 +9,26 @@ namespace STV
             Type = "Power";
             Rarity = "Rare";
             DescriptionModifier = "";
-            EnergyCost = ;
+            EnergyCost = 1;
             if (EnergyCost >= 0)
                 SetTmpEnergyCost(EnergyCost);
             GoldCost = CardRNG.Next(45, 56);
             BuffID = 7;
             BuffAmount = 4;
-            HeroBuff = true;
             if (Upgraded)
                 UpgradeCard();
         }
 
         public override void CardEffect(Hero hero, List<Enemy> encounter, int turnNumber, int extraDamage = 0)
         {
+            hero.AddBuff(BuffID, BuffAmount);
+            hero.AddBuff(55, 1);
         }
 
         public override void UpgradeCard()
         {
-            if (!Upgraded) ;
+            if (!Upgraded) 
+                BuffAmount++;
             base.UpgradeCard();
         }
 

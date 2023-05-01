@@ -23,7 +23,7 @@
         {
             int target = hero.DetermineTarget(encounter);
             hero.Attack(encounter[target], AttackDamage + extraDamage);
-            encounter[target].AddBuff(BuffID, BuffAmount);
+            encounter[target].AddBuff(BuffID, BuffAmount,hero);
         }
 
         public override void UpgradeCard()

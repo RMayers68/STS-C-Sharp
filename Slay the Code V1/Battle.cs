@@ -15,7 +15,7 @@ namespace STV
             foreach (Enemy e in encounter)
                 Console.WriteLine(e.Name);
             foreach (Card c in hero.Deck)
-                hero.DrawPile.Add(new Anger(true));
+                hero.DrawPile.Add(c.AddCard());
             int turnNumber = 0;
             StartOfCombat(hero, encounter);
             //Check HP values to end encounter when one group is reduced to 0

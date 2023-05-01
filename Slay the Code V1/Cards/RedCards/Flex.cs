@@ -9,7 +9,7 @@ namespace STV
             Type = "Skill";
             Rarity = "Common";
             DescriptionModifier = "";
-            EnergyCost = ;
+            EnergyCost = 0;
             if (EnergyCost >= 0)
                 SetTmpEnergyCost(EnergyCost);
             GoldCost = CardRNG.Next(45, 56);
@@ -22,7 +22,7 @@ namespace STV
         public override void CardEffect(Hero hero, List<Enemy> encounter, int turnNumber, int extraDamage = 0)
         {
             hero.AddBuff(BuffID, BuffAmount);
-            hero.AddBuff(30, BuffAmount)
+            hero.AddBuff(30, BuffAmount);
         }
 
         public override void UpgradeCard()

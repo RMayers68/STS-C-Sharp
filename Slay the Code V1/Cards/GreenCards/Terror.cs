@@ -22,7 +22,7 @@ namespace STV
         public override void CardEffect(Hero hero, List<Enemy> encounter, int turnNumber, int extraDamage = 0)
         {
             int target = hero.DetermineTarget(encounter);
-            encounter[target].AddBuff(BuffID, BuffAmount);
+            encounter[target].AddBuff(BuffID, BuffAmount,hero);
         }
 
         public override void UpgradeCard()

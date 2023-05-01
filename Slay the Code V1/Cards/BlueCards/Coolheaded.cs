@@ -9,25 +9,25 @@ namespace STV
             Type = "Skill";
             Rarity = "Common";
             DescriptionModifier = "";
-            EnergyCost = ;
+            EnergyCost = 1;
             if (EnergyCost >= 0)
                 SetTmpEnergyCost(EnergyCost);
             GoldCost = CardRNG.Next(45, 56);
-            BlockLoops = 1;
-            MagicNumber = 1;
             CardsDrawn = 1;
-            OrbChannels = true;
             if (Upgraded)
                 UpgradeCard();
         }
 
         public override void CardEffect(Hero hero, List<Enemy> encounter, int turnNumber, int extraDamage = 0)
         {
+            Orb.ChannelOrb(hero, encounter, 1);
+            hero.DrawCards(CardsDrawn);
         }
 
         public override void UpgradeCard()
         {
-            if (!Upgraded) ;
+            if (!Upgraded) 
+                CardsDrawn++;
             base.UpgradeCard();
         }
 

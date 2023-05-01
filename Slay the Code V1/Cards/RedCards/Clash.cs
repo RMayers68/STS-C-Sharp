@@ -13,7 +13,6 @@
                 SetTmpEnergyCost(EnergyCost);
             GoldCost = CardRNG.Next(45, 56);
             AttackDamage = 14;
-            AttackLoops = 1;
             if (Upgraded)
                 UpgradeCard();
         }

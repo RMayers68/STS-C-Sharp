@@ -9,19 +9,19 @@ namespace STV
             Type = "Skill";
             Rarity = "Uncommon";
             DescriptionModifier = "";
-            EnergyCost = ;
+            EnergyCost = 2;
             if (EnergyCost >= 0)
                 SetTmpEnergyCost(EnergyCost);
             GoldCost = CardRNG.Next(45, 56);
             BuffID = 10;
             BuffAmount = 5;
-            HeroBuff = true;
             if (Upgraded)
                 UpgradeCard();
         }
 
         public override void CardEffect(Hero hero, List<Enemy> encounter, int turnNumber, int extraDamage = 0)
         {
+            hero.AddBuff(BuffID, BuffAmount);
         }
 
         public override void UpgradeCard()
@@ -32,12 +32,12 @@ namespace STV
 
         public override string GetDescription()
         {
-            return DescriptionModifier + $"{(Upgraded ? ";
-                }
-
-                public override Card AddCard()
-                {
-                        return new Worship();
-                }
+            return DescriptionModifier + $"{(Upgraded ? $"Retain. " : "")} Gain 5 Mantra.";
         }
+
+        public override Card AddCard()
+        {
+            return new Worship();
+        }
+    }
 }

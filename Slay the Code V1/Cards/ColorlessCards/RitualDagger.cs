@@ -9,26 +9,31 @@ namespace STV
             Type = "Attack";
             Rarity = "Common";
             DescriptionModifier = "";
-            EnergyCost = ;
+            EnergyCost = 1;
             if (EnergyCost >= 0)
                 SetTmpEnergyCost(EnergyCost);
             GoldCost = CardRNG.Next(45, 56);
             AttackDamage = 15;
-            AttackLoops = 1;
             MagicNumber = 3;
-            Targetable = true;
-            SingleAttack = true;
             if (Upgraded)
                 UpgradeCard();
         }
 
         public override void CardEffect(Hero hero, List<Enemy> encounter, int turnNumber, int extraDamage = 0)
         {
+            int target = hero.DetermineTarget(encounter);
+            hero.Attack(encounter[target], AttackDamage + extraDamage);
+            if (encounter[target].Hp <= 0 && !encounter[target].HasBuff("Minion"))
+            {
+                hero.Deck.FindAll(x => x.Name == Name).Find(x => x.AttackDamage == AttackDamage).AttackDamage += MagicNumber;
+                AttackDamage += MagicNumber;
+            }
         }
 
         public override void UpgradeCard()
         {
-            if (!Upgraded) ;
+            if (!Upgraded) 
+                MagicNumber += 2;
             base.UpgradeCard();
         }
 

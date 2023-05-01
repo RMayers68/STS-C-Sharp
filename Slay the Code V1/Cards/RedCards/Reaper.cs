@@ -24,7 +24,7 @@ namespace STV
             foreach (Enemy e in encounter)
             {
                 enemyHP += e.Hp;
-                hero.Attack(e, AttackDamage, encounter);
+                hero.Attack(e, AttackDamage+extraDamage, encounter);
                 reaper += e.Hp;
             }
             hero.CombatHeal(enemyHP - reaper);

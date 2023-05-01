@@ -31,7 +31,7 @@ namespace STV
 
         public override string GetDescription()
         {
-            return DescriptionModifier + $"{(Upgraded ? $"Innate. " : "" )}At the start of your turn, lose 1 HP and draw 1 card."
+            return DescriptionModifier + $"{(Upgraded ? $"Innate. " : "")}At the start of your turn, lose 1 HP and draw 1 card.";
         }
         public override Card AddCard()
         {

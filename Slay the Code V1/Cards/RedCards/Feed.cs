@@ -14,7 +14,6 @@ namespace STV
                 SetTmpEnergyCost(EnergyCost);
             GoldCost = CardRNG.Next(45, 56);
             AttackDamage = 10;
-            AttackLoops = 1;
             MagicNumber = 3;
             if (Upgraded)
                 UpgradeCard();

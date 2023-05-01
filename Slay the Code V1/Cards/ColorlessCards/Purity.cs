@@ -9,7 +9,7 @@ namespace STV
             Type = "Skill";
             Rarity = "Uncommon";
             DescriptionModifier = "";
-            EnergyCost = ;
+            EnergyCost = 0;
             if (EnergyCost >= 0)
                 SetTmpEnergyCost(EnergyCost);
             GoldCost = CardRNG.Next(45, 56);
@@ -20,11 +20,14 @@ namespace STV
 
         public override void CardEffect(Hero hero, List<Enemy> encounter, int turnNumber, int extraDamage = 0)
         {
+            for (int i = 0; i < MagicNumber; i++)
+                PickCard(hero.Hand, "exhaust").Exhaust(hero, encounter, hero.Hand);
         }
 
         public override void UpgradeCard()
         {
-            if (!Upgraded) ;
+            if (!Upgraded) 
+                MagicNumber +=2;
             base.UpgradeCard();
         }
 

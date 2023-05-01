@@ -1,5 +1,4 @@
-﻿
-namespace STV
+﻿namespace STV
 {
     public class Scrape : Card
     {
@@ -9,26 +8,37 @@ namespace STV
             Type = "Attack";
             Rarity = "Uncommon";
             DescriptionModifier = "";
-            EnergyCost = ;
+            EnergyCost = 1;
             if (EnergyCost >= 0)
                 SetTmpEnergyCost(EnergyCost);
             GoldCost = CardRNG.Next(45, 56);
             AttackDamage = 7;
-            AttackLoops = 1;
             CardsDrawn = 4;
-            Targetable = true;
-            SingleAttack = true;
             if (Upgraded)
                 UpgradeCard();
         }
 
         public override void CardEffect(Hero hero, List<Enemy> encounter, int turnNumber, int extraDamage = 0)
         {
+            int target = hero.DetermineTarget(encounter);
+            hero.Attack(encounter[target], AttackDamage + extraDamage);
+            for (int i = 0; i < CardsDrawn; i++)
+            {
+                if (hero.Hand.Count == 10)
+                    break;
+                hero.DrawCards(1);
+                if (hero.Hand.Last().EnergyCost != 0)
+                    hero.Hand.Last().MoveCard(hero.Hand, hero.DiscardPile);
+            }
         }
 
         public override void UpgradeCard()
         {
-            if (!Upgraded) ;
+            if (!Upgraded)
+            {
+                CardsDrawn++;
+                AttackDamage += 3;
+            }
             base.UpgradeCard();
         }
 

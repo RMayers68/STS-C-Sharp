@@ -9,7 +9,7 @@ namespace STV
             Type = "Skill";
             Rarity = "Uncommon";
             DescriptionModifier = "";
-            EnergyCost = ;
+            EnergyCost = 0;
             if (EnergyCost >= 0)
                 SetTmpEnergyCost(EnergyCost);
             GoldCost = CardRNG.Next(45, 56);
@@ -20,22 +20,25 @@ namespace STV
 
         public override void CardEffect(Hero hero, List<Enemy> encounter, int turnNumber, int extraDamage = 0)
         {
+            Card foreignInfluence = (PickCard(RandomCards("All Heroes", MagicNumber, "Attack"), "add to your hand"));
+            if (Upgraded)
+                foreignInfluence.TmpEnergyCost = 0;
+            hero.AddToHand(foreignInfluence);
         }
 
         public override void UpgradeCard()
         {
-            if (!Upgraded) ;
             base.UpgradeCard();
         }
 
         public override string GetDescription()
         {
-            return DescriptionModifier + $"Choose 1 of 3 Attacks of any color to add into your hand.{(Upgraded ? ";
-                }
-
-                public override Card AddCard()
-                {
-                        return new ForeignInfluence();
-                }
+            return DescriptionModifier + $"Choose 1 of 3 Attacks of any color to add into your hand. {(Upgraded ? $"It costs 0 this turn." : "")}";
         }
+
+        public override Card AddCard()
+        {
+            return new ForeignInfluence();
+        }
+    }
 }

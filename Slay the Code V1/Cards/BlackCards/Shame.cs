@@ -12,7 +12,6 @@ namespace STV
             EnergyCost = -2;
             BuffID = 6;
             BuffAmount = 1;
-            HeroBuff = true;
         }
 
         public override void CardEffect(Hero hero, List<Enemy> encounter, int turnNumber, int extraDamage = 0)

@@ -9,7 +9,7 @@ namespace STV
             Type = "Skill";
             Rarity = "Rare";
             DescriptionModifier = "";
-            EnergyCost = ;
+            EnergyCost = 1;
             if (EnergyCost >= 0)
                 SetTmpEnergyCost(EnergyCost);
             GoldCost = CardRNG.Next(45, 56);
@@ -19,22 +19,22 @@ namespace STV
 
         public override void CardEffect(Hero hero, List<Enemy> encounter, int turnNumber, int extraDamage = 0)
         {
+            hero.AddToDrawPile(new Beta(), true);
         }
 
         public override void UpgradeCard()
         {
-            if (!Upgraded) ;
             base.UpgradeCard();
         }
 
         public override string GetDescription()
         {
-            return DescriptionModifier + $"{(Upgraded ? ";
-                }
-
-                public override Card AddCard()
-                {
-                        return new Alpha();
-                }
+            return DescriptionModifier + $"{(Upgraded ? $"Innate. " : "")} Shuffle a Beta into your draw pile. Exhaust.";
         }
+
+        public override Card AddCard()
+        {
+            return new Alpha();
+        }
+    }
 }

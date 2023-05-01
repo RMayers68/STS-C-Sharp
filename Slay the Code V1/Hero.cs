@@ -62,34 +62,34 @@
             {
                 while (i < 4)
                 {
-                    AddToDeck(Dict.cardL[0]);
+                    AddToDeck(new Defend());
                     i++;
                 }
                 while (i < 8)
                 {
-                    AddToDeck(Dict.cardL[0]);
+                    AddToDeck(new Strike());
                     i++;
                 }
             }
             switch (Name)
             {
                 case "Ironclad":
-                    AddToDeck(Dict.cardL[0]);
-                    AddToDeck(Dict.cardL[0]);
+                    AddToDeck(new Strike());
+                    AddToDeck(new Bash());
                     break;
                 case "Silent":
-                    AddToDeck(Dict.cardL[220]);
-                    AddToDeck(Dict.cardL[219]);
-                    AddToDeck(Dict.cardL[121]);
-                    AddToDeck(Dict.cardL[139]);
+                    AddToDeck(new Strike());
+                    AddToDeck(new Defend());
+                    AddToDeck(new Survivor());
+                    AddToDeck(new Neutralize());
                     break;
                 case "Defect":
-                    AddToDeck(Dict.cardL[170]);
-                    AddToDeck(Dict.cardL[214]);
+                    AddToDeck(new Zap());
+                    AddToDeck(new Dualcast());
                     break;
                 case "Watcher":
-                    AddToDeck(Dict.cardL[241]);
-                    AddToDeck(Dict.cardL[285]);
+                    AddToDeck(new Eruption());
+                    AddToDeck(new Vigilance());
                     break;
             }
             Deck.Sort();
@@ -372,6 +372,8 @@
         public void AddToDrawPile(Card card, bool shuffle)
         {
             DrawPile.Add(card);
+            if (HasBuff("Master Reality"))
+                card.UpgradeCard();
             if (shuffle)
                 ShuffleDrawPile();
         }

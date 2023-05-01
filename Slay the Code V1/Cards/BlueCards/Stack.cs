@@ -9,28 +9,30 @@ namespace STV
             Type = "Skill";
             Rarity = "Common";
             DescriptionModifier = "";
-            EnergyCost = ;
+            EnergyCost = 1;
             if (EnergyCost >= 0)
                 SetTmpEnergyCost(EnergyCost);
             GoldCost = CardRNG.Next(45, 56);
-            BlockLoops = 1;
+            BlockAmount = 0;
             if (Upgraded)
                 UpgradeCard();
         }
 
         public override void CardEffect(Hero hero, List<Enemy> encounter, int turnNumber, int extraDamage = 0)
         {
+            hero.CardBlock(hero.DiscardPile.Count + BlockAmount, encounter);
         }
 
         public override void UpgradeCard()
         {
-            if (!Upgraded) ;
+            if (!Upgraded) 
+                BlockAmount += 3;
             base.UpgradeCard();
         }
 
         public override string GetDescription()
         {
-            return DescriptionModifier + $"Gain Block equal to the number of cards in your discard pile{(Upgraded ? ";
+            return DescriptionModifier + $"Gain Block equal to the number of cards in your discard pile{(Upgraded ? $" +3" : "")}.";
                 }
 
                 public override Card AddCard()

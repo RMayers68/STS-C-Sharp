@@ -24,7 +24,7 @@ namespace STV
         {
             foreach (Enemy e in encounter)
             {
-                hero.Attack(e, AttackDamage, encounter);
+                hero.Attack(e, AttackDamage+extraDamage, encounter);
                 hero.AddBuff(BuffID, BuffAmount, hero);
             }             
         }

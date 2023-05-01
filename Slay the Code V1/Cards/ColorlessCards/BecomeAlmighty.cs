@@ -15,18 +15,19 @@ namespace STV
             GoldCost = CardRNG.Next(45, 56);
             BuffID = 4;
             BuffAmount = 3;
-            HeroBuff = true;
             if (Upgraded)
                 UpgradeCard();
         }
 
         public override void CardEffect(Hero hero, List<Enemy> encounter, int turnNumber, int extraDamage = 0)
         {
+            hero.AddBuff(BuffID, BuffAmount);
         }
 
         public override void UpgradeCard()
         {
-            if (!Upgraded) ;
+            if (!Upgraded) 
+                BuffAmount++;
             base.UpgradeCard();
         }
 

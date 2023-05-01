@@ -9,32 +9,36 @@ namespace STV
             Type = "Skill";
             Rarity = "Rare";
             DescriptionModifier = "";
-            EnergyCost = ;
+            EnergyCost = 0;
             if (EnergyCost >= 0)
                 SetTmpEnergyCost(EnergyCost);
             GoldCost = CardRNG.Next(45, 56);
+            MagicNumber++;
             if (Upgraded)
                 UpgradeCard();
         }
 
         public override void CardEffect(Hero hero, List<Enemy> encounter, int turnNumber, int extraDamage = 0)
         {
+            for (int i = 0; i < MagicNumber; i++)
+                hero.AddToHand(PickCard(hero.DrawPile, "move to your hand"));
         }
 
         public override void UpgradeCard()
         {
-            if (!Upgraded) ;
+            if (!Upgraded) 
+                MagicNumber++;
             base.UpgradeCard();
         }
 
         public override string GetDescription()
         {
-            return DescriptionModifier + $"Choose {(Upgraded ? ";
-                }
-
-                public override Card AddCard()
-                {
-                        return new Seek();
-                }
+            return DescriptionModifier + $"Choose {(Upgraded ? $"2 cards" : "a card")} from your drawpile and place {(Upgraded ? $"them" : "it")} in your hand.";
         }
+
+        public override Card AddCard()
+        {
+            return new Seek();
+        }
+    }
 }

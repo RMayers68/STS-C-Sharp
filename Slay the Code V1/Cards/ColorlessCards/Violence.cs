@@ -1,31 +1,36 @@
-﻿
-namespace STV
+﻿namespace STV
 {
-    public class Safety : Card
+    public class Violence : Card
     {
-        public Safety(bool Upgraded = false)
+        public Violence(bool Upgraded = false)
         {
             Name = "Safety";
             Type = "Skill";
             Rarity = "Common";
             DescriptionModifier = "";
-            EnergyCost = ;
+            EnergyCost = 0;
             if (EnergyCost >= 0)
                 SetTmpEnergyCost(EnergyCost);
             GoldCost = CardRNG.Next(45, 56);
-            BlockAmount = 12;
-            BlockLoops = 1;
+            MagicNumber = 3;
             if (Upgraded)
                 UpgradeCard();
         }
 
         public override void CardEffect(Hero hero, List<Enemy> encounter, int turnNumber, int extraDamage = 0)
         {
+            for (int i = 0; i < MagicNumber; i++)
+            {
+                Card violence = hero.DrawPile.Find(x => x.Type == "Attack");
+                hero.AddToHand(violence);
+                hero.DrawPile.Remove(violence);
+            }
         }
 
         public override void UpgradeCard()
         {
-            if (!Upgraded) ;
+            if (!Upgraded) 
+                MagicNumber++;
             base.UpgradeCard();
         }
 
@@ -36,7 +41,7 @@ namespace STV
 
         public override Card AddCard()
         {
-            return new Safety();
+            return new Violence();
         }
     }
 }

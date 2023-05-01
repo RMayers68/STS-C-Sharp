@@ -9,35 +9,34 @@ namespace STV
             Type = "Power";
             Rarity = "Uncommon";
             DescriptionModifier = "";
-            EnergyCost = ;
+            EnergyCost = 1;
             if (EnergyCost >= 0)
                 SetTmpEnergyCost(EnergyCost);
             GoldCost = CardRNG.Next(45, 56);
             BuffID = 61;
             BuffAmount = 1;
-            HeroBuff = true;
             if (Upgraded)
                 UpgradeCard();
         }
 
         public override void CardEffect(Hero hero, List<Enemy> encounter, int turnNumber, int extraDamage = 0)
         {
+            hero.AddBuff(BuffID, BuffAmount);
         }
 
         public override void UpgradeCard()
         {
-            if (!Upgraded) ;
             base.UpgradeCard();
         }
 
         public override string GetDescription()
         {
-            return DescriptionModifier + $"{(Upgraded ? ";
-                }
-
-                public override Card AddCard()
-                {
-                        return new HelloWorld();
-                }
+            return DescriptionModifier + $"{(Upgraded ? $"Innate. " : "")}At the start of your turn, add a random Common card into your hand.";
         }
+
+        public override Card AddCard()
+        {
+            return new HelloWorld();
+        }
+    }
 }

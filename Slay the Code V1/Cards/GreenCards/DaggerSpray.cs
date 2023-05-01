@@ -22,7 +22,7 @@ namespace STV
         {
             for (int i = 0; i < 2; i++)
                 foreach (Enemy e in encounter)
-                    hero.Attack(e, AttackDamage, encounter);
+                    hero.Attack(e, AttackDamage+extraDamage, encounter);
         }
 
         public override void UpgradeCard()

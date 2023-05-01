@@ -9,34 +9,37 @@ namespace STV
             Type = "Skill";
             Rarity = "Uncommon";
             DescriptionModifier = "";
-            EnergyCost = ;
+            EnergyCost = -1;
             if (EnergyCost >= 0)
                 SetTmpEnergyCost(EnergyCost);
             GoldCost = CardRNG.Next(45, 56);
             BuffID = 72;
-            HeroBuff = true;
+            MagicNumber = 0;
             if (Upgraded)
                 UpgradeCard();
         }
 
         public override void CardEffect(Hero hero, List<Enemy> encounter, int turnNumber, int extraDamage = 0)
         {
+            hero.AddBuff(BuffID, hero.Energy + MagicNumber);
+            hero.Energy = 0;
         }
 
         public override void UpgradeCard()
         {
-            if (!Upgraded) ;
+            if (!Upgraded) 
+                MagicNumber++;
             base.UpgradeCard();
         }
 
         public override string GetDescription()
         {
-            return DescriptionModifier + $"Put a Miracle+ into your hand at the start of your next X{(Upgraded ? ";
-                }
-
-                public override Card AddCard()
-                {
-                        return new Collect();
-                }
+            return DescriptionModifier + $"Put a Miracle+ into your hand at the start of your next X{(Upgraded ? $"+1" : "")} turns. Exhaust";
         }
+
+        public override Card AddCard()
+        {
+            return new Collect();
+        }
+    }
 }

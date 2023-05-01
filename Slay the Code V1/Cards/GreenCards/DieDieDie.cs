@@ -21,7 +21,7 @@ namespace STV
         public override void CardEffect(Hero hero, List<Enemy> encounter, int turnNumber, int extraDamage = 0)
         {
             foreach (Enemy e in encounter)
-                hero.Attack(e, AttackDamage, encounter);
+                hero.Attack(e, AttackDamage+extraDamage, encounter);
         }
 
         public override void UpgradeCard()

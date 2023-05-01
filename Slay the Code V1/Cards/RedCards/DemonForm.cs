@@ -14,7 +14,6 @@
             GoldCost = CardRNG.Next(45, 56);
             BuffID = 3;
             BuffAmount = 2;
-            HeroBuff = true;
             if (Upgraded)
                 UpgradeCard();
         }
