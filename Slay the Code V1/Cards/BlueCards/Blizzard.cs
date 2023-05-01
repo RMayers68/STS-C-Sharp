@@ -16,7 +16,7 @@ namespace STV
             AttackLoops = 1;
             MagicNumber = 2;
             AttackAll = true;
-            if (upgraded)
+            if (Upgraded)
                 UpgradeCard();
         }
 

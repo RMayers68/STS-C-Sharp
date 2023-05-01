@@ -18,7 +18,7 @@ namespace STV
             MagicNumber = 2;
             AttackAll = true;
             OrbChannels = true;
-            if (upgraded)
+            if (Upgraded)
                 UpgradeCard();
         }
 

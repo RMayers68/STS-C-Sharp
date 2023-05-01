@@ -15,7 +15,7 @@
             BuffID = 10;
             BuffAmount = 3;
             HeroBuff = true;
-            if (upgraded)
+            if (Upgraded)
                 UpgradeCard();
         }
 

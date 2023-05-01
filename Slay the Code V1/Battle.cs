@@ -194,6 +194,8 @@ namespace STV
                     deva.CounterSet(deva.Intensity);
                     hero.Energy += deva.Counter;
                 }
+                if (hero.FindBuff("Berserk") is Buff guts && guts != null)
+                    hero.Energy += guts.Intensity;
                 if (hero.FindBuff("Devotion") is Buff devote && devote != null)
                     hero.AddBuff(10, devote.Intensity);
                 if (hero.FindBuff("Creative AI") is Buff creative && creative != null)
@@ -647,8 +649,11 @@ namespace STV
             {
                 e.PoisonDamage();
                 if (e.Hp <= 0 && e.FindBuff("Corpse Explosion") is Buff corpse && corpse != null)
-                    foreach (Enemy e2 in encounter)
-                        e.NonAttackDamage(e2, corpse.Intensity, "Corpse Explosion");
+                {
+                    for (int i = 0; i < corpse.Intensity; i++)
+                        foreach (Enemy e2 in encounter)
+                            e.NonAttackDamage(e2, corpse.Intensity, "Corpse Explosion");
+                }                   
                 HealthChecks(hero, encounter, turnNumber);
             }
         }

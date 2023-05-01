@@ -20,7 +20,7 @@ namespace STV
             Targetable = true;
             SingleAttack = true;
             OrbChannels = true;
-            if (upgraded)
+            if (Upgraded)
                 UpgradeCard();
         }
 

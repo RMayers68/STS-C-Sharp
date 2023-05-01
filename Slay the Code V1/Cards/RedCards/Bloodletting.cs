@@ -14,18 +14,20 @@
             GoldCost = CardRNG.Next(45, 56);
             MagicNumber = 3;
             EnergyGained = 2;
-            SelfDamage = true;
             if (Upgraded)
                 UpgradeCard();
         }
 
         public override void CardEffect(Hero hero, List<Enemy> encounter, int turnNumber, int extraDamage = 0)
         {
+            hero.SelfDamage(3);
+            hero.GainTurnEnergy(EnergyGained);
         }
 
         public override void UpgradeCard()
         {
-            if (!Upgraded) ;
+            if (!Upgraded) 
+                EnergyGained++;
             base.UpgradeCard();
         }
 

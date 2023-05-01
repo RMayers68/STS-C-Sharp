@@ -19,11 +19,14 @@
 
         public override void CardEffect(Hero hero, List<Enemy> encounter, int turnNumber, int extraDamage = 0)
         {
+            PickCard(hero.Hand, "exhaust").Exhaust(hero, encounter, hero.Hand);
+            hero.DrawCards(CardsDrawn);
         }
 
         public override void UpgradeCard()
         {
-            if (!Upgraded) ;
+            if (!Upgraded) 
+                CardsDrawn++;
             base.UpgradeCard();
         }
 

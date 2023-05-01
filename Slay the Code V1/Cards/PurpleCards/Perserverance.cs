@@ -16,7 +16,7 @@ namespace STV
             BlockAmount = 5;
             BlockLoops = 1;
             MagicNumber = 2;
-            if (upgraded)
+            if (Upgraded)
                 UpgradeCard();
         }
 

@@ -2,7 +2,7 @@
 {
     public class Anger : Card
     {
-        public Anger(bool upgraded = false)
+        public Anger(bool Upgraded = false)
         {
             Name = "Anger";
             Type = "Attack";
@@ -13,8 +13,7 @@
                 SetTmpEnergyCost(EnergyCost);
             GoldCost = CardRNG.Next(45, 56);
             AttackDamage = 6;
-            Upgraded = false;
-            if (upgraded)
+            if (Upgraded)
                 UpgradeCard();
         }
 

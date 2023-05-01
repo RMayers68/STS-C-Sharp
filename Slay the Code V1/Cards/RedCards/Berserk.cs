@@ -14,18 +14,20 @@
             GoldCost = CardRNG.Next(45, 56);
             BuffID = 1;
             BuffAmount = 2;
-            HeroBuff = true;
             if (Upgraded)
                 UpgradeCard();
         }
 
         public override void CardEffect(Hero hero, List<Enemy> encounter, int turnNumber, int extraDamage = 0)
         {
+            hero.AddBuff(119, 1);
+            hero.AddBuff(BuffID, BuffAmount);
         }
 
         public override void UpgradeCard()
         {
-            if (!Upgraded) ;
+            if (!Upgraded)
+                BuffAmount--;
             base.UpgradeCard();
         }
 

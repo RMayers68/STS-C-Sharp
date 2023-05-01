@@ -14,22 +14,26 @@ namespace STV
                 SetTmpEnergyCost(EnergyCost);
             GoldCost = CardRNG.Next(45, 56);
             BlockAmount = 11;
-            BlockLoops = 1;
             BuffID = 2;
             BuffAmount = 2;
-            Targetable = true;
-            EnemyBuff = true;
-            if (upgraded)
+            if (Upgraded)
                 UpgradeCard();
         }
 
         public override void CardEffect(Hero hero, List<Enemy> encounter, int turnNumber, int extraDamage = 0)
         {
+            int target = hero.DetermineTarget(encounter);
+            encounter[target].AddBuff(BuffID, BuffAmount);
+            hero.CardBlock(BlockAmount, encounter);
         }
 
         public override void UpgradeCard()
         {
-            if (!Upgraded) ;
+            if (!Upgraded)
+            {
+                BuffAmount++;
+                BlockAmount += 3;
+            }
             base.UpgradeCard();
         }
 

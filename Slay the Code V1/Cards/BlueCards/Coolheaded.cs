@@ -17,7 +17,7 @@ namespace STV
             MagicNumber = 1;
             CardsDrawn = 1;
             OrbChannels = true;
-            if (upgraded)
+            if (Upgraded)
                 UpgradeCard();
         }
 

@@ -17,7 +17,7 @@ namespace STV
             AttackLoops = 2;
             Targetable = true;
             SingleAttack = true;
-            if (upgraded)
+            if (Upgraded)
                 UpgradeCard();
         }
 

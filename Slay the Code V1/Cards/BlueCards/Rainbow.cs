@@ -15,7 +15,7 @@ namespace STV
             GoldCost = CardRNG.Next(45, 56);
             BlockLoops = 3;
             OrbChannels = true;
-            if (upgraded)
+            if (Upgraded)
                 UpgradeCard();
         }
 

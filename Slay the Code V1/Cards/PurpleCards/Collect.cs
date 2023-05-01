@@ -15,7 +15,7 @@ namespace STV
             GoldCost = CardRNG.Next(45, 56);
             BuffID = 72;
             HeroBuff = true;
-            if (upgraded)
+            if (Upgraded)
                 UpgradeCard();
         }
 

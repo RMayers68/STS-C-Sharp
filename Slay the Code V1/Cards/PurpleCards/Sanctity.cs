@@ -16,7 +16,7 @@ namespace STV
             BlockAmount = 6;
             BlockLoops = 1;
             CardsDrawn = 2;
-            if (upgraded)
+            if (Upgraded)
                 UpgradeCard();
         }
 

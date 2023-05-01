@@ -9,31 +9,32 @@ namespace STV
             Type = "Attack";
             Rarity = "Uncommon";
             DescriptionModifier = "";
-            EnergyCost = ;
+            EnergyCost = 2;
             if (EnergyCost >= 0)
                 SetTmpEnergyCost(EnergyCost);
             GoldCost = CardRNG.Next(45, 56);
             AttackDamage = 12;
-            AttackLoops = 1;
-            Targetable = true;
-            SingleAttack = true;
-            if (upgraded)
+            MagicNumber = 0;
+            if (Upgraded)
                 UpgradeCard();
         }
 
         public override void CardEffect(Hero hero, List<Enemy> encounter, int turnNumber, int extraDamage = 0)
         {
+            int target = hero.DetermineTarget(encounter);
+            hero.Attack(encounter[target], AttackDamage + extraDamage);
         }
 
         public override void UpgradeCard()
         {
-            if (!Upgraded) ;
+            MagicNumber++;
+            AttackDamage += MagicNumber + 3;
             base.UpgradeCard();
         }
 
         public override string GetDescription()
         {
-            return DescriptionModifier + $"Deal {AttackDamage} damage. Can be upgraded any number of times.";
+            return DescriptionModifier + $"Deal {AttackDamage} damage. Can be Upgraded any number of times.";
         }
 
         public override Card AddCard()

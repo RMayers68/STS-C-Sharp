@@ -14,7 +14,7 @@ namespace STV
 
         public abstract void EnemyAction(Hero hero, List<Enemy> encounter);
 
-        public abstract void SetEnemyIntent(int turnNumber, List<Enemy> encounter);
+        public abstract void SetEnemyIntent(int turnNumber, List<Enemy> encounter = null);
 
         //enemy attack intents list
         public static List<string> AttackIntents()

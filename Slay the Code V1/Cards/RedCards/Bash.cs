@@ -2,7 +2,7 @@
 {
     public class Bash : Card
     {
-        public Bash(bool upgraded = false)
+        public Bash(bool Upgraded = false)
         {
             Name = "Bash";
             Type = "Attack";
@@ -14,8 +14,7 @@
             GoldCost = 0;
             AttackDamage = 8;
             BuffAmount = 2;
-            Upgraded = false;
-            if (upgraded)
+            if (Upgraded)
                 UpgradeCard();
         }
 

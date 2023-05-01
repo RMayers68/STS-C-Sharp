@@ -18,7 +18,7 @@ namespace STV
             MagicNumber = 20;
             Targetable = true;
             SingleAttack = true;
-            if (upgraded)
+            if (Upgraded)
                 UpgradeCard();
         }
 

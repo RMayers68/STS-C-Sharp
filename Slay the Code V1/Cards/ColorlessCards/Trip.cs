@@ -17,7 +17,7 @@ namespace STV
             BuffAmount = 2;
             Targetable = true;
             EnemyBuff = true;
-            if (upgraded)
+            if (Upgraded)
                 UpgradeCard();
         }
 

@@ -9,28 +9,31 @@ namespace STV
             Type = "Skill";
             Rarity = "Common";
             DescriptionModifier = "";
-            EnergyCost = ;
+            EnergyCost = 0;
             if (EnergyCost >= 0)
                 SetTmpEnergyCost(EnergyCost);
             GoldCost = CardRNG.Next(45, 56);
             CardsDrawn = 1;
-            if (upgraded)
+            if (Upgraded)
                 UpgradeCard();
         }
 
         public override void CardEffect(Hero hero, List<Enemy> encounter, int turnNumber, int extraDamage = 0)
         {
+            hero.DrawCards(CardsDrawn);
+            PickCard(hero.Hand, "add to the top of your drawpile").MoveCard(hero.Hand, hero.DrawPile);
         }
 
         public override void UpgradeCard()
         {
-            if (!Upgraded) ;
+            if (!Upgraded) 
+                CardsDrawn++;
             base.UpgradeCard();
         }
 
         public override string GetDescription()
         {
-            return DescriptionModifier + $"Draw {CardsDrawn} card{(Upgraded ? ";
+            return DescriptionModifier + $"Draw {CardsDrawn} card{(Upgraded ? $"s" : "")}.  Place a card from your hand on top of your draw pile. Exhaust.";
                 }
 
                 public override Card AddCard()

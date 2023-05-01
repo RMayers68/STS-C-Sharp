@@ -9,32 +9,32 @@ namespace STV
             Type = "Skill";
             Rarity = "Common";
             DescriptionModifier = "";
-            EnergyCost = ;
+            EnergyCost = 1;
             if (EnergyCost >= 0)
                 SetTmpEnergyCost(EnergyCost);
             GoldCost = CardRNG.Next(45, 56);
             BlockAmount = 4;
-            BlockLoops = 1;
             BuffID = 44;
-            BuffAmount = 4;
-            HeroBuff = true;
-            if (upgraded)
+            if (Upgraded)
                 UpgradeCard();
         }
 
         public override void CardEffect(Hero hero, List<Enemy> encounter, int turnNumber, int extraDamage = 0)
         {
+            hero.CardBlock(BlockAmount, encounter);
+            hero.AddBuff(BuffID, BlockAmount);
         }
 
         public override void UpgradeCard()
         {
-            if (!Upgraded) ;
+            if (!Upgraded) 
+                BlockAmount += 2;
             base.UpgradeCard();
         }
 
         public override string GetDescription()
         {
-            return DescriptionModifier + $"Gain {BlockAmount} Block. Next turn gain {BuffAmount} Block.";
+            return DescriptionModifier + $"Gain {BlockAmount} Block. Next turn gain {BlockAmount} Block.";
         }
 
         public override Card AddCard()

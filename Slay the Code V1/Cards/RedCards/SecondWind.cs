@@ -9,22 +9,34 @@ namespace STV
             Type = "Skill";
             Rarity = "Uncommon";
             DescriptionModifier = "";
-            EnergyCost = ;
+            EnergyCost = 1;
             if (EnergyCost >= 0)
                 SetTmpEnergyCost(EnergyCost);
             GoldCost = CardRNG.Next(45, 56);
             BlockAmount = 5;
-            if (upgraded)
+            if (Upgraded)
                 UpgradeCard();
         }
 
         public override void CardEffect(Hero hero, List<Enemy> encounter, int turnNumber, int extraDamage = 0)
         {
+            int secondWind = 0;
+            for (int i = hero.Hand.Count - 1; i >= 0; i--)
+            {
+                if (hero.Hand[i].Type != "Attack")
+                {
+                    hero.Hand[i].Exhaust(hero, encounter, hero.Hand);
+                    secondWind++;
+                }
+            }
+            for (int i = 0; i < secondWind; i++)
+                hero.CardBlock(BlockAmount, encounter);
         }
 
         public override void UpgradeCard()
         {
-            if (!Upgraded) ;
+            if (!Upgraded) 
+                BlockAmount += 2;
             base.UpgradeCard();
         }
 

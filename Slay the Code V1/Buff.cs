@@ -150,6 +150,7 @@
                 "Time Warp" => $"Whenever you play {Counter} more cards this combat, ends your turn and gains 2 Strength.",
                 "Curiosity" => $"Whenever you play a Power card, gains {Intensity} Strength.",
                 "Minion" => $"Minions abandon combat without their leader.",
+                "Berserk" => $"At the start of your turn, gain {Intensity} Energy.",
                 _ => "",
             };
         }

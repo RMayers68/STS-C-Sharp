@@ -15,7 +15,7 @@ namespace STV
             GoldCost = CardRNG.Next(45, 56);
             BlockLoops = 1;
             MagicNumber = 3;
-            if (upgraded)
+            if (Upgraded)
                 UpgradeCard();
         }
 

@@ -195,6 +195,8 @@
                         break;
                     Card drawCard = DrawPile.Last();
                     drawCard.MoveCard(DrawPile, Hand);
+                    if (drawCard.Name == "Endless Agony")
+                        AddToHand(drawCard.AddCard());
                     if (drawCard.Type == "Status" && FindBuff("Evolve") is Buff evolve && evolve != null)
                         DrawCards(evolve.Intensity);
                     if (HasBuff("Confused") && drawCard.EnergyCost < 0)
@@ -329,6 +331,14 @@
             if (Hand.Count < 10)
                 Hand.Add(card);
             else DiscardPile.Add(card);
+        }
+
+        public void AddToDiscard(Card card)
+        {
+            if (card == null) return;
+            if (HasBuff("Master Reality"))
+                card.UpgradeCard();
+            DiscardPile.Add(card);
         }
 
         public void AddToPotions(Potion potion)

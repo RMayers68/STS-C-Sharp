@@ -9,28 +9,33 @@ namespace STV
             Type = "Skill";
             Rarity = "Uncommon";
             DescriptionModifier = "";
-            EnergyCost = ;
+            EnergyCost = 0;
             if (EnergyCost >= 0)
                 SetTmpEnergyCost(EnergyCost);
             GoldCost = CardRNG.Next(45, 56);
-            SelfDamage = true;
-            if (upgraded)
+            if (Upgraded)
                 UpgradeCard();
         }
 
         public override void CardEffect(Hero hero, List<Enemy> encounter, int turnNumber, int extraDamage = 0)
         {
+            int gamba = 0;
+            for (int i = hero.Hand.Count - 1; i >= 0; i--)
+            {
+                hero.Hand[i].Discard(hero, encounter, turnNumber);
+                gamba++;
+            }
+            hero.DrawCards(gamba);
         }
 
         public override void UpgradeCard()
         {
-            if (!Upgraded) ;
             base.UpgradeCard();
         }
 
         public override string GetDescription()
         {
-            return DescriptionModifier + $"Discard your hand, then draw that many cards. Exhaust.";
+            return DescriptionModifier + $"Discard your hand, then draw that many cards.{(Upgraded ? $"" : " Exhaust.")}";
         }
 
         public override Card AddCard()

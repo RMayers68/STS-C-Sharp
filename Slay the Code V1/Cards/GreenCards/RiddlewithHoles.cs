@@ -1,43 +1,44 @@
 ﻿namespace STV
 {
-    public class PhantasmalKiller : Card
+    public class RiddlewithHoles : Card
     {
-        public PhantasmalKiller(bool Upgraded = false)
+        public RiddlewithHoles(bool Upgraded = false)
         {
-            Name = "Phantasmal Killer";
-            Type = "Skill";
-            Rarity = "Rare";
+            Name = "Riddle with Holes";
+            Type = "Attack";
+            Rarity = "Uncommon";
             DescriptionModifier = "";
-            EnergyCost = 1;
+            EnergyCost = 2;
             if (EnergyCost >= 0)
                 SetTmpEnergyCost(EnergyCost);
             GoldCost = CardRNG.Next(45, 56);
-            BuffID = 49;
-            BuffAmount = 1;
+            AttackDamage = 3;
             if (Upgraded)
                 UpgradeCard();
         }
 
         public override void CardEffect(Hero hero, List<Enemy> encounter, int turnNumber, int extraDamage = 0)
         {
-            hero.AddBuff(BuffID, BuffAmount);
+            int target = hero.DetermineTarget(encounter);
+            for (int i = 0; i < 5; i++)
+                hero.Attack(encounter[target], AttackDamage + extraDamage);
         }
 
         public override void UpgradeCard()
         {
             if (!Upgraded) 
-                EnergyCost--;
+                AttackDamage++;
             base.UpgradeCard();
         }
 
         public override string GetDescription()
         {
-            return DescriptionModifier + $"On your next turn, your Attack damage is doubled.";
+            return DescriptionModifier + $"Deal {AttackDamage} damage 5 times.";
         }
 
         public override Card AddCard()
         {
-            return new PhantasmalKiller();
+            return new RiddlewithHoles();
         }
     }
 }

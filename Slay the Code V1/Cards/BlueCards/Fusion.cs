@@ -16,7 +16,7 @@ namespace STV
             BlockLoops = 1;
             MagicNumber = 3;
             OrbChannels = true;
-            if (upgraded)
+            if (Upgraded)
                 UpgradeCard();
         }
 

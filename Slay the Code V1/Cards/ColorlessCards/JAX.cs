@@ -19,7 +19,7 @@ namespace STV
                         BuffID = 4;
                         BuffAmount = 2;
                         SelfDamage = true;
-                        if (upgraded)
+                        if (Upgraded)
                                 UpgradeCard();
 }
 

@@ -2,7 +2,7 @@
 {
     public class Armaments : Card
     {
-        public Armaments(bool upgraded = false)
+        public Armaments(bool Upgraded = false)
         {
             Name = "Armaments";
             Type = "Skill";
@@ -13,8 +13,7 @@
                 SetTmpEnergyCost(EnergyCost);
             GoldCost = CardRNG.Next(45, 56);
             BlockAmount = 5;
-            Upgraded = false;
-            if (upgraded)
+            if (Upgraded)
                 UpgradeCard();
         }
 

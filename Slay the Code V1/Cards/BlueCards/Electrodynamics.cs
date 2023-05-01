@@ -18,7 +18,7 @@ namespace STV
             BuffAmount = 1;
             HeroBuff = true;
             OrbChannels = true;
-            if (upgraded)
+            if (Upgraded)
                 UpgradeCard();
         }
 

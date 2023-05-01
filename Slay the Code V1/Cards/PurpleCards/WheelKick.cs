@@ -19,7 +19,7 @@ namespace STV
             CardsDrawn = 2;
             Targetable = true;
             SingleAttack = true;
-            if (upgraded)
+            if (Upgraded)
                 UpgradeCard();
         }
 

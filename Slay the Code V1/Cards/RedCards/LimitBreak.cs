@@ -9,28 +9,28 @@ namespace STV
             Type = "Skill";
             Rarity = "Rare";
             DescriptionModifier = "";
-            EnergyCost = ;
+            EnergyCost = 1;
             if (EnergyCost >= 0)
                 SetTmpEnergyCost(EnergyCost);
             GoldCost = CardRNG.Next(45, 56);
-            MagicNumber = 2;
-            if (upgraded)
+            if (Upgraded)
                 UpgradeCard();
         }
 
         public override void CardEffect(Hero hero, List<Enemy> encounter, int turnNumber, int extraDamage = 0)
         {
+            if (hero.FindBuff("Strength") is Buff str && str != null)
+                hero.AddBuff(4, str.Intensity);
         }
 
         public override void UpgradeCard()
         {
-            if (!Upgraded) ;
             base.UpgradeCard();
         }
 
         public override string GetDescription()
         {
-            return DescriptionModifier + $"Double your Strength. Exhaust.";
+            return DescriptionModifier + $"Double your Strength.{(Upgraded ? "" : " Exhaust.")}";
         }
 
         public override Card AddCard()

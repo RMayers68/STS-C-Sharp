@@ -14,7 +14,7 @@ namespace STV
                 SetTmpEnergyCost(EnergyCost);
             GoldCost = CardRNG.Next(45, 56);
             EnergyGained = 1;
-            if (upgraded)
+            if (Upgraded)
                 UpgradeCard();
         }
 

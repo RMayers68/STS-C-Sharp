@@ -6,7 +6,7 @@
         private static readonly Dictionary<int, Card> cards = new()   //Dictionary of Card objects
         {
             { 0, new Anger() },
-            /*{ 1, new Armaments() },
+            { 1, new Armaments() },
             { 2, new Barricade() },
             { 3, new Bash() },
             { 4, new BattleTrance() },
@@ -149,12 +149,12 @@
             { 141, new Terror() },
             { 142, new ToolsoftheTrade() },
             { 143, new Unload() },
-            { 144, new Well-LaidPlans() },
+            { 144, new WellLaidPlans() },
             { 145, new WraithForm() },
             { 146, new Aggregate() },
             { 147, new AllForOne() },
             { 148, new Amplify() },
-            { 149, new Auto-Shields() },
+            { 149, new AutoShields() },
             { 150, new BallLightning() },
             { 151, new Barrage() },
             { 152, new BeamCell() },
@@ -300,7 +300,7 @@
             { 292, new Worship() },
             { 293, new WreathofFlame() },
             { 294, new Bite() },
-            { 295, new J.A.X.() },
+            { 295, new JAX() },
             { 296, new Shiv() },
             { 297, new Apotheosis() },
             { 298, new BandageUp() },
@@ -346,7 +346,7 @@
             { 338, new Safety() },
             { 339, new Smite() },
             { 340, new ThroughViolence() },
-            { 341, new Ascender'sBane() },
+            { 341, new AscendersBane() },
             { 342, new Necronomicurse() },
             { 343, new Parasite() },
             { 344, new Pride() },
@@ -368,8 +368,7 @@
             { 360, new Expunger() },
             { 361, new BecomeAlmighty() },
             { 362, new FameandFortune() },
-            { 363, new LiveForever() },
-             */
+            { 363, new LiveForever() },             
         };
         public static Dictionary<int, Card> cardL = cards;
 
@@ -494,6 +493,7 @@
             { 116, new Buff("Time Warp", true,4) },
             { 117, new Buff("Curiosity", true,3) },
             { 118, new Buff("Minion", true, 3) },
+            { 119, new Buff("Berserk", true, 3) },
 
             /*
              * Buff types:

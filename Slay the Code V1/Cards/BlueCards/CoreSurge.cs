@@ -20,7 +20,7 @@ namespace STV
             Targetable = true;
             HeroBuff = true;
             SingleAttack = true;
-            if (upgraded)
+            if (Upgraded)
                 UpgradeCard();
         }
 

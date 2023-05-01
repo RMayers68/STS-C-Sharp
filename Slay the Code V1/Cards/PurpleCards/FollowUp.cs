@@ -20,7 +20,7 @@ namespace STV
         EnergyGained = 1;
         Targetable = true;
         SingleAttack = true;
-        if (upgraded)
+        if (Upgraded)
             UpgradeCard();
     }
 

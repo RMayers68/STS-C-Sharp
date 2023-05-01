@@ -15,18 +15,20 @@
             BuffID = 21;
             BuffAmount = 1;
             CardsDrawn = 3;
-            HeroBuff = true;
             if (Upgraded)
                 UpgradeCard();
         }
 
         public override void CardEffect(Hero hero, List<Enemy> encounter, int turnNumber, int extraDamage = 0)
         {
+            hero.DrawCards(CardsDrawn);
+            hero.AddBuff(21, 1);
         }
 
         public override void UpgradeCard()
         {
-            if (!Upgraded) ;
+            if (!Upgraded) 
+                CardsDrawn++;
             base.UpgradeCard();
         }
 

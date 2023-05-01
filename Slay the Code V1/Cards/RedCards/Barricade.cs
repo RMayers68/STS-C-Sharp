@@ -2,7 +2,7 @@
 {
     public class Barricade : Card
     {
-        public Barricade(bool upgraded = false)
+        public Barricade(bool Upgraded = false)
         {
             Name = "Barricade";
             Type = "Power";
@@ -12,8 +12,7 @@
             if (EnergyCost >= 0)
                 SetTmpEnergyCost(EnergyCost);
             GoldCost = CardRNG.Next(135, 166);
-            Upgraded = false;
-            if (upgraded)
+            if (Upgraded)
                 UpgradeCard();
         }
 

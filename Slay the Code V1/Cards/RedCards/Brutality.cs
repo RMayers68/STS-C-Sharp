@@ -15,24 +15,23 @@ namespace STV
             GoldCost = CardRNG.Next(45, 56);
             BuffID = 23;
             BuffAmount = 1;
-            HeroBuff = true;
             if (Upgraded)
                 UpgradeCard();
         }
 
         public override void CardEffect(Hero hero, List<Enemy> encounter, int turnNumber, int extraDamage = 0)
         {
+            hero.AddBuff(BuffID, BuffAmount);
         }
 
         public override void UpgradeCard()
         {
-            if (!Upgraded) ;
             base.UpgradeCard();
         }
 
         public override string GetDescription()
         {
-            return DescriptionModifier + $"At the start of your turn, lose 1 HP and draw 1 card."
+            return DescriptionModifier + $"{(Upgraded ? $"Innate. " : "" )}At the start of your turn, lose 1 HP and draw 1 card."
         }
         public override Card AddCard()
         {

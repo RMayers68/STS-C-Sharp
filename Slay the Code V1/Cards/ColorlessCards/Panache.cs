@@ -17,7 +17,7 @@ namespace STV
             BuffID = 93;
             BuffAmount = 10;
             HeroBuff = true;
-            if (upgraded)
+            if (Upgraded)
                 UpgradeCard();
         }
 
