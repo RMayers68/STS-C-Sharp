@@ -61,7 +61,7 @@
             for (int i = 0; i < 8; i++)
             {
                 while (i < 4)
-                {
+                {                   
                     AddToDeck(new Defend());
                     i++;
                 }
@@ -365,7 +365,7 @@
                 card.UpgradeCard();
             if (HasRelic("Ceramic"))
                 GoldChange(9);
-            Deck.Add(new Anger());
+            Deck.Add(card.AddCard());
             Console.WriteLine(card != null ? $"You have added {card.Name} to your Deck!" : "This was a check, remove now.\n");
         }
 

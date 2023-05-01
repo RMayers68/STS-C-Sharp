@@ -188,9 +188,7 @@
             hero.AddAction("Discard",turnNumber);
             if (hero.HasRelic("Hovering Kite") && hero.Actions.FindAll(x => x == $"{turnNumber}: Discard").Count == 1)
                 hero.Energy++;
-            foreach (Card eviscerate in FindAllCardsInCombat(hero, "Eviscerate"))
-                if (eviscerate.TmpEnergyCost != 0)
-                    eviscerate.TmpEnergyCost--;
+
         }
 
         public static void Scry(Hero hero, int amount)

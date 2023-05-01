@@ -1,6 +1,4 @@
 ﻿using ConsoleTableExt;
-using System.Diagnostics.Metrics;
-using System.Xml.Linq;
 using static Global.Functions;
 namespace STV
 {
