@@ -11,7 +11,7 @@
             EnergyCost = 4;
             if (EnergyCost >= 0)
                 SetTmpEnergyCost(EnergyCost);
-            GoldCost = CardRNG.Next(45, 56);
+            GoldCost = CardRNG.Next(68, 83);
             AttackDamage = 18;
             if (Upgraded)
                 UpgradeCard();

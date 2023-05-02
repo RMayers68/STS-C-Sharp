@@ -12,8 +12,8 @@ namespace STV
             EnergyCost = 1;
             if (EnergyCost >= 0)
                 SetTmpEnergyCost(EnergyCost);
-            GoldCost = CardRNG.Next(45, 56);
-            BuffID = 61;
+            GoldCost = CardRNG.Next(68, 83);
+            BuffID = 61;    
             BuffAmount = 1;
             if (Upgraded)
                 UpgradeCard();

@@ -25,8 +25,8 @@
                 foreach (Card c in hero.Hand)
                     c.UpgradeCard();
             }
-            else if (hero.Hand.Find(x => x.IsUpgraded()) is Card armaments && armaments != null)
-                armaments.UpgradeCard();
+            else if (hero.Hand.Find(x => !x.IsUpgraded()) != null)
+                PickCard(hero.Hand,"upgrade").UpgradeCard();
         }
 
         public override void UpgradeCard()

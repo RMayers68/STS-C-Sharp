@@ -11,7 +11,7 @@
             EnergyCost = 1;
             if (EnergyCost >= 0)
                 SetTmpEnergyCost(EnergyCost);
-            GoldCost = CardRNG.Next(45, 56);
+            GoldCost = CardRNG.Next(68, 83);
             AttackDamage = 5;
             CardsDrawn = 1;
             EnergyGained = 1;

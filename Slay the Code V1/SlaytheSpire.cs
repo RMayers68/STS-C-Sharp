@@ -67,6 +67,8 @@ namespace STV
             }
             ScreenWipe();
             Console.WriteLine($"You have chosen the {hero.Name}! Here is the {hero.Name} Deck.\n");
+            // Manual tests go here
+            hero.GoldChange(999);
             ConsoleTableExt.ConsoleTableBuilder.From(hero.Deck).ExportAndWriteLine(TableAligntment.Center);
             Pause();
             for (int act = 1; act <= 3; act++)
@@ -219,16 +221,20 @@ namespace STV
                     {
                         ScreenWipe();
                         Console.WriteLine($"Hello {hero.Name}! You have arrived at a campfire. What would you like to do? Enter your option.\n");
-                        Console.WriteLine("1.Rest (Unless you have too much coffee)");
-                        Console.WriteLine("2.Upgrade (Unless you found a sweet hammer)");
-                        Console.WriteLine("3.Lift (Only if you found some dumbells to train with)");
-                        Console.WriteLine("4.Toke (Only if you found some good shiiiiit on the way up)");
-                        Console.WriteLine("5.Dig (Only if you have something to dig with. Obviously.)");
+                        Console.WriteLine("0: Leave (I would really only do this if I couldn't do anything else.");
+                        Console.WriteLine("1: Rest (Unless you have too much coffee)\n");
+                        Console.WriteLine("2: Upgrade (Unless you found a sweet hammer)\n");
+                        Console.WriteLine("3: Lift (Only if you found some dumbells to train with)\n");
+                        Console.WriteLine("4: Toke (Only if you found some good shiiiiit on the way up)\n");
+                        Console.WriteLine("5: Dig (Only if you have something to dig with. Obviously.)\n");
                         while (!Int32.TryParse(Console.ReadLine(), out restChoice) || restChoice < 0 || restChoice > 5)
                             Console.WriteLine("Invalid input, enter again:");
                         switch (restChoice)
                         {
-                            default: // Rest
+                            default:
+                                Console.WriteLine("Okay, you're really just leaving? See ya bud.");
+                                break;
+                            case 1: // Rest
                                 int regalPillow = 0;
                                 if (hero.HasRelic("Regal"))
                                     regalPillow = 15;
@@ -262,6 +268,7 @@ namespace STV
                                 hero.AddToRelics(Relic.RandomRelic(hero.Name));
                                 break;
                         }
+                        restChoice = 0;
                         Pause();
                     }
                     if (hero.HasRelic("Ancient"))

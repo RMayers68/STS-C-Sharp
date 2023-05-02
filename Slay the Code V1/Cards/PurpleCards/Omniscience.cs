@@ -12,7 +12,7 @@ namespace STV
             EnergyCost = 4;
             if (EnergyCost >= 0)
                 SetTmpEnergyCost(EnergyCost);
-            GoldCost = CardRNG.Next(45, 56);
+            GoldCost = CardRNG.Next(135, 166);
             MagicNumber = 2;
             if (Upgraded)
                 UpgradeCard();

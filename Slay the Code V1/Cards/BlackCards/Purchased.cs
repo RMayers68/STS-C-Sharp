@@ -1,11 +1,11 @@
 ﻿
 namespace STV
 {
-    public class Pride : Card
+    public class Purchased : Card
     {
-        public Pride()
+        public Purchased()
         {
-            Name = "Pride";
+            Name = "Purchased";
             Type = "Curse";
             Rarity = "Common";
             DescriptionModifier = "";
@@ -24,7 +24,7 @@ namespace STV
 
         public override Card AddCard()
         {
-            return new Pride();
+            return new Purchased();
         }
     }
 }

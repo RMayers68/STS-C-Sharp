@@ -11,7 +11,7 @@
             EnergyCost = 0;
             if (EnergyCost >= 0)
                 SetTmpEnergyCost(EnergyCost);
-            GoldCost = CardRNG.Next(45, 56);
+            GoldCost = CardRNG.Next(68, 83);
             BuffID = 21;
             BuffAmount = 1;
             CardsDrawn = 3;

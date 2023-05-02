@@ -20,13 +20,6 @@
         public int TmpEnergyCost { get; set; }
 
         public static readonly Random CardRNG = new();
-
-        // constructors
-        public Card()
-        {
-            this.Name = "Purchased";
-            this.GoldCost = 0;
-        }
         
         //accessors and mutators
         public void SetAttackDamage(int addedDamage)
@@ -40,6 +33,7 @@
             EnergyCost = energyCost;
             TmpEnergyCost = energyCost;
         }
+
         public void SetTmpEnergyCost(int tmpEnergyCost)
         { TmpEnergyCost = tmpEnergyCost; }
 
@@ -86,8 +80,8 @@
         public override string ToString()
         {
             if (EnergyCost == -2)
-                return $"Name: {Name}{(Upgraded ? "+" : "")}\nType: {Type}\nEffect: {GetDescription()}";
-            return $"Name: {Name}{(Upgraded ? "+" : "")}\nEnergy Cost: {(EnergyCost > TmpEnergyCost ? $"{TmpEnergyCost}" : $"{EnergyCost}" )} \tType: {Type}\nEffect: {GetDescription()}\n";
+                return $"Name: {Name}\nType: {Type}\nEffect: {GetDescription()}";
+            return $"Name: {Name}\nEnergy Cost: {(EnergyCost > TmpEnergyCost ? $"{TmpEnergyCost}" : $"{EnergyCost}" )} \tType: {Type}\nEffect: {GetDescription()}\n";
         }
 
         
@@ -232,7 +226,7 @@
                 if (typeExclusion != "")
                     referenceCard = SpecificTypeRandomCard(name,typeExclusion);
                 else referenceCard = RandomCard(name);
-                //cards.Add(new Card(referenceCard));
+                cards.Add(referenceCard.AddCard());
             }
             return cards;
         }
@@ -533,13 +527,12 @@
         // Description String
         public abstract string GetDescription();
 
-        //"Rare" CardRNG.Next(135, 166); "Uncommon" CardRNG.Next(68, 83); CardRNG.Next(45, 56);
-
         public virtual void UpgradeCard()
         {
             if ((Upgraded && Name != "Searing Blow") || Type == "Curse" || (Type == "Status" && Name != "Burn"))
                 return;           
             Upgraded = true;
+            Name += "+";
             Console.WriteLine($"{Name} has been Upgraded!");
         }
     }

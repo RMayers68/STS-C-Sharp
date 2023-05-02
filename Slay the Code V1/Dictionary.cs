@@ -349,7 +349,7 @@
             { 341, new AscendersBane() },
             { 342, new Necronomicurse() },
             { 343, new Parasite() },
-            { 344, new Pride() },
+            { 344, new Purchased() },
             { 345, new CurseoftheBell() },
             { 346, new Regret() },
             { 347, new Shame() },

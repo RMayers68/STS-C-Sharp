@@ -12,7 +12,7 @@ namespace STV
             EnergyCost = 3;
             if (EnergyCost >= 0)
                 SetTmpEnergyCost(EnergyCost);
-            GoldCost = CardRNG.Next(45, 56);
+            GoldCost = CardRNG.Next(135, 166);
             AttackDamage = 7;
             if (Upgraded)
                 UpgradeCard();

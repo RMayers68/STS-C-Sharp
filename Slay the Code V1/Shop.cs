@@ -16,7 +16,7 @@ namespace STV
             List<Relic> shopRelics = new();
             for (int i = 0; i < 7; i++)
             {
-                Card shopCard = new Anger();
+                Card shopCard = new Purchased();
                 while (shopCard.Type != "Attack" && i < 2)
                     shopCard = Card.RandomCards(hero.Name, 1)[0];
                 while (shopCard.Type != "Skill" && i >= 2 && i < 4)
@@ -52,7 +52,7 @@ namespace STV
                 Console.WriteLine($"Hello {hero.Name}! You have {hero.Gold} Gold. What would you like to purchase? Enter your option or press 0 to leave.\n");
                 Console.WriteLine("\nCards:\n*************************************");
                 for (int i = 1; i <= 7; i++)
-                    Console.WriteLine($"{i}: {shopCards[i - 1].Name} {(shopCards[i - 1].Name == "Purchased" ? "" : " - " + $"{( discount > 1 ? $"{shopCards[i - 1].GetGoldCost() / discount}" : $"{shopCards[i - 1].GetGoldCost()}")}")}");
+                    Console.WriteLine($"{i}: {shopCards[i - 1].Name} {(shopCards[i - 1].Name == "Purchased" ? "" : "- " + $"{( discount > 1 ? $"{shopCards[i - 1].GetGoldCost() / discount}" : $"{shopCards[i - 1].GetGoldCost()}")}")}");
                 Console.WriteLine("\nPotions:\n*************************************");
                 for (int i = 8; i <= 10; i++)
                     Console.WriteLine($"{i}: {shopPotions[i - 8].Name} {(shopPotions[i - 8].Name == "Purchased" ? "" : "- " + $"{(discount > 1 ? $"{shopPotions[i - 8].GoldCost / discount}" : $"{shopPotions[i - 8].GoldCost}")}")}");
@@ -76,7 +76,7 @@ namespace STV
                             hero.Gold = newHeroGold;
                             hero.AddToDeck(shopCard);
                             Console.WriteLine($"You have purchased {shopCard.Name}");
-                            //shopCards[shopChoice - 1] = new Card(hero.HasRelic("Courier") ? Card.RandomCards(hero.Name, 1)[0] : new());
+                            shopCards[shopChoice - 1] = hero.HasRelic("Courier") ? Card.RandomCards(hero.Name, 1)[0] : new Purchased();
                         }
                         else Console.WriteLine("You don't have enough Gold to buy this card.");
                     }
@@ -114,7 +114,7 @@ namespace STV
                             hero.Gold = newHeroGold;
                             hero.AddToRelics(shopRelic);
                             Console.WriteLine($"You have purchased {shopRelic.Name}");
-                            shopRelics[shopChoice - 8] = new Relic(hero.HasRelic("Courier") ? shopChoice < 13 ? Relic.RandomRelic(hero.Name) : Relic.ShopRelic(hero.Name) : new());
+                            shopRelics[shopChoice - 11] = new Relic(hero.HasRelic("Courier") ? shopChoice < 13 ? Relic.RandomRelic(hero.Name) : Relic.ShopRelic(hero.Name) : new());
                         }
                         else Console.WriteLine("You don't have enough Gold to buy this relic.");
                     }
