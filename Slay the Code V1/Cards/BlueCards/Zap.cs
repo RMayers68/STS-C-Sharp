@@ -7,12 +7,12 @@ namespace STV
         {
             Name = "Zap";
             Type = "Skill";
-            Rarity = "Common";
+            Rarity = "Basic";
             DescriptionModifier = "";
             EnergyCost = 1;
             if (EnergyCost >= 0)
                 SetTmpEnergyCost(EnergyCost);
-            GoldCost = CardRNG.Next(45, 56);
+            GoldCost = 0;
             if (Upgraded)
                 UpgradeCard();
         }

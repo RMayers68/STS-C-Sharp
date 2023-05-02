@@ -7,12 +7,12 @@ namespace STV
         {
             Name = "Eruption";
             Type = "Attack";
-            Rarity = "Common";
+            Rarity = "Basic";
             DescriptionModifier = "";
             EnergyCost = 2;
             if (EnergyCost >= 0)
                 SetTmpEnergyCost(EnergyCost);
-            GoldCost = CardRNG.Next(45, 56);
+            GoldCost = 0;
             AttackDamage = 9;
             if (Upgraded)
                 UpgradeCard();

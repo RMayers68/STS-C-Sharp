@@ -7,12 +7,12 @@ namespace STV
         {
             Name = "Neutralize";
             Type = "Attack";
-            Rarity = "Common";
+            Rarity = "Basic";
             DescriptionModifier = "";
             EnergyCost = 0;
             if (EnergyCost >= 0)
                 SetTmpEnergyCost(EnergyCost);
-            GoldCost = CardRNG.Next(45, 56);
+            GoldCost = 0;
             AttackDamage = 3;
             BuffID = 2;
             BuffAmount = 1;

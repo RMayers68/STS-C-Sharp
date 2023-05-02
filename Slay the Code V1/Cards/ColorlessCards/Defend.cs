@@ -7,12 +7,12 @@ namespace STV
         {
             Name = "Defend";
             Type = "Skill";
-            Rarity = "Common";
+            Rarity = "Basic";
             DescriptionModifier = "";
             EnergyCost = 1;
             if (EnergyCost >= 0)
                 SetTmpEnergyCost(EnergyCost);
-            GoldCost = CardRNG.Next(45, 56);
+            GoldCost = 0;
             BlockAmount = 5;
             if (Upgraded)
                 UpgradeCard();

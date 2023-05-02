@@ -6,7 +6,7 @@
         {
             Name = "Bash";
             Type = "Attack";
-            Rarity = "Starter";
+            Rarity = "Basic";
             DescriptionModifier = "";
             EnergyCost = 2;
             if (EnergyCost >= 0)
