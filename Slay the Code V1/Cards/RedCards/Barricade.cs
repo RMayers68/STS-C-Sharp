@@ -10,7 +10,7 @@
             DescriptionModifier = "";
             EnergyCost = 3;
             if (EnergyCost >= 0)
-                SetTmpEnergyCost(EnergyCost);
+                TmpEnergyCost = EnergyCost;
             GoldCost = CardRNG.Next(135, 166);
             if (Upgraded)
                 UpgradeCard();

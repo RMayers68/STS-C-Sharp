@@ -10,7 +10,7 @@
             DescriptionModifier = "";
             EnergyCost = -1;
             if (EnergyCost >= 0)
-                SetTmpEnergyCost(EnergyCost);
+                TmpEnergyCost = EnergyCost;
             GoldCost = CardRNG.Next(135, 166);
             MagicNumber = 0;
             if (Upgraded)

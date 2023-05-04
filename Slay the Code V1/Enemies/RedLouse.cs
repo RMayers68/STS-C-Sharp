@@ -10,7 +10,7 @@
             Hp = MaxHP;
             Block = 0;
             Buffs = new();
-            AddBuff(3, EnemyRNG.Next(3, 8));
+            AddBuff(5, EnemyRNG.Next(3, 8));
             Actions = new();
             Relics = new();
             D = EnemyRNG.Next(5,8);

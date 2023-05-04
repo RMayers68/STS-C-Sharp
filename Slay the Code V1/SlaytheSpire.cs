@@ -1,4 +1,4 @@
-﻿// Richard Mayers, April 21th, 2023
+﻿// Richard Mayers, May 4th, 2023
 using static Global.Functions;
 using ConsoleTableExt;
 using STV;
@@ -65,12 +65,6 @@ namespace STV
                 Console.BackgroundColor = ConsoleColor.DarkBlue;
                 hero.Stance = "None";
             }
-            ScreenWipe();
-            Console.WriteLine($"You have chosen the {hero.Name}! Here is the {hero.Name} Deck.\n");
-            // Manual tests go here
-            hero.GoldChange(999);
-            ConsoleTableExt.ConsoleTableBuilder.From(hero.Deck).ExportAndWriteLine(TableAligntment.Center);
-            Pause();
             for (int act = 1; act <= 3; act++)
             {
                 //Initial RNG chances
@@ -250,8 +244,8 @@ namespace STV
                             case 2: // Upgrade
                                 if (hero.HasRelic("Fusion"))
                                     Console.WriteLine("You can't upgrade a card due to Fusion Hammer's effect.");
-                                if (hero.Deck.Any(x => !x.IsUpgraded()))
-                                    Card.PickCard(hero.Deck.FindAll(x => !x.IsUpgraded()), "upgrade").UpgradeCard();
+                                if (hero.Deck.FindAll(x => x.Type != "Curse").Any(x => !x.Upgraded))
+                                    Card.PickCard(hero.Deck.FindAll(x => !x.Upgraded), "upgrade").UpgradeCard();
                                 break;
                             case 3: // Lift
                                 if (hero.FindRelic("Girya") is Relic girya && girya != null)

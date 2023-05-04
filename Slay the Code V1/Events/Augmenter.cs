@@ -1,6 +1,6 @@
 ﻿namespace STV
 {
-    public class Augmenter
+    public class Augmenter : Event
     {
     }
 }

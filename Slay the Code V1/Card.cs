@@ -21,33 +21,13 @@
 
         public static readonly Random CardRNG = new();
         
-        //accessors and mutators
-        public void SetAttackDamage(int addedDamage)
-        { this.AttackDamage += addedDamage; }
-
-        public void SetBlockAmount(int addedDamage)
-        { this.BlockAmount += addedDamage; }
+        // Energy Cost Mutator
 
         public void SetEnergyCost(int energyCost)
         {
             EnergyCost = energyCost;
             TmpEnergyCost = energyCost;
         }
-
-        public void SetTmpEnergyCost(int tmpEnergyCost)
-        { TmpEnergyCost = tmpEnergyCost; }
-
-        public int GetGoldCost()
-        { return GoldCost; }
-
-        public int GetMagicNumber()
-        { return MagicNumber; }
-
-        public string GetName()
-        { return $"{Name}{(Upgraded ? "+" : "")}"; }
-
-        public bool IsUpgraded()
-        { return Upgraded; }
 
         //comparators and equals
         public override bool Equals(object obj)
@@ -111,10 +91,10 @@
         public static Card PickCard(List<Card> list, string action)
         {
             int cardChoice;
-            if (list.Count < 0) { return null; }
+            if (list.Count < 1) { return new Purchased(); }
             Console.WriteLine($"Which card would you like to {action}?");
-            for (int i = 0; i < list.Count; i++)
-                Console.WriteLine($"{i + 1}:{list[i].Name}");
+            for (int i = 1; i <= list.Count; i++)
+                Console.WriteLine($"{i}:{list[i-1]}");
             while (!Int32.TryParse(Console.ReadLine(), out cardChoice) || cardChoice < 1 || cardChoice > list.Count)
                 Console.WriteLine("Invalid input, enter again:");
             return list[cardChoice - 1];
@@ -141,6 +121,8 @@
         //Moving Cards to different List methods
         public void MoveCard(List<Card> from, List<Card> to)
         {
+            if (Name == "Purchased")
+                return;
             from.Remove(this);
             to.Add(this);
         }
@@ -214,7 +196,7 @@
         public static void AddShivs(Hero hero, int amount)
         {
             for (int i = 0; i < amount; i++) ;
-                //hero.AddToHand(new Card(Dict.cardL[296]));
+                hero.AddToHand(new Shiv());
         }
 
         public static List<Card> RandomCards(string name, int count, string typeExclusion = "")
@@ -330,7 +312,7 @@
                 }
             }
 
-            // Moves the Card Played from Hand to Designated Location and check certain relic effects (that can be said in a lot of sections oops)
+            // Moves the Card Played from Hand to Designated Location and check certain relic effects 
             if (FindCard(Name, hero.Hand) != null)
             {
                 if (Type == "Skill")
@@ -360,7 +342,7 @@
                         hero.CombatHeal(2);
                     hero.Hand.Remove(this);
                     if (hero.HasRelic("Mummified") && hero.Hand.Count != 0)
-                        hero.Hand[CardRNG.Next(hero.Hand.Count)].SetTmpEnergyCost(0);
+                        hero.Hand[CardRNG.Next(hero.Hand.Count)].TmpEnergyCost = 0;
                     if (hero.FindBuff("Heatsinks") is Buff heat && heat != null)
                         hero.DrawCards(heat.Intensity);
                     if (hero.FindBuff("Storm") is Buff storm && storm != null)
@@ -445,8 +427,8 @@
                 if (hero.HasBuff("Double Damage"))
                     extraDamage += extraDamage + AttackDamage;
             }
-            //else if (hero.HasBuff("Hex"))
-            //hero.AddToDrawPile(new(Dict.cardL[356]),true);
+            else if (hero.HasBuff("Hex"))
+            hero.AddToDrawPile(new Dazed(),true);
 
             CardEffect(hero, encounter, turnNumber, extraDamage);
 

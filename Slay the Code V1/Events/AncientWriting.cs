@@ -1,6 +1,6 @@
 ﻿namespace STV
 {
-    public class AncientWriting
+    public class AncientWriting : Event
     {
     }
 }

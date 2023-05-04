@@ -1,6 +1,6 @@
 ﻿namespace STV
 {
-    public class BigFish
+    public class BigFish : Event
     {
     }
 }

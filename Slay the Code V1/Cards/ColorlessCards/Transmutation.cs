@@ -11,7 +11,7 @@ namespace STV
             DescriptionModifier = "";
             EnergyCost = -1;
             if (EnergyCost >= 0)
-                SetTmpEnergyCost(EnergyCost);
+                TmpEnergyCost = EnergyCost;
             GoldCost = CardRNG.Next(135, 166);
             if (Upgraded)
                 UpgradeCard();
@@ -25,7 +25,7 @@ namespace STV
                 transmutation = RandomCard("Colorless");
                 if (Upgraded)
                     transmutation.UpgradeCard();
-                transmutation.SetTmpEnergyCost(0);
+                transmutation.TmpEnergyCost = 0;
                 hero.AddToHand( transmutation);
             }
             hero.Energy = 0;

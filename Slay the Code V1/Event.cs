@@ -2,9 +2,12 @@
 
 namespace STV
 {
-    public class Event
+    public abstract class Event
     {
-        private static readonly Random EventRNG = new();
+        public string Name { get; set; }
+        public string StartOfEncounter { get; set; }
+        public List<string> Options { get; set; }
+        public static readonly Random EventRNG = new();
         public static void EventDecider(Hero hero, int actModifier)
         {
             hero.Actions.Clear();
@@ -12,5 +15,9 @@ namespace STV
             actModifier.CompareTo(actModifier);
             return;
         }
+
+        public virtual void EventAction(Hero hero) { }
+
+        public virtual string Result(int result) { return ""; }
     }
 }

@@ -18,14 +18,11 @@ namespace STV
             StartOfCombat(hero, encounter);
             //Check HP values to end encounter when one group is reduced to 0
             while ((!encounter.All(x => x.Hp == 0)) && (hero.Hp != 0) && encounter.Count > 0)
-            {
-                // Start of Player Turn              
+            {             
                 StartOfPlayerTurn(hero, encounter, turnNumber);
                 turnNumber++;
-                Pause();
-                // PLAYER TURN MENU PLUS ALL ACTIONS DETAILS                
+                Pause();             
                 PlayerTurn(hero,encounter,turnNumber);
-                // Orbin Time
                 OrbinTime(hero, encounter);
                 Console.WriteLine("Enemy's Turn!\n");
                 for (int i = encounter.Count - 1; i >= 0; i--)
@@ -40,8 +37,7 @@ namespace STV
                         hero.Block -= 15;
                     else hero.Block = 0;
                 }
-            }
-            // END OF COMBAT
+            }   
             ScreenWipe();
             if (hero.Hp <= 0)
                 Console.WriteLine("\nYou were Defeated!\n");
@@ -54,14 +50,14 @@ namespace STV
         {
             if (hero.HasRelic("Mark of Pain"))
                 for (int i = 0; i < 2; i++)
-                    //hero.DrawPile.Add(new(Dict.cardL[357]));
+                    hero.DrawPile.Add(new Wound());
             // Init Shuffle
             hero.ShuffleDrawPile();
             if (hero.HasRelic("Ench"))
             {
-                //Card enchiridion = new(Card.RandomCards(hero.Name, 1, "Power")[0]);
-                //enchiridion.SetTmpEnergyCost(0);
-                //hero.AddToHand(enchiridion);
+                Card enchiridion = Card.RandomCards(hero.Name, 1, "Power")[0];
+                enchiridion.TmpEnergyCost = 0;
+                hero.AddToHand(enchiridion);
             }
             if (hero.HasRelic("Runic Capacitor"))
                 hero.OrbSlots += 2;
@@ -140,13 +136,13 @@ namespace STV
             hero.DrawCards(5 - hero.Hand.Count);
             if (hero.FindRelic("Water") is Relic water && water != null)
                 for (int i = 0; i < water.EffectAmount; i++)
-                    //hero.AddToHand(new Card(Dict.cardL[336]));
+                    hero.AddToHand(new Miracle());
             if (hero.HasRelic("Snake"))
                 hero.DrawCards(2);
             if (hero.HasRelic("Preparation"))
                 hero.DrawCards(2);
             if (hero.HasRelic("Toolbox"))
-                //hero.AddToHand(new(Card.PickCard(Card.RandomCards("Colorless", 3), "add to your hand")));
+               hero.AddToHand(Card.PickCard(Card.RandomCards("Colorless", 3), "add to your hand"));
             // Gambling Chip
             if (hero.HasRelic("Gambling"))
                 GamblingIsGood(hero);
@@ -183,10 +179,7 @@ namespace STV
                     for (int i = 0; i < magnet.Intensity; i++)
                         hero.AddToHand(Card.RandomCard("Colorless"));
                 if (hero.HasBuff("Collect"))
-                {
-                    //hero.AddToHand(new(Dict.cardL[336]));
-                    hero.Hand.Last().UpgradeCard();
-                }
+                    hero.AddToHand(new Miracle(true));
                 if (hero.FindBuff("Deva Form") is Buff deva && deva != null)
                 {
                     deva.CounterSet(deva.Intensity);
@@ -198,19 +191,29 @@ namespace STV
                     hero.AddBuff(10, devote.Intensity);
                 if (hero.FindBuff("Creative AI") is Buff creative && creative != null)
                     for (int i = 0; i < creative.Intensity; i++)
-                        //hero.AddToHand(new(Card.SpecificTypeRandomCard(hero.Name, "Power")));
+                        hero.AddToHand(Card.SpecificTypeRandomCard(hero.Name, "Power"));
                 if (hero.FindBuff("Battle Hymn") is Buff hymn && hymn != null)
-                    //for (int i = 0; i < hymn.Intensity; i++)
-                        //hero.AddToHand(new(Dict.cardL[339]));
+                    for (int i = 0; i < hymn.Intensity; i++)
+                        hero.AddToHand(new Smite());
                 if (hero.FindBuff("Hello") is Buff hello && hello != null)
-                    //for (int i = 0; i < hello.Intensity; i++)
-                        //hero.AddToHand(new(Card.SpecificRarityRandomCard(hero.Name, "Common")));
+                    for (int i = 0; i < hello.Intensity; i++)
+                        hero.AddToHand(Card.SpecificRarityRandomCard(hero.Name, "Common"));
                 if (hero.FindBuff("Machine Learning") is Buff machine && machine != null)
                     hero.DrawCards(machine.Intensity);
                 if (hero.HasBuff("Draw Reduction"))
                     hero.DrawCards(4);
                 else hero.DrawCards(5);
                 // Checking for "Next turn" buffs/debuffs, activating their effects, then removing them
+                if (hero.FindBuff("Rage") is Buff rage && rage != null)
+                    hero.Buffs.Remove(rage);
+                if (hero.FindBuff("Double Tap") is Buff dtap && dtap != null)
+                    hero.Buffs.Remove(dtap);
+                if (hero.FindBuff("Burst") is Buff burst && burst != null)
+                    hero.Buffs.Remove(burst);
+                if (hero.FindBuff("Amplify") is Buff amp && amp != null)
+                    hero.Buffs.Remove(amp);
+                if (hero.FindBuff("Flame Barrier") is Buff barrier && barrier != null)
+                    hero.Buffs.Remove(barrier);
                 if (hero.FindBuff("Energized") is Buff energized && energized != null)
                 {
                     hero.GainTurnEnergy(energized.Intensity);
@@ -338,8 +341,8 @@ namespace STV
                 hero.DrawCards(1);
             if (hero.HasRelic("Snecko Eye"))
                 hero.DrawCards(2);
-            if (hero.HasRelic("Warped") && hero.Hand.Find(x => x.IsUpgraded()) is Card armaments && armaments != null)
-                armaments.UpgradeCard();
+            if (hero.HasRelic("Warped") && hero.Hand.Find(x => !x.Upgraded) is Card tongs && tongs != null)
+                tongs.UpgradeCard();
             for (int i = 0; i < encounter.Count; i++)
                 encounter[i].SetEnemyIntent(turnNumber, encounter);
             hero.Energy += hero.MaxEnergy;
@@ -385,45 +388,45 @@ namespace STV
                     switch (i)
                     {
                         case 1:
-                            Console.WriteLine($"(R)ead Card's Effects {(hero.Hand.Count >= i ? Tab(9) + i + ":" + hero.Hand[i - 1].GetName() : "")}\n");
+                            Console.WriteLine($"[R]ead Card's Effects {(hero.Hand.Count >= i ? Tab(9) + i + ":" + hero.Hand[i - 1].Name : "")}\n");
                             break;
                         case 2:
-                            Console.WriteLine($"View Your (B)uffs/Debuffs {(hero.Hand.Count >= i ? Tab(8) + i + ":" + hero.Hand[i - 1].GetName() : "")}\n");
+                            Console.WriteLine($"View Your [B]uffs/Debuffs {(hero.Hand.Count >= i ? Tab(8) + i + ":" + hero.Hand[i - 1].Name : "")}\n");
                             break;
                         case 3:
-                            Console.WriteLine($"Use (P)otion {(hero.Hand.Count >= i ? Tab(10) + i + ":" + hero.Hand[i - 1].GetName() : "")}\n");
+                            Console.WriteLine($"Use [P]otion {(hero.Hand.Count >= i ? Tab(10) + i + ":" + hero.Hand[i - 1].Name : "")}\n");
                             break;
                         case 4:
-                            Console.WriteLine($"View Enemy (I)nformation {(hero.Hand.Count >= i ? Tab(8) + i + ":" + hero.Hand[i - 1].GetName() : "")}\n");
+                            Console.WriteLine($"View Enemy [I]nformation {(hero.Hand.Count >= i ? Tab(8) + i + ":" + hero.Hand[i - 1].Name : "")}\n");
                             break;
                         case 5:
-                            Console.WriteLine($"(E)nd Turn {(hero.Hand.Count >= i ? Tab(10) + i + ":" + hero.Hand[i - 1].GetName() : "")}\n");
+                            Console.WriteLine($"[E]nd Turn {(hero.Hand.Count >= i ? Tab(10) + i + ":" + hero.Hand[i - 1].Name : "")}\n");
                             break;
                         case 6:
-                            Console.WriteLine($"******************** {(hero.Hand.Count >= i ? Tab(9) + i + ":" + hero.Hand[i - 1].GetName() : "")}\n");
+                            Console.WriteLine($"******************** {(hero.Hand.Count >= i ? Tab(9) + i + ":" + hero.Hand[i - 1].Name : "")}\n");
                             break;
                         case 7:
-                            Console.WriteLine($"{hero.Name} Information: {(hero.Hand.Count >= i ? Tab(9) + i + ":" + hero.Hand[i - 1].GetName() : "")}\n");
+                            Console.WriteLine($"{hero.Name} Information: {(hero.Hand.Count >= i ? Tab(9) + i + ":" + hero.Hand[i - 1].Name : "")}\n");
                             break;
                         case 8:
-                            Console.WriteLine($"(Draw) Pile:{hero.DrawPile.Count}\t(Discard) Pile:{hero.DiscardPile.Count}{Tab(1)}(Exhaust)ed:{hero.ExhaustPile.Count} {(hero.Hand.Count >= i ? Tab(5) + i + ":" + hero.Hand[i - 1].GetName() : "")}\n");
+                            Console.WriteLine($"[Draw] Pile:{hero.DrawPile.Count}\t[Discard] Pile:{hero.DiscardPile.Count}{Tab(1)}[Exhaust]ed:{hero.ExhaustPile.Count} {(hero.Hand.Count >= i ? Tab(5) + i + ":" + hero.Hand[i - 1].Name : "")}\n");
                             break;
                         case 9:
-                            Console.WriteLine($"HP:{hero.Hp}/{hero.MaxHP} + {hero.Block} Block\tEnergy:{hero.Energy}/{hero.MaxEnergy} {(hero.Hand.Count >= i ? Tab(7) + i + ":" + hero.Hand[i - 1].GetName() : "")}\n");
+                            Console.WriteLine($"HP:{hero.Hp}/{hero.MaxHP} + {hero.Block} Block\tEnergy:{hero.Energy}/{hero.MaxEnergy} {(hero.Hand.Count >= i ? Tab(7) + i + ":" + hero.Hand[i - 1].Name : "")}\n");
                             break;
                         case 10:
-                            Console.WriteLine($"{(hero.Hand.Count >= i ? Tab(11) + i + ":" + hero.Hand[i - 1].GetName() : "")}\n");
+                            Console.WriteLine($"{(hero.Hand.Count >= i ? Tab(11) + i + ":" + hero.Hand[i - 1].Name : "")}\n");
                             break;
                     }
                 }
-                if (hero.Stance != null)
+                if (hero.Stance != "None")
                     Console.WriteLine($"{hero.Name}'s Stance: {hero.Stance}");
                 if (hero.Orbs.Count > 0)
                 {
                     int orbNumber = 0;
                     Console.Write($"{hero.Name}'s Orbs:\n");
                     foreach (var orb in hero.Orbs)
-                        Console.Write($"{orbNumber++}: {orb.Name} - {orb.Effect}{Tab(2)}");
+                        Console.Write($"{++orbNumber}: {orb.Name} - {orb.Effect}{Tab(2)}");
                 }
                 if (hero.HasRelic("Cultist"))
                     Console.WriteLine($"{(CombatRNG.Next(2) == 0 ? "CCCAAAWWWWWWWWW" : "CAW CAW CAWWW")}");
@@ -462,7 +465,6 @@ namespace STV
                             Console.WriteLine("Invalid input, enter again:");
                             break;
                         case "R":
-                            //ConsoleTableBuilder.From(hand).ExportAndWriteLine(TableAligntment.Center);
                             foreach (Card c in hero.Hand)
                                 Console.WriteLine(c.ToString());
                             break;
@@ -614,9 +616,9 @@ namespace STV
                     if (hero.Hand[i].Name == "Sands of Time" && hero.Hand[i].EnergyCost != 0)
                         hero.Hand[i].EnergyCost--;
                     if (hero.Hand[i].Name == "Windmill Strike")
-                        hero.Hand[i].SetAttackDamage(hero.Hand[i].GetMagicNumber());
+                        hero.Hand[i].AttackDamage += hero.Hand[i].MagicNumber;
                     if (hero.Hand[i].Name == "Perserverance")
-                        hero.Hand[i].SetBlockAmount(hero.Hand[i].GetMagicNumber());
+                        hero.Hand[i].BlockAmount += hero.Hand[i].MagicNumber;
                     if (hero.FindBuff("Establishment") is Buff establish && establish != null)
                         hero.Hand[i].SetEnergyCost(hero.Hand[i].EnergyCost - 1);
                     continue;
@@ -637,10 +639,10 @@ namespace STV
             foreach (Card c in hero.Hand)
                 c.DescriptionModifier = ""; // Resetting temp Retain effects
             if (hero.HasRelic("Nilry's"))
-                //hero.AddToDrawPile(new(Card.PickCard(Card.RandomCards(hero.Name, 3), "add to your drawpile")), true);
+                hero.AddToDrawPile(Card.PickCard(Card.RandomCards(hero.Name, 3), "add to your drawpile"), true);
             if (hero.FindBuff("Study") is Buff study && study != null)
                 for (int i = 0; i < study.Intensity; i++)
-                    //hero.AddToDrawPile(new(Dict.cardL[335]), true);
+                    hero.AddToDrawPile(new Insight(), true);
             if (hero.FindBuff("Constricted") is Buff constrict && constrict != null)
                 encounter[0].NonAttackDamage(hero, constrict.Intensity, "Constrict");
             foreach (Enemy e in encounter)

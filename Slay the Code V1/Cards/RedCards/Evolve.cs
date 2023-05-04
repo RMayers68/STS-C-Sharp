@@ -11,7 +11,7 @@ namespace STV
             DescriptionModifier = "";
             EnergyCost = 1;
             if (EnergyCost >= 0)
-                SetTmpEnergyCost(EnergyCost);
+                TmpEnergyCost = EnergyCost;
             GoldCost = CardRNG.Next(68, 83);
             BuffID = 28;
             BuffAmount = 1;

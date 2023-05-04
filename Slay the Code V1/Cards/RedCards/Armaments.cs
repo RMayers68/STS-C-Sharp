@@ -10,7 +10,7 @@
             DescriptionModifier = "";
             EnergyCost = 1;
             if (EnergyCost >= 0)
-                SetTmpEnergyCost(EnergyCost);
+                TmpEnergyCost = EnergyCost;
             GoldCost = CardRNG.Next(45, 56);
             BlockAmount = 5;
             if (Upgraded)
@@ -25,7 +25,7 @@
                 foreach (Card c in hero.Hand)
                     c.UpgradeCard();
             }
-            else if (hero.Hand.Find(x => !x.IsUpgraded()) != null)
+            else if (hero.Hand.Find(x => !x.Upgraded) != null)
                 PickCard(hero.Hand,"upgrade").UpgradeCard();
         }
 

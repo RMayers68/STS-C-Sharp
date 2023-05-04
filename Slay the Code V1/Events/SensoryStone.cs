@@ -1,6 +1,6 @@
 ﻿namespace STV
 {
-    public class SensoryStone
+    public class SensoryStone : Event
     {
     }
 }

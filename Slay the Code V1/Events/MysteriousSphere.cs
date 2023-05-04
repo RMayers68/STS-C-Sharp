@@ -1,6 +1,6 @@
 ﻿namespace STV
 {
-    public class MysteriousSphere
+    public class MysteriousSphere : Event
     {
     }
 }

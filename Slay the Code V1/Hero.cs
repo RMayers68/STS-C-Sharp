@@ -46,6 +46,7 @@
                 this.Potions = new();
                 this.Actions = new();
                 this.Orbs = new();
+                this.Stance = "None";
                 this.OrbSlots = 1;
                 this.Gold = 99;
                 this.EasyFights = 0;
@@ -207,8 +208,8 @@
                     else if (drawCard.Name == "Deus Ex Machina")
                     {
                         drawCard.MoveCard(Hand, ExhaustPile);
-                        for (int j = 0; j < drawCard.GetMagicNumber(); i++) ;
-                            //AddToHand(new Card(Dict.cardL[336]));
+                        for (int j = 0; j < drawCard.MagicNumber; i++) ;
+                            AddToHand(new Miracle());
                     }
                 }
             }
@@ -346,6 +347,7 @@
             if (potion == null) return;
             if (Potions.Count < PotionSlots)
                 Potions.Add(new(potion));
+            else Console.WriteLine("You're potions are full and you can not add more of them.");
         }
 
         public void AddToDeck(Card card)

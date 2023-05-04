@@ -1,6 +1,6 @@
 ﻿namespace STV
 {
-    public class TheSssserpent
+    public class TheSssserpent : Event
     {
     }
 }

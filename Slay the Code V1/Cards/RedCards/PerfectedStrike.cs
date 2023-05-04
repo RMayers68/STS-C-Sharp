@@ -11,7 +11,7 @@ namespace STV
             DescriptionModifier = "";
             EnergyCost = 2;
             if (EnergyCost >= 0)
-                SetTmpEnergyCost(EnergyCost);
+                TmpEnergyCost = EnergyCost;
             GoldCost = CardRNG.Next(45, 56);
             AttackDamage = 6;
             MagicNumber = 2;

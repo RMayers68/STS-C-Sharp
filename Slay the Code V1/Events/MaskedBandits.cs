@@ -1,6 +1,6 @@
 ﻿namespace STV
 {
-    public class MaskedBandits
+    public class MaskedBandits : Event
     {
     }
 }

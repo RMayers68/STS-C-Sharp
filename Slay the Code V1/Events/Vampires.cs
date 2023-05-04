@@ -1,6 +1,6 @@
 ﻿namespace STV
 {
-    public class Vampires
+    public class Vampires : Event
     {
     }
 }

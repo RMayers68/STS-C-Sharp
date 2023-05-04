@@ -1,6 +1,6 @@
 ﻿namespace STV
 {
-    public class LivingWall
+    public class LivingWall : Event
     {
     }
 }

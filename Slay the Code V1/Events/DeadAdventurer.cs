@@ -1,6 +1,6 @@
 ﻿namespace STV
 {
-    public class DeadAdventurer
+    public class DeadAdventurer : Event
     {
     }
 }

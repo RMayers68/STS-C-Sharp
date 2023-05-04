@@ -175,7 +175,7 @@
 		public void NonAttackDamage(Actor target, int damage, string effect)
 		{
 			if (Hp <= 0) return;
-            Console.Write($"\n{Name} dealt {damage} from their {effect} to the {target.Name}");
+            Console.Write($"\n{target.Name} suffered {damage} from {effect}");
             damage = ReduceDamageByBlock(target,damage);
             if (damage > 0)
                 target.HPLoss(damage);
@@ -251,11 +251,8 @@
             {
                 Hp += heal;
                 if (Hp > MaxHP)
-                {
-                    heal = Hp + heal - MaxHP;
                     Hp = MaxHP;
-                }
-                Console.WriteLine($"{Name} has healed {heal} HP and are now at {Hp}/{MaxHP} HP!");
+                Console.WriteLine($"{Name} has healed {(Hp == MaxHP ? "all" : $"{heal}" )} HP and is now at {Hp}/{MaxHP} HP!");
             }
         }
         public int IntangibleCheck(int damage)

@@ -11,7 +11,7 @@ namespace STV
             DescriptionModifier = "";
             EnergyCost = 1;
             if (EnergyCost >= 0)
-                SetTmpEnergyCost(EnergyCost);
+                TmpEnergyCost = EnergyCost;
             GoldCost = CardRNG.Next(68, 83);
             MagicNumber = 3;
             if (Upgraded)
@@ -22,7 +22,7 @@ namespace STV
         {
             Card discovery;
             discovery = PickCard(RandomCards(hero.Name, MagicNumber), "add to your hand");
-            discovery.SetTmpEnergyCost(0);
+            discovery.TmpEnergyCost = 0;
             hero.AddToHand(discovery);
         }
 

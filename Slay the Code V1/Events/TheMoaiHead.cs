@@ -1,6 +1,6 @@
 ﻿namespace STV
 {
-    public class TheMoaiHead
+    public class TheMoaiHead : Event
     {
     }
 }

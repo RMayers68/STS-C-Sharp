@@ -10,7 +10,7 @@
             DescriptionModifier = "";
             EnergyCost = 0;
             if (EnergyCost >= 0)
-                SetTmpEnergyCost(EnergyCost);
+                TmpEnergyCost = EnergyCost;
             GoldCost = CardRNG.Next(68, 83);
             AttackDamage = 4;
             if (Upgraded)

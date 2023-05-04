@@ -1,6 +1,6 @@
 ﻿namespace STV
 {
-    public class PleadingVagrant
+    public class PleadingVagrant : Event
     {
     }
 }

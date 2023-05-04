@@ -1,6 +1,6 @@
 ﻿namespace STV
 {
-    public class WingStatue
+    public class WingStatue : Event
     {
     }
 }

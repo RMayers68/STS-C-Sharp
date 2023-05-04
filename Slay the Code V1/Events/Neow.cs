@@ -1,6 +1,6 @@
 ﻿namespace STV
 {
-    public class Neow
+    public class Neow : Event
     {
     }
 }

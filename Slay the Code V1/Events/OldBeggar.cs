@@ -1,6 +1,6 @@
 ﻿namespace STV
 {
-    public class OldBeggar
+    public class OldBeggar : Event
     {
     }
 }

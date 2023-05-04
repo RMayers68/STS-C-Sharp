@@ -1,6 +1,6 @@
 ﻿namespace STV
 {
-    public class GoldenIdol
+    public class GoldenIdol : Event
     {
     }
 }

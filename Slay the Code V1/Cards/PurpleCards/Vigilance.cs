@@ -11,7 +11,7 @@ namespace STV
             DescriptionModifier = "";
             EnergyCost = 2;
             if (EnergyCost >= 0)
-                SetTmpEnergyCost(EnergyCost);
+                TmpEnergyCost = EnergyCost;
             GoldCost = 0;
             BlockAmount = 8;
             if (Upgraded)

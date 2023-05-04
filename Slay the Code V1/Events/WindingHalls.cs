@@ -1,6 +1,6 @@
 ﻿namespace STV
 {
-    public class WindingHalls
+    public class WindingHalls : Event
     {
     }
 }

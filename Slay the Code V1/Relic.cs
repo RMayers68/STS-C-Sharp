@@ -40,7 +40,7 @@ namespace STV
 
         public override string ToString()
         {
-            return Name + " " + GetDescription();
+            return Name + " - " + GetDescription();
         }
 
         public static Relic RandomRelic(string exclusion = "")
@@ -51,7 +51,6 @@ namespace STV
                 int i when i < 85 => Dict.relicL[RelicRNG.Next(40, 76)],
                 _ => Dict.relicL[RelicRNG.Next(76,110)],
             };
-            Console.WriteLine($"You have found a Relic: {randomRelic}");
             return new(randomRelic);
         }
 
@@ -67,6 +66,7 @@ namespace STV
 
         public void RelicPickupEffect(Hero hero)
         {
+            Console.WriteLine($"You have acquired {this}.");
             switch (Name)
             {
                 default: break;
@@ -82,9 +82,9 @@ namespace STV
                     List<Card> skillList = hero.Deck.FindAll(x => x.Type == "Skill");
                     for (int i = 0; i < 2; i++)
                     {                        
-                        if (skillList.All(x => x.IsUpgraded())) break;
+                        if (skillList.All(x => x.Upgraded)) break;
                         Card warPaint = skillList[RelicRNG.Next(skillList.Count)];
-                        while (warPaint.IsUpgraded())
+                        while (warPaint.Upgraded)
                             warPaint = skillList[RelicRNG.Next(skillList.Count)];
                         warPaint.UpgradeCard();
                     }
@@ -93,9 +93,9 @@ namespace STV
                     List<Card> attackList = hero.Deck.FindAll(x => x.Type == "Attack");
                     for (int i = 0; i < 2; i++)
                     {
-                        if (attackList.All(x => x.IsUpgraded())) break;
+                        if (attackList.All(x => x.Upgraded)) break;
                         Card whetstone = attackList[RelicRNG.Next(attackList.Count)];
-                        while (whetstone.IsUpgraded())
+                        while (whetstone.Upgraded)
                             whetstone = attackList[RelicRNG.Next(attackList.Count)];
                         whetstone.UpgradeCard();
                     }
@@ -141,7 +141,7 @@ namespace STV
                     hero.GoldChange(50);
                     hero.SetMaxHP(5);
                     hero.AddToDeck(Card.PickCard(Card.RandomCards(hero.Name, 3), "add to your Deck"));
-                    if (hero.Deck.FindAll(x => !x.IsUpgraded()) is List<Card> cards && cards != null)
+                    if (hero.Deck.FindAll(x => x.Type != "Curse").FindAll(x => !x.Upgraded) is List<Card> cards && cards != null)
                         cards[RelicRNG.Next(cards.Count)].UpgradeCard();
                     break;
                 case "Necronomicon":

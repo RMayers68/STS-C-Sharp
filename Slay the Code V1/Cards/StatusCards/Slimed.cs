@@ -11,7 +11,7 @@ namespace STV
             DescriptionModifier = "";
             EnergyCost = 1;
             if (EnergyCost >= 0)
-                SetTmpEnergyCost(EnergyCost);
+                TmpEnergyCost = EnergyCost;
         }
 
         public override void CardEffect(Hero hero, List<Enemy> encounter, int turnNumber, int extraDamage = 0)

@@ -1,6 +1,6 @@
 ﻿namespace STV
 {
-    public class TheMausoleum
+    public class TheMausoleum : Event
     {
     }
 }

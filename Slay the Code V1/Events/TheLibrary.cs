@@ -1,6 +1,6 @@
 ﻿namespace STV
 {
-    public class TheLibrary
+    public class TheLibrary : Event
     {
     }
 }

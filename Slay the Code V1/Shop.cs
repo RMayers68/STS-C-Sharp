@@ -52,7 +52,7 @@ namespace STV
                 Console.WriteLine($"Hello {hero.Name}! You have {hero.Gold} Gold. What would you like to purchase? Enter your option or press 0 to leave.\n");
                 Console.WriteLine("\nCards:\n*************************************");
                 for (int i = 1; i <= 7; i++)
-                    Console.WriteLine($"{i}: {shopCards[i - 1].Name} {(shopCards[i - 1].Name == "Purchased" ? "" : "- " + $"{( discount > 1 ? $"{shopCards[i - 1].GetGoldCost() / discount}" : $"{shopCards[i - 1].GetGoldCost()}")}")}");
+                    Console.WriteLine($"{i}: {shopCards[i - 1].Name} {(shopCards[i - 1].Name == "Purchased" ? "" : "- " + $"{( discount > 1 ? $"{shopCards[i - 1].GoldCost / discount}" : $"{shopCards[i - 1].GoldCost}")}")}");
                 Console.WriteLine("\nPotions:\n*************************************");
                 for (int i = 8; i <= 10; i++)
                     Console.WriteLine($"{i}: {shopPotions[i - 8].Name} {(shopPotions[i - 8].Name == "Purchased" ? "" : "- " + $"{(discount > 1 ? $"{shopPotions[i - 8].GoldCost / discount}" : $"{shopPotions[i - 8].GoldCost}")}")}");
@@ -70,7 +70,7 @@ namespace STV
                     Card shopCard = shopCards[shopChoice - 1];
                     if (shopCard.Name != "Purchased")
                     {
-                        newHeroGold = hero.Gold - shopCard.GetGoldCost() / discount;
+                        newHeroGold = hero.Gold - shopCard.GoldCost / discount;
                         if (newHeroGold >= 0)
                         {
                             hero.Gold = newHeroGold;

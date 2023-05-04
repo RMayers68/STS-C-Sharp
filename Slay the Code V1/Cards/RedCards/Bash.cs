@@ -10,7 +10,7 @@
             DescriptionModifier = "";
             EnergyCost = 2;
             if (EnergyCost >= 0)
-                SetTmpEnergyCost(EnergyCost);
+                TmpEnergyCost = EnergyCost;
             GoldCost = 0;
             AttackDamage = 8;
             BuffAmount = 2;

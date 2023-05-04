@@ -1,6 +1,6 @@
 ﻿namespace STV
 {
-    public class MindBloom
+    public class MindBloom : Event
     {
     }
 }

@@ -154,7 +154,7 @@
                         if (hero.Hand.Count < 10)
                         {
                             liquidMemories.MoveCard(hero.DiscardPile, hero.Hand);
-                            liquidMemories.SetTmpEnergyCost(0);
+                            liquidMemories.TmpEnergyCost = 0;
                         }                      
                     }
                     break;

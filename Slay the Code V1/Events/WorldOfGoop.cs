@@ -1,6 +1,6 @@
 ﻿namespace STV
 {
-    public class WorldOfGoop
+    public class WorldOfGoop : Event
     {
     }
 }

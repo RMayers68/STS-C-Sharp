@@ -1,6 +1,6 @@
 ﻿namespace STV
 {
-    public class Nloth
+    public class Nloth : Event
     {
     }
 }

@@ -1,6 +1,6 @@
 ﻿namespace STV
 {
-    public class CursedTome
+    public class CursedTome : Event
     {
     }
 }
