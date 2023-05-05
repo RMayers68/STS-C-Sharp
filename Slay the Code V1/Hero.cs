@@ -371,6 +371,15 @@
             Console.WriteLine(card != null ? $"You have added {card.Name} to your Deck!" : "This was a check, remove now.\n");
         }
 
+        public void RemoveFromDeck(Card card)
+        {
+            if (card == null) return;
+            if (card.Name == "Parasite")
+                SetMaxHP(-3);
+            Deck.Remove(card);
+            Console.WriteLine($"You have removed {card.Name} to your Deck!");
+        }
+
         public void AddToDrawPile(Card card, bool shuffle)
         {
             DrawPile.Add(card);

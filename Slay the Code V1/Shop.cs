@@ -128,7 +128,7 @@ namespace STV
                         if (newHeroGold >= 0)
                         {
                             hero.Gold = newHeroGold;
-                            hero.Deck.Remove(Card.PickCard(hero.Deck, "remove from your Deck"));
+                            hero.RemoveFromDeck(Card.PickCard(hero.Deck, "remove"));
                             removeCard = "Removed";
                             if (!hero.HasRelic("Smiling"))
                                 hero.RemoveCost += 25;

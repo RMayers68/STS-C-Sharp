@@ -199,14 +199,19 @@
                 hero.AddToHand(new Shiv());
         }
 
-        public static List<Card> RandomCards(string name, int count, string typeExclusion = "")
+        public static List<Card> RandomCards(string name, int count, string Exclusion = "")
         {
-            List<Card> cards = new();
+            List<Card> cards = new(); string typeExclusion = "", rareExclusion = "";
+            if (Exclusion == "Common" ||  Exclusion == "Uncommon" || Exclusion == "Rare")
+                rareExclusion = Exclusion;
+            else typeExclusion = Exclusion;
             for (int i = 0; i < count; i++)
             {
                 Card referenceCard;
                 if (typeExclusion != "")
                     referenceCard = SpecificTypeRandomCard(name,typeExclusion);
+                else if (rareExclusion != "")
+                    referenceCard = SpecificRarityRandomCard(name, rareExclusion);
                 else referenceCard = RandomCard(name);
                 cards.Add(referenceCard.AddCard());
             }
@@ -226,14 +231,14 @@
             else return RandomCard(name);
         }
 
-        public static Card SpecificRarityRandomCard(string name = "All Heroes", string typeExclusion = "")
+        public static Card SpecificRarityRandomCard(string name = "All Heroes", string rareExclusion = "")
         {
             Card referenceCard;
-            if (typeExclusion != null)
+            if (rareExclusion != null)
             {
                 do
                     referenceCard = RandomCard(name);
-                while (referenceCard.Type != typeExclusion);
+                while (referenceCard.Rarity != rareExclusion);
                 return referenceCard;
             }
             else return RandomCard(name);

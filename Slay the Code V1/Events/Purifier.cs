@@ -21,7 +21,7 @@
             if (playerChoice == "P")
             {
                 Card removeCard = Card.PickCard(hero.Deck, "remove");
-                hero.Deck.Remove(removeCard);
+                hero.RemoveFromDeck(removeCard);
                 Console.WriteLine(Result(0));
             }
             else Console.WriteLine(Result(1));

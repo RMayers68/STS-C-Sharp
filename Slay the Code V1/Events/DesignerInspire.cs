@@ -37,10 +37,10 @@ namespace STV.Events
             if (playerChoice == "A")
                 Card.PickCard(hero.Deck, "upgrade").UpgradeCard();
             else if (playerChoice == "C")
-                hero.Deck.Remove(Card.PickCard(hero.Deck, "remove"));
+                hero.RemoveFromDeck(Card.PickCard(hero.Deck, "remove"));
             else if (playerChoice == "F")
             {
-                hero.Deck.Remove(Card.PickCard(hero.Deck, "remove"));
+                hero.RemoveFromDeck(Card.PickCard(hero.Deck, "remove"));
                 List<Card> list = hero.Deck.FindAll(x => x.Type != "Curse").FindAll(x => !x.Upgraded);
                 list[EventRNG.Next(list.Count)].UpgradeCard();
             }

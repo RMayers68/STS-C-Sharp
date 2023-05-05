@@ -62,7 +62,7 @@
             }
             else if (playerChoice == "C")
             {
-                hero.Deck.Remove(card);
+                hero.RemoveFromDeck(card);
                 Console.WriteLine(Result(2));
             }
             else Console.WriteLine(Result(4));

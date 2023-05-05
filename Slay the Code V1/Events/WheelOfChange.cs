@@ -29,7 +29,7 @@
             else if (wheelChoice == 3)
                 hero.AddToDeck(new Decay());
             else if (wheelChoice == 4)
-                hero.Deck.Remove(Card.PickCard(hero.Deck, "remove"));
+                hero.RemoveFromDeck(Card.PickCard(hero.Deck, "remove"));
             else hero.NonAttackDamage(hero, hero.MaxHP / 10, "the Gremlin's Shiv");
         }
 

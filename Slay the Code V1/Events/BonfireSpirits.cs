@@ -15,7 +15,7 @@
             {
                 Console.WriteLine($"\nYou toss an offering into the bonfire...");
                 Card offering = Card.PickCard(hero.Deck, "remove");
-                hero.Deck.Remove(offering);
+                hero.RemoveFromDeck(offering);
                 if (offering.Type == "Curse")
                 {
                     Console.WriteLine(Result(0));

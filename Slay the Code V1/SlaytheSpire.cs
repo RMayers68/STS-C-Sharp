@@ -256,7 +256,7 @@ namespace STV
                                 break;
                             case 4: // Toke
                                 if (hero.HasRelic("Peace"))
-                                    hero.Deck.Remove(Card.PickCard(hero.Deck, "remove from your Deck"));
+                                    hero.RemoveFromDeck(Card.PickCard(hero.Deck, "remove"));
                                 break;
                             case 5: //Dig
                                 hero.AddToRelics(Relic.RandomRelic(hero.Name));
@@ -283,6 +283,11 @@ namespace STV
                         hero.MaxEnergy++;
                         Battle.Combat(hero, hero.Encounter);
                         hero.MaxEnergy--;
+                    }
+                    if (hero.HasRelic("Insect"))
+                    {
+                        foreach (Enemy e in hero.Encounter)
+                            e.Hp = Convert.ToInt32(e.Hp * 0.75);
                     }
                     else Battle.Combat(hero, hero.Encounter);
                     hero.CombatRewards(activeRoom.Location);

@@ -130,7 +130,7 @@ namespace STV
                     break;
                 case "Empty Cage":
                     for (int i = 0; i < 2; i++)
-                        hero.Deck.Remove(Card.PickCard(hero.Deck, "remove from your Deck"));
+                        hero.RemoveFromDeck(Card.PickCard(hero.Deck, "remove"));
                     break;
                 case "Pandora's Box":
                     foreach(Card c in hero.Deck.FindAll(x => x.Name == "Strike" || x.Name == "Defend"))

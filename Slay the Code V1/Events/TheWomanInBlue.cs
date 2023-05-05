@@ -6,7 +6,7 @@
         {
             Name = "The Woman In Blue";
             StartOfEncounter = $"From the darkness, an arm pulls you into a small shop. As your eyes adjust, you see a pale woman in sharp clothes gesturing towards a wall of potions.\r\nPale Woman: \"Buy a potion. Now!\" she states.";
-            Options = new() { "Buy [1] Potion - 20 Gold.\r\n", "Buy [2] Potions - 30 Gold.", "Buy [3] Potions - 40 Gold.", "[L]eave" };
+            Options = new() { "Buy [1] Potion - 20 Gold.", "Buy [2] Potions - 30 Gold.", "Buy [3] Potions - 40 Gold.", "[L]eave" };
         }
 
         public override void EventAction(Hero hero)
@@ -35,6 +35,11 @@
                         amount--;
                     }
                 }
+                if (playerChoice == "1")
+                    hero.Gold -= 20;
+                else if (playerChoice == "2")
+                    hero.Gold -= 30;
+                else hero.Gold -= 40;
                 Console.WriteLine(Result(0));
             }
             else
