@@ -19,7 +19,7 @@
             else gold = EventRNG.Next(20, 50);
             Console.WriteLine($"{StartOfEncounter}\n{Options[0]}\n{Options[1]}");
             string playerChoice = "";
-            while (choices.Any(x => x == playerChoice))
+            while (!choices.Any(x => x == playerChoice))
             {
                 playerChoice = Console.ReadLine().ToUpper();
             }

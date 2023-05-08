@@ -36,10 +36,10 @@ namespace STV
             }
             for (int i = 0; i < 2; i++)
             {
-                Relic shopRelic = Relic.RandomRelic(hero.Name);
+                Relic shopRelic = Relic.RandomRelic(hero);
                 shopRelics.Add(shopRelic);
             }
-            shopRelics.Add(Relic.ShopRelic(hero.Name));
+            shopRelics.Add(Relic.RandomRelic(hero,"Shop"));
             string removeCard = "Remove Card";
             while (shopChoice != 0)
             {
@@ -114,7 +114,7 @@ namespace STV
                             hero.Gold = newHeroGold;
                             hero.AddToRelics(shopRelic);
                             Console.WriteLine($"You have purchased {shopRelic.Name}");
-                            shopRelics[shopChoice - 11] = new Relic(hero.HasRelic("Courier") ? shopChoice < 13 ? Relic.RandomRelic(hero.Name) : Relic.ShopRelic(hero.Name) : new());
+                            shopRelics[shopChoice - 11] = new Relic(hero.HasRelic("Courier") ? shopChoice < 13 ? Relic.RandomRelic(hero) : Relic.RandomRelic(hero,"Shop") : new());
                         }
                         else Console.WriteLine("You don't have enough Gold to buy this relic.");
                     }

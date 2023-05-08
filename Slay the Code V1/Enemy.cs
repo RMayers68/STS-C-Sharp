@@ -49,7 +49,7 @@ namespace STV
              * Act 2: 5
              * Act 3: 10
              * 
-             * Example(Act 3 Elites): 10+3 = Case 13
+             * Example(Act 3 Elites): 3+10 = Case 13
              */
 
             return list switch

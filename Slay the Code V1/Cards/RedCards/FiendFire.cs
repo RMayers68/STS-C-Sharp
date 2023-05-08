@@ -21,7 +21,7 @@ namespace STV
         public override void CardEffect(Hero hero, List<Enemy> encounter, int turnNumber, int extraDamage = 0)
         {
             int fiendFire = 0;
-            int target = hero.DetermineTarget(encounter);            
+            int target = DetermineTarget(encounter);            
             for (int i = hero.Hand.Count; i >= 1; i--)
             {
                 hero.Hand[i - 1].Exhaust(hero, encounter, hero.Hand);

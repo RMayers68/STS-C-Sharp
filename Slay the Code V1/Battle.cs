@@ -182,7 +182,7 @@ namespace STV
                     hero.AddToHand(new Miracle(true));
                 if (hero.FindBuff("Deva Form") is Buff deva && deva != null)
                 {
-                    deva.CounterSet(deva.Intensity);
+                    deva.Counter += deva.Intensity;
                     hero.Energy += deva.Counter;
                 }
                 if (hero.FindBuff("Berserk") is Buff guts && guts != null)
@@ -504,23 +504,32 @@ namespace STV
                             }
                             break;
                         case "DRAW":
+                            List<CardLibrary> drawList = new List<CardLibrary>();
+                            foreach (Card c in hero.DrawPile)
+                                drawList.Add(new(c));
                             if (hero.HasRelic("Frozen Eye"))
                             {
-                                hero.DrawPile.Reverse();
-                                ConsoleTableExt.ConsoleTableBuilder.From(hero.DrawPile).ExportAndWriteLine(TableAligntment.Center);
+                                hero.DrawPile.Reverse();                                
+                                ConsoleTableExt.ConsoleTableBuilder.From(drawList).ExportAndWriteLine(TableAligntment.Center);
                                 hero.DrawPile.Reverse();
                             }
                             else
                             {
-                                ConsoleTableExt.ConsoleTableBuilder.From(hero.DrawPile).ExportAndWriteLine(TableAligntment.Center);
+                                ConsoleTableExt.ConsoleTableBuilder.From(drawList).ExportAndWriteLine(TableAligntment.Center);
                                 hero.ShuffleDrawPile();
                             }
                             break;
                         case "DISCARD":
-                            ConsoleTableExt.ConsoleTableBuilder.From(hero.DiscardPile).ExportAndWriteLine(TableAligntment.Center);
+                            List<CardLibrary> discardList = new List<CardLibrary>();
+                            foreach (Card c in hero.DrawPile)
+                                discardList.Add(new(c));
+                            ConsoleTableExt.ConsoleTableBuilder.From(discardList).ExportAndWriteLine(TableAligntment.Center);
                             break;
                         case "EXHAUST":
-                            ConsoleTableExt.ConsoleTableBuilder.From(hero.ExhaustPile).ExportAndWriteLine(TableAligntment.Center);
+                            List<CardLibrary> exhaustList = new List<CardLibrary>();
+                            foreach (Card c in hero.DrawPile)
+                                exhaustList.Add(new(c));
+                            ConsoleTableExt.ConsoleTableBuilder.From(exhaustList).ExportAndWriteLine(TableAligntment.Center);
                             break;
                         // END OF PLAYER AND START OF ENEMY TURN
                         case "E":
@@ -609,6 +618,14 @@ namespace STV
                 for (int i = 0; i < plans.Intensity; i++)
                     Card.PickCard(hero.Hand, "retain in your hand").DescriptionModifier += "Retain.";
             }
+            if (hero.Hand.Any(x => x.Name == "Regret"))
+                hero.SelfDamage(hero.Hand.Count);
+            if (hero.Hand.Any(x => x.Name == "Shame"))
+                hero.AddBuff(6, 2);
+            if (hero.Hand.Any(x => x.Name == "Doubt"))
+                hero.AddBuff(2, 2);
+            if (hero.Hand.Any(x => x.Name == "Decay"))
+                hero.NonAttackDamage(hero,2,"Decay");
             for (int i = hero.Hand.Count - 1; i >= 0; i--)
             {
                 if (hero.Hand[i].GetDescription().Contains("Retain."))

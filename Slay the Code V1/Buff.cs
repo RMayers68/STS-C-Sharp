@@ -5,27 +5,33 @@
         // attributes
         public string Name { get; set; }
         public bool BuffDebuff { get; set; }
-        public byte Type { get; set; }
+        public int Type { get; set; }
         public int Intensity { get; set; }
         public int Duration { get; set; }
         public int Counter { get; set; }
 
-
         //constructor
-
-        public Buff(string name, bool buffDebuff, byte type)
+        public Buff(string name, bool buffDebuff, int type)
         {
             this.Name = name;
             this.BuffDebuff = buffDebuff;
             this.Type = type;
         }
 
-        // pulling from dictionary
+        // Pulling from dictionary
         public Buff(Buff buff)
         {
             this.Name = buff.Name;
             this.BuffDebuff = buff.BuffDebuff;
             this.Type = buff.Type;
+        }
+
+        public bool DurationEnded()
+        {
+            Duration--;
+            if (Duration == 0 && Type == 1)
+                return true;
+            else return false;
         }
 
         //string method
@@ -153,44 +159,6 @@
                 "Berserk" => $"At the start of your turn, gain {Intensity} Energy.",
                 _ => "",
             };
-        }
-
-
-        // Duration-related methods
-        public void DurationSet(int turnDuration)
-        { Duration += turnDuration; }
-
-        public bool DurationEnded()
-        {
-            Duration--;
-            if (Duration == 0 && Type == 1)
-                return true;
-            else return false;
-        }
-
-        //Counter methods
-        public void CounterSet(int counter)
-        { Counter += counter; }
-
-        // Decrements counter by 1 and returns true if it is ready to be removed (set to 0)
-        public bool CounterAtZero()
-        {
-            Counter--;
-            if (Counter == 0 && Type == 4)
-                return true;
-            else return false;
-        }
-
-        // Intensity related methods
-        public void IntensitySet(int intensity)
-        { Intensity += intensity; }
-
-        public bool IntensityAtZero()
-        {
-            Intensity--;
-            if (Intensity == 0)
-                return true;
-            else return false;
         }
     }
 }

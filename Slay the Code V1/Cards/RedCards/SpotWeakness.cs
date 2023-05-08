@@ -21,7 +21,7 @@ namespace STV
 
         public override void CardEffect(Hero hero, List<Enemy> encounter, int turnNumber, int extraDamage = 0)
         {
-            int target = hero.DetermineTarget(encounter);
+            int target = DetermineTarget(encounter);
             if (Enemy.AttackIntents().Contains(encounter[target].Intent))
                 hero.AddBuff(BuffID, BuffAmount);
         }

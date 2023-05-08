@@ -27,7 +27,7 @@ namespace STV
             else Console.WriteLine("Fanged Stranger: \"Join us sister, and feel the warmth of the Spire.\"");
             Console.WriteLine($"{Options[0]}\n{Options[1]}\n{Options[2]}");
             string playerChoice = "";
-            while (choices.Any(x => x == playerChoice))
+            while (!choices.Any(x => x == playerChoice))
             {
                 playerChoice = Console.ReadLine().ToUpper();
             }

@@ -14,13 +14,13 @@
             List<string> choices = new() { "O", "L" };
             Console.WriteLine($"{StartOfEncounter}\n{Options[0]}\n{Options[1]}");
             string playerChoice = "";
-            while (choices.Any(x => x == playerChoice))
+            while (!choices.Any(x => x == playerChoice))
             {
                 playerChoice = Console.ReadLine().ToUpper();
             }
             if (playerChoice == "O")
             {
-                hero.AddToRelics(Relic.RandomRelic());
+                hero.AddToRelics(Relic.RandomRelic(hero));
                 if (EventRNG.Next(2) == 0)
                 {
                     Console.WriteLine(Result(0));

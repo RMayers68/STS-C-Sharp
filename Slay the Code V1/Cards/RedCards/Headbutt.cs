@@ -20,7 +20,7 @@ namespace STV
 
         public override void CardEffect(Hero hero, List<Enemy> encounter, int turnNumber, int extraDamage = 0)
         {
-            int target = hero.DetermineTarget(encounter);
+            int target = DetermineTarget(encounter);
             hero.Attack(encounter[target], AttackDamage + extraDamage);
             if (hero.DiscardPile.Count > 0)
                 PickCard(hero.DiscardPile, "send to the top of your drawpile").MoveCard(hero.DiscardPile, hero.DrawPile);

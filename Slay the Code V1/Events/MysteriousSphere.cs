@@ -14,7 +14,7 @@
             List<string> choices = new() { "O", "L" };
             Console.WriteLine($"{StartOfEncounter}\n{Options[0]}\n{Options[1]}");
             string playerChoice = "";
-            while (choices.Any(x => x == playerChoice))
+            while (!choices.Any(x => x == playerChoice))
             {
                 playerChoice = Console.ReadLine().ToUpper();
             }

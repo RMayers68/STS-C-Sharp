@@ -45,7 +45,7 @@
             switch (Name)
             {
                 case "Fire Potion":
-                    target = hero.DetermineTarget(encounter);
+                    target = Card.DetermineTarget(encounter);
                     hero.NonAttackDamage(encounter[target], EffectAmount,Name);
                     break;
                 case "Energy Potion":
@@ -58,14 +58,14 @@
                     hero.GainBlock(EffectAmount, encounter);
                     break;
                 case "Fear Potion":
-                    target = hero.DetermineTarget(encounter);
+                    target = Card.DetermineTarget(encounter);
                     encounter[target].AddBuff(1, EffectAmount, hero);
                     break;
                 case "Swift Potion":
                     hero.DrawCards(EffectAmount);
                     break;
                 case "Weak Potion":
-                    target = hero.DetermineTarget(encounter);
+                    target = Card.DetermineTarget(encounter);
                     encounter[target].AddBuff(2, EffectAmount, hero);
                     break;
                 case "Focus Potion":
@@ -77,11 +77,11 @@
                 case "Attack Potion" or "Skill Potion" or "Power Potion" or "Colorless Potion":
                     Card cardPotion;
                     if (Name == "Colorless Potion")
-                        //cardPotion = new(Card.PickCard(Card.RandomCards("Colorless", 3), "add to your hand"));
-                        //else cardPotion = new(Card.PickCard(Card.RandomCards(hero.Name, 3, Name.Split(" ")[0]),"add to your hand"));
-                        //cardPotion.SetTmpEnergyCost(0);
-                        for (int i = 0; i < EffectAmount; i++) ;
-                        //hero.AddToHand(cardPotion);                   
+                        cardPotion = (Card.PickCard(Card.RandomCards("Colorless", 3), "add to your hand"));
+                    else cardPotion = (Card.PickCard(Card.RandomCards(hero.Name, 3, Name.Split(" ")[0]),"add to your hand"));
+                        cardPotion.TmpEnergyCost = 0;
+                    for (int i = 0; i < EffectAmount; i++) ;
+                    hero.AddToHand(cardPotion);
                     break;
                 case "Blessing of the Forge":
                     foreach (Card c in hero.Hand)
@@ -106,15 +106,15 @@
                     hero.HealHP(Convert.ToInt32(hero.MaxHP * (EffectAmount / 100.0)));
                     break;
                 case "Poison Potion":
-                    target = hero.DetermineTarget(encounter);
+                    target = Card.DetermineTarget(encounter);
                     encounter[target].AddBuff(39, EffectAmount, hero);
                     break;
                 case "Bottled Miracle":
                     for (int i = 0; i < EffectAmount; i++)
                     {
-                        if (hero.Hand.Count < 10) ;
-                            //hero.Hand.Add(new Card(Dict.cardL[336]));
-                        //else hero.DiscardPile.Add(new Card(Dict.cardL[336]));
+                        if (hero.Hand.Count < 10)
+                            hero.Hand.Add(new Miracle());
+                        else hero.DiscardPile.Add(new Miracle());
                     }
                     break;
                 case "Liquid Bronze":
@@ -134,8 +134,7 @@
                             hero.DrawPile.Remove(distilledChaos);
                         else if (Name == "Tantrum")
                             hero.ShuffleDrawPile();
-                        else
-                            distilledChaos.MoveCard(hero.DrawPile, hero.DiscardPile);
+                        else distilledChaos.MoveCard(hero.DrawPile, hero.DiscardPile);
                     }
                     break;
                 case "Duplication Potion":
@@ -204,9 +203,6 @@
                 case "Fruit Juice":
                     hero.SetMaxHP(EffectAmount);
                     break;
-                case "Smoke Bomb":
-                    // Code combat to end
-                    break;
                 case "Snecko Oil":
                     hero.DrawCards(EffectAmount);
                     foreach (Card c in hero.Hand)
@@ -239,8 +235,30 @@
                 Console.WriteLine("You cant take the potion due to Sozu. (Hope you didn't spend gold!)");
                 return null;
             }
-            return new(Dict.potionL[PotionRNG.Next(42)]);
+            Potion potion = Dict.potionL[PotionRNG.Next(41)];
+            while (!HeroSpecificPotionCheck(hero, potion))
+                potion = Dict.potionL[PotionRNG.Next(41)];
+            return new(potion);
         }
+
+        public static bool HeroSpecificPotionCheck(Hero hero, Potion pot)
+        {
+            List<string> excludedPotions = new() { "Blood", "Heart", "Elixir", "Poison", "Cunning", "Ghost", "Darkness", "Focus", "Capacity", "Miracle", "Ambrosia", "Stance", };
+            if (hero.Name == "Ironclad")
+                excludedPotions.RemoveRange(0, 3);
+            else if (hero.Name == "Silent")
+                excludedPotions.RemoveRange(3, 3);
+            else if (hero.Name == "Defect")
+                excludedPotions.RemoveRange(6, 3);
+            else excludedPotions.RemoveRange(9,3);
+            foreach(string p in excludedPotions)
+            {
+                if (pot.Name.Contains(p))
+                    return false;
+            }
+            return true;
+        }
+
         public string GetDescription(Hero? hero = null)
         {
             int sacredBark = 1;

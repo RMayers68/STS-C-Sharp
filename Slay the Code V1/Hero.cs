@@ -20,39 +20,47 @@
 
         private static readonly Random HeroRNG = new();
 
-        public Hero(string name, int maxHP)
-        {
-            Name = name;
-            MaxHP = maxHP;
-            Hp = maxHP;
-        }
-
-        public Hero(Hero hero)
+        public Hero(int choice)
         {
             {
-                this.Name = hero.Name;
-                this.MaxHP = hero.MaxHP;
-                this.Hp = hero.MaxHP;
-                this.MaxEnergy = 3;
-                this.Energy = 0;
-                this.Block = 0;
-                this.Deck = new();
-                this.DrawPile = new();
-                this.Hand = new();
-                this.DiscardPile = new();
-                this.ExhaustPile = new();
-                this.Buffs = new();
-                this.Relics = new();
-                this.Potions = new();
-                this.Actions = new();
-                this.Orbs = new();
-                this.Stance = "None";
-                this.OrbSlots = 1;
-                this.Gold = 99;
-                this.EasyFights = 0;
-                this.PotionSlots = 3;
-                this.PotionChance = 4;
-                this.RemoveCost = 75;
+                Name = choice switch
+                {
+                    1 => "Ironclad",
+                    2 => "Silent",
+                    3 => "Defect",
+                    _ => "Watcher",
+                };
+                MaxHP = 80;
+                OrbSlots = 1;
+                if (choice == 2)
+                    MaxHP = 70;
+                else if (choice == 3)
+                {
+                    MaxHP = 75;
+                    OrbSlots = 3;
+                }                 
+                else if (choice == 4)
+                    MaxHP = 72;
+                Hp = MaxHP;
+                MaxEnergy = 3;
+                Energy = 0;
+                Block = 0;
+                Deck = new();
+                DrawPile = new();
+                Hand = new();
+                DiscardPile = new();
+                ExhaustPile = new();
+                Buffs = new();
+                Relics = new();
+                Potions = new();
+                Actions = new();
+                Orbs = new();
+                Stance = "None";               
+                Gold = 99;
+                EasyFights = 0;
+                PotionSlots = 3;
+                PotionChance = 4;
+                RemoveCost = 75;
             }
         }
 
@@ -119,19 +127,6 @@
             if (Relics.Find(x => x.Name == "Magic Flower") != null)
                 heal = Convert.ToInt32(heal * 1.5);
             HealHP(heal);
-        }
-
-        public int DetermineTarget(List<Enemy> encounter)
-        {
-            int x = 0;
-            if (encounter.Count == 1)
-                return x;
-            Console.WriteLine("What enemy would you like to target?\n");
-            for (int i = 0; i < encounter.Count; i++)
-                Console.Write($"{i + 1}:{encounter[i].Name}\t");
-            while (!Int32.TryParse(Console.ReadLine(), out x) || x < 1 || x > encounter.Count || encounter[x - 1].Hp == 0)
-                Console.WriteLine("Invalid input, enter again:");
-            return x - 1;
         }
 
         public void SelfDamage(int damage)
@@ -287,8 +282,8 @@
             else if (roomLocation == "Elite")
             {
                 if (HasRelic("Black Star"))
-                    AddToRelics(Relic.RandomRelic(Name));
-                AddToRelics(Relic.RandomRelic(Name));
+                    AddToRelics(Relic.RandomRelic(this));
+                AddToRelics(Relic.RandomRelic(this));
             }
             if (HeroRNG.Next(10) < PotionChance || HasRelic("White Beast Statue"))
             {
@@ -346,8 +341,12 @@
         {
             if (potion == null) return;
             if (Potions.Count < PotionSlots)
+            {
                 Potions.Add(new(potion));
-            else Console.WriteLine("You're potions are full and you can not add more of them.");
+                Console.WriteLine($"You have added {potion.Name} to your potion bag.");
+            }
+                
+            else Console.WriteLine("Your potions are full and you can not add more of them.");
         }
 
         public void AddToDeck(Card card)
@@ -373,7 +372,7 @@
 
         public void RemoveFromDeck(Card card)
         {
-            if (card == null) return;
+            if (card == null || card.Name == "Curse of the Bell" || card.Name == "Necronomicurse") return;
             if (card.Name == "Parasite")
                 SetMaxHP(-3);
             Deck.Remove(card);
@@ -396,7 +395,8 @@
 
         public void RemoveCounterCheck(Buff buff)
         {
-            if (buff.CounterAtZero())
+            buff.Counter--;
+            if (buff.Counter == 0)
                 Buffs.Remove(buff);
         }
     }

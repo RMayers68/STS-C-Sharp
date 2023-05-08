@@ -12,14 +12,14 @@
         public override void EventAction(Hero hero)
         {
             List<string> choices = new() { "O", "S", "D" };
-            if (!hero.HasRelic("Golden Idol")
+            if (!hero.HasRelic("Golden Idol"))
             {
                 Options[1] = "Locked - Requires Golden Idol";
                 choices.Remove("O");
             }
             Console.WriteLine($"{StartOfEncounter}\n{Options[0]}\n{Options[1]}\n{Options[2]}");
             string playerChoice = "";
-            while (choices.Any(x => x == playerChoice))
+            while (!choices.Any(x => x == playerChoice))
             {
                 playerChoice = Console.ReadLine().ToUpper();
             }

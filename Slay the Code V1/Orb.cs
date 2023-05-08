@@ -9,16 +9,25 @@
         private static readonly Random OrbRNG = new();   
 
         //constructor
-        public Orb(string name,int effect)
+        public Orb(int ID)
         {
-            this.Name = name;
-            this.Effect = effect;
-        }
-
-        public Orb(Orb orb)
-        {
-            this.Name = orb.Name;
-            this.Effect = orb.Effect;
+            Name = "Lightning";
+            Effect = 3;
+            if (ID == 1)
+            {
+                Name = "Frost";
+                Effect = 2;
+            }
+            else if (ID == 2)
+            {
+                Name = "Dark";
+                Effect = 6;
+            }
+            else if (ID == 3)
+            {
+                Name = "Plasma";
+                Effect = 1;
+            }
         }
 
         // Orb methods
@@ -64,7 +73,7 @@
 
         public static void ChannelOrb(Hero hero, List<Enemy> encounter, int orbID)
         {
-            Orb channeledOrb = new(Dict.orbL[orbID]);
+            Orb channeledOrb = new(orbID);
             if (hero.Orbs.Count == hero.OrbSlots)
             {
                 hero.Orbs[0].Evoke(hero,encounter);

@@ -23,7 +23,7 @@ namespace STV
         {
             if (hero.FindBuff("Strength") is Buff heavyBlade && heavyBlade != null)
                 extraDamage += heavyBlade.Intensity * MagicNumber;
-            int target = hero.DetermineTarget(encounter);
+            int target = DetermineTarget(encounter);
             hero.Attack(encounter[target], AttackDamage + extraDamage);
         }
 

@@ -5,7 +5,7 @@
         public Neow()
         {
             Name = "Neow";
-            StartOfEncounter = $"You see a big, whale-like creature with light blue skin and six bright yellow eyes. She bellows: \"Hello... Again.. I am... Neow.\nShe then offers a choice of Blessings for your ascent up the Spire";
+            StartOfEncounter = $"You see a big, whale-like creature with light blue skin and six bright yellow eyes. She bellows: \n\"Hello... Again.. I am... Neow.\nShe then offers a choice of Blessings for your ascent up the Spire:\n";
             Options = new();
         }
 
@@ -28,7 +28,7 @@
             };
             List<string> advantages = new()
             {
-                $"Max HP +{hero.MaxHP/10}",
+                $"Max HP +{hero.MaxHP/10*2}",
                 "Remove 2 cards",
                 "Transform 2 cards",
                 "Gain 250 Gold",
@@ -62,7 +62,7 @@
             List<string> choices = new() { "1", "2", "3", "4" };
             Console.WriteLine($"{StartOfEncounter}\n{Options[0]}\n{Options[1]}\n{Options[2]}\n{Options[3]}");
             string playerChoice = "";
-            while (choices.Any(x => x == playerChoice))
+            while (!choices.Any(x => x == playerChoice))
             {
                 playerChoice = Console.ReadLine().ToUpper();
             }
@@ -95,7 +95,7 @@
                         hero.AddToDeck(Card.RandomCards(hero.Name, 1, "Rare")[0]);
                         break;
                     case "Obtain a random common relic":
-                        hero.AddToRelics(Relic.RandomRelic(hero.Name));
+                        hero.AddToRelics(Relic.RandomRelic(hero,"Common"));
                         break;
                     case "Receive 100 gold":
                         hero.GoldChange(100);
@@ -131,7 +131,7 @@
                         hero.AddToDeck(Card.PickCard(Card.RandomCards("Colorless", 3, "Rare"), "obtain"));
                         break;
                     case "Obtain a random rare relic":
-                        hero.AddToRelics(Relic.RandomRelic(hero.Name));
+                        hero.AddToRelics(Relic.RandomRelic(hero,"Rare"));
                         break;
                 }
                 switch (advDisadv[1])
@@ -153,7 +153,7 @@
             else
             {
                 hero.Relics.Clear();
-                hero.AddToRelics(Relic.BossRelic());
+                hero.AddToRelics(Relic.RandomRelic(hero,"Boss"));
             }
         }
     }

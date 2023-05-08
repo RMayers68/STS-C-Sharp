@@ -15,7 +15,7 @@
             List<Potion> potions = new() { new Potion(Potion.RandomPotion(hero)), new Potion(Potion.RandomPotion(hero)), new Potion(Potion.RandomPotion(hero)) };
             Console.WriteLine($"{StartOfEncounter}\n{Options[0]}\n{Options[1]}\n{Options[2]}\n{Options[3]}");
             string playerChoice = "";
-            while (choices.Any(x => x == playerChoice))
+            while (!choices.Any(x => x == playerChoice))
             {
                 playerChoice = Console.ReadLine().ToUpper();
             }

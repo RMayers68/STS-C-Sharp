@@ -14,7 +14,7 @@
             List<string> choices = new() { "B", "D", "C" };
             Console.WriteLine($"{StartOfEncounter}\n{Options[0]}\n{Options[1]}\n{Options[2]}");
             string playerChoice = "";
-            while (choices.Any(x => x == playerChoice))
+            while (!choices.Any(x => x == playerChoice))
             {
                 playerChoice = Console.ReadLine().ToUpper();
             }
@@ -31,7 +31,7 @@
             else
             {
                 Console.WriteLine(Result(2));
-                hero.AddToRelics(Relic.RandomRelic(hero.Name));
+                hero.AddToRelics(Relic.RandomRelic(hero));
                 hero.AddToDeck(new Regret());
             }
         }

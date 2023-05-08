@@ -23,7 +23,7 @@ namespace STV
             foreach (string s in hero.Actions)
                 if (s.Contains("Mantra"))
                     extraDamage += Int32.Parse(s.Last().ToString());
-            int target = hero.DetermineTarget(encounter);
+            int target = DetermineTarget(encounter);
             hero.Attack(encounter[target], AttackDamage + extraDamage);
         }
 

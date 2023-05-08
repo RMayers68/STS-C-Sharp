@@ -14,7 +14,7 @@
             List<string> choices = new() { "R", "L" };
             Console.WriteLine($"{StartOfEncounter}\n{Options[0]}\n{Options[1]}");
             string playerChoice = "";
-            while (choices.Any(x => x == playerChoice))
+            while (!choices.Any(x => x == playerChoice))
             {
                 playerChoice = Console.ReadLine().ToUpper();
             }
@@ -25,7 +25,7 @@
                 Options = new() { "[C]ontinue - Lose 1 HP" };
                 Console.WriteLine($"{StartOfEncounter}\n{Options[0]}");
                 playerChoice = "";
-                while (choices.Any(x => x == playerChoice))
+                while (!choices.Any(x => x == playerChoice))
                 {
                     playerChoice = Console.ReadLine().ToUpper();
                 }
@@ -33,7 +33,7 @@
                 hero.SelfDamage(1);
                 Options = new() { "[C]ontinue - Lose 2 HP" };
                 playerChoice = "";
-                while (choices.Any(x => x == playerChoice))
+                while (!choices.Any(x => x == playerChoice))
                 {
                     playerChoice = Console.ReadLine().ToUpper();
                 }
@@ -41,7 +41,7 @@
                 hero.SelfDamage(2);
                 Options = new() { "[C]ontinue - Lose 3 HP" };
                 playerChoice = "";
-                while (choices.Any(x => x == playerChoice))
+                while (!choices.Any(x => x == playerChoice))
                 {
                     playerChoice = Console.ReadLine().ToUpper();
                 }
@@ -50,7 +50,7 @@
                 choices = new() { "T", "S" };
                 Options = new() { "[T]ake - Obtain the Book, Lose 10 HP" , "[S]top - Lose 3 HP" };
                 playerChoice = "";
-                while (choices.Any(x => x == playerChoice))
+                while (!choices.Any(x => x == playerChoice))
                 {
                     playerChoice = Console.ReadLine().ToUpper();
                 }

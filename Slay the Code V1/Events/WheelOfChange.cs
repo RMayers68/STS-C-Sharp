@@ -23,7 +23,7 @@
             if (wheelChoice == 0)
                 hero.GoldChange(200);
             else if (wheelChoice == 1)
-                hero.AddToRelics(Relic.RandomRelic(hero.Name));
+                hero.AddToRelics(Relic.RandomRelic(hero));
             else if (wheelChoice == 2)
                 hero.HealHP(hero.MaxHP);
             else if (wheelChoice == 3)

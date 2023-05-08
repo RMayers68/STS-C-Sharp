@@ -23,7 +23,7 @@ namespace STV
         {
             foreach (Card c in FindAllCardsInCombat(hero, "Strike"))
                 extraDamage += MagicNumber;
-            int target = hero.DetermineTarget(encounter);
+            int target = DetermineTarget(encounter);
             hero.Attack(encounter[target], AttackDamage + extraDamage);
         }
 

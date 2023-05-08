@@ -45,9 +45,11 @@
 				return;
 			if (effect == 0) return;
             // Artifact stopping debuffs
-            if ((!Dict.buffL[ID].BuffDebuff) && HasRelic("Artifact"))
+            if ((!Dict.buffL[ID].BuffDebuff) && FindBuff("Artifact") is Buff artifact && artifact != null)
 			{
-                FindBuff("Artifact").Counter--;
+                artifact.Counter--;
+				if (artifact.Counter == 0)
+					hero.Buffs.Remove(artifact);
 				return;
 			}
 
@@ -62,39 +64,30 @@
 			if (buff.Name == "Vulnerable" && hero != null && hero.HasRelic("Champion"))
 				AddBuff(2, 1);
 			// Add attributes based on type of Buff
-			byte b = Dict.buffL[ID].Type switch
+			if (buff.Type == 1)
 			{
-				byte i when i == 1 =>  1,
-				byte i when i >= 2 && i <= 3 => 2,
-				_ => 3,
-			};
-			switch (b)
+                buff.Duration += effect;
+                Console.WriteLine($"{Name} is now {buff.Name} for {buff.Duration} turns!");
+            }
+			else if (buff.Type == 2)
 			{
-                default:
-                    return;
-                case 1: //Duration
-					buff.DurationSet(effect);
-					Console.WriteLine($"{Name} is now {buff.Name} for {buff.Duration} turns!");
-					break;
-				case 2: //Intensity
-					buff.IntensitySet(effect);
-					Console.WriteLine($"{Name} gained {effect} {buff.Name}!");
-					break;
-				case 3: //Counter
-					buff.CounterSet(effect);
-					Console.WriteLine($"{Name}'s {buff.Name} is now at {buff.Counter}!");
-					if (buff.Name == "Mantra")
-					{
-                        AddAction($"Mantra Gained: {effect}");
-						if (buff.Counter >= 10)
-						{
-							buff.CounterSet(-10);
-							((Hero)this).SwitchStance("Divinity");
-
-                        }
-                    }						
-					break;
-			}
+				buff.Intensity += effect;
+                Console.WriteLine($"{Name} gained {effect} {buff.Name}!");
+            }
+			else
+			{
+                buff.Counter += effect;
+                Console.WriteLine($"{Name}'s {buff.Name} is now at {buff.Counter}!");
+                if (buff.Name == "Mantra")
+                {
+                    AddAction($"Mantra Gained: {effect}");
+                    if (buff.Counter >= 10)
+                    {
+                        buff.Counter -= 10;
+                        ((Hero)this).SwitchStance("Divinity");
+                    }
+                }
+            }
 			if (hero != null && hero.FindBuff("Sadistic") is Buff sadistic && !sadistic.BuffDebuff)
 				NonAttackDamage(this, sadistic.Intensity,sadistic.Name);
 		}
@@ -123,14 +116,15 @@
             }
 			if (target.FindBuff("Slow") is Buff slow && slow != null)
 				damage *= Convert.ToInt32(slow.Intensity * 0.1);
-            Console.Write($"\n{Name} dealt {damage} from their attack to the {target.Name}");
+            Console.WriteLine($"\n{Name} dealt {damage} from their attack to the {target.Name}.");
             damage = ReduceDamageByBlock(target, damage);
 			if (damage > 0)
 			{
 				if (target.FindBuff("Flying") is Buff fly && fly != null)
 				{
 					damage /= 2;
-					if (fly.IntensityAtZero())
+					fly.Intensity--;
+					if (fly.Intensity == 0)
 						target.Buffs.Remove(fly);
 				}
 				if (HasRelic("Boot") && damage < 5)
@@ -142,13 +136,13 @@
 					armor.Intensity--;
 				if (damage > 0 && FindBuff("Envenom") is Buff envenom && envenom != null)
 					target.AddBuff(39, envenom.Intensity, (Hero)this);
-				if (damage > 0 && FindBuff("Static Discharge") is Buff discharge && discharge != null)
+				if (damage > 0 && target.FindBuff("Static Discharge") is Buff discharge && discharge != null)
 					for (int i = 0; i < discharge.Intensity; i++)
 						Orb.ChannelOrb((Hero)target, encounter, 0);
 				if (target.FindBuff("Angry") is Buff angry && angry != null)
 					target.AddBuff(4, angry.Intensity);
 				if (HasBuff("Painful Stabs"))
-					//((Hero)target).DiscardPile.Add(new(Dict.cardL[357]));
+					((Hero)target).DiscardPile.Add(new Wound());
 				if (target.HasBuff("Reactive"))
 					((Enemy)target).SetEnemyIntent(1);
 				if (target.FindBuff("Malleable") is Buff mall && mall != null)
@@ -157,7 +151,6 @@
 					mall.Intensity++;
 				}
             }
-			Console.Write("!\n");
             if (target.FindBuff("Curl Up") is Buff curlUp && curlUp != null)      // Louse Curl Up Effect
             {
                 Console.WriteLine($"{target.Name} has curled up and gained {curlUp.Intensity} Block!");
@@ -175,7 +168,7 @@
 		public void NonAttackDamage(Actor target, int damage, string effect)
 		{
 			if (Hp <= 0) return;
-            Console.Write($"\n{target.Name} suffered {damage} from {effect}");
+            Console.WriteLine($"{target.Name} suffered {damage} from {effect}.");
             damage = ReduceDamageByBlock(target,damage);
             if (damage > 0)
                 target.HPLoss(damage);
@@ -192,7 +185,7 @@
 				target.Block = damageCalc;
 				if (target.Block <= 0 && HasRelic("Hand Drill"))
 					target.AddBuff(1, 2, (Hero)this );
-				Console.Write($", reducing Block to {(target.Block > 0 ? $"{target.Block}" : "0")}");
+				Console.WriteLine($"{target.Name}'s Block reduced to {(target.Block > 0 ? $"{target.Block}" : "0")}.");
 			}
 			return damage;
         }
@@ -201,7 +194,7 @@
 		{
             if (FindBuff("Poison") is Buff poison && poison != null)
 			{
-                Console.Write($"{Name} suffered from their poison");
+                Console.WriteLine($"{Name} suffered from their poison.");
                 HPLoss(poison.Intensity);
                 Console.Write("!\n");
                 poison.Intensity--;
@@ -234,7 +227,7 @@
 				damage = IntangibleCheck(damage);
 			}
 			Hp -= damage;
-            Console.Write($", reducing their HP to {(Hp < 0 ? "0" : Hp)}/{MaxHP}");
+            Console.WriteLine($"{Name}'s HP is now {(Hp < 0 ? "0" : Hp)}/{MaxHP}.");
 			if (HasBuff("Shifting"))
 			{
 				AddBuff(4, -1 * damage);

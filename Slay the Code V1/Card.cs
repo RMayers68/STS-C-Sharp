@@ -118,6 +118,7 @@
             }
             return null;
         }
+
         //Moving Cards to different List methods
         public void MoveCard(List<Card> from, List<Card> to)
         {
@@ -270,7 +271,19 @@
             while (transformedCard.Name == Name);
             hero.Deck.Remove(this);
             hero.AddToDeck(transformedCard);
-            Console.WriteLine($"Your {Name} card transformed into {transformedCard.Name}!");
+        }
+
+        public static int DetermineTarget(List<Enemy> encounter)
+        {
+            int x = 0;
+            if (encounter.Count == 1)
+                return x;
+            Console.WriteLine("What enemy would you like to target?\n");
+            for (int i = 0; i < encounter.Count; i++)
+                Console.Write($"{i + 1}:{encounter[i].Name}\t");
+            while (!Int32.TryParse(Console.ReadLine(), out x) || x < 1 || x > encounter.Count || encounter[x - 1].Hp == 0)
+                Console.WriteLine("Invalid input, enter again:");
+            return x - 1;
         }
 
         public void CardAction(Hero hero, List<Enemy> encounter, int turnNumber)
@@ -373,13 +386,14 @@
             // Card Effects begin here
             Console.WriteLine($"You played {this.Name}.");
             int target = 0, extraDamage = 0, wallop = encounter[target].Hp, xEnergy = hero.Energy + (hero.HasRelic("Chemical X") ? 2 : 0);
-            string lastCardPlayed = "";
             if (EnergyCost == -1)
                 hero.Energy = xEnergy;
             else if (EnergyCost != -2)
                 hero.Energy -= TmpEnergyCost;
-            this.TmpEnergyCost = EnergyCost;
+            TmpEnergyCost = EnergyCost;
 
+            if (FindCard("Pain", hero.Hand) != null)
+                hero.SelfDamage(1);
             foreach (Enemy e in encounter)
             {
                 if (e.FindBuff("Slow") is Buff slow && slow != null)
@@ -387,8 +401,6 @@
                 if (e.FindBuff("Time Warp") is Buff warp && warp != null)
                     warp.Counter--;
             }
-
-
 
             // Effects relating to playing an Attack card
             if (Type == "Attack")

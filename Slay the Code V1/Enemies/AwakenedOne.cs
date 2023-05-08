@@ -22,7 +22,7 @@
             if (Intent == "Sludge")
             {
                 Attack(hero, 18, encounter);
-                hero.DiscardPile.Add(Dict.cardL[359]);
+                hero.DiscardPile.Add(new Void());
             }
             else if (Intent == "Rebirth")
             {

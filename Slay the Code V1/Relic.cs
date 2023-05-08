@@ -1,6 +1,4 @@
-﻿using System.Security.Cryptography.X509Certificates;
-
-namespace STV
+﻿namespace STV
 {
     public class Relic
     {
@@ -43,30 +41,63 @@ namespace STV
             return Name + " - " + GetDescription();
         }
 
-        public static Relic RandomRelic(string exclusion = "")
+        public static Relic RandomRelic(Hero hero, string exclusion = "")
         {
-            Relic randomRelic = RelicRNG.Next(100) switch
+            Relic randomRelic;
+            int bottomRange = 4, topRange = 110, rarityRoll = RelicRNG.Next(101);
+            // Changing which relics are random rolled based on situation, first based on basic rarity check
+            if (exclusion == "Common" || rarityRoll <= 50)
+                topRange = 40;
+            else if (exclusion == "Uncommon" || rarityRoll <= 80)
             {
-                int i when i < 50 => Dict.relicL[RelicRNG.Next(4, 40)],
-                int i when i < 85 => Dict.relicL[RelicRNG.Next(40, 76)],
-                _ => Dict.relicL[RelicRNG.Next(76,110)],
+                bottomRange = 40;
+                topRange = 76;
+            }
+            else bottomRange = 76;
+            // Changing random relics if in Shop or Boss rooms
+            if ( exclusion == "Shop")
+            {
+                bottomRange = 110;
+                topRange = 130;
+            }
+            else if ( exclusion == "Boss")
+            {
+                bottomRange = 130;
+                topRange = 160;
+            }
+            randomRelic = Dict.relicL[RelicRNG.Next(bottomRange,topRange)];
+            while (!HeroSpecificRelicCheck(hero, randomRelic) || hero.HasRelic(randomRelic.Name))
+                randomRelic = Dict.relicL[RelicRNG.Next(bottomRange,topRange)];
+            return randomRelic;
+        }
+
+        public static bool HeroSpecificRelicCheck(Hero hero, Relic relic)
+        {
+            List<string> excludedRelics = new() 
+            { 
+                "Red Skull", "Phrog", "Clay", "Champion", "Charon", "Magic Flower", "Brimstone", "Black Blood", "Mark of Pain", "Runic Cube",
+                "Snecko Skull", "Ninja Scroll", "Krane", "Specimen", "Tingsha", "Tough Bandages", "Twisted Funnel", "Serpent", "Wrist Blade", "Hovering Kite",
+                "Data Disk", "Gold-Plated", "Symbiotic", "Emotion", "Runic Capacitor", "Frozen Core", "Inserter", "Nuclear Battery",
+                "Damaru", "Duality", "Teardrop Locket", "Cloak Clasp", "Golden Eye", "Melange", "Holy Water", "Violet Lotus",
             };
-            return new(randomRelic);
-        }
-
-        public static Relic ShopRelic(string exclusion = "")
-        {
-            return new(Dict.relicL[RelicRNG.Next(110, 130)]);
-        }
-
-        public static Relic BossRelic(string exclusion = "")
-        {
-            return new(Dict.relicL[RelicRNG.Next(130, 160)]);
+            if (hero.Name == "Ironclad")
+                excludedRelics.RemoveRange(0, 10);
+            else if (hero.Name == "Silent")
+                excludedRelics.RemoveRange(10, 10);
+            else if (hero.Name == "Defect")
+                excludedRelics.RemoveRange(20, 8);
+            else excludedRelics.RemoveRange(28, 8);
+            foreach (string r in excludedRelics)
+            {
+                if (relic.Name.Contains(r))
+                    return false;
+            }
+            return true;
         }
 
         public void RelicPickupEffect(Hero hero)
         {
-            Console.WriteLine($"You have acquired {this}.");
+            Console.WriteLine($"You have acquired {this}");
             switch (Name)
             {
                 default: break;

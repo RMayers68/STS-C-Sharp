@@ -26,7 +26,7 @@ namespace STV
                     hero.Attack(e, AttackDamage + extraDamage, encounter);
             else
             {
-                int target = hero.DetermineTarget(encounter);
+                int target = DetermineTarget(encounter);
                 encounter[target].AddBuff(BuffID, BuffAmount, hero);
             }
         }

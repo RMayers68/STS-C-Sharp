@@ -20,7 +20,7 @@ namespace STV
 
         public override void CardEffect(Hero hero, List<Enemy> encounter, int turnNumber, int extraDamage = 0)
         {
-            int target = hero.DetermineTarget(encounter);
+            int target = DetermineTarget(encounter);
             if (encounter[target].FindBuff("Poison") is Buff poison && poison != null)
                 encounter[target].AddBuff(39, poison.Intensity * MagicNumber, hero);
         }

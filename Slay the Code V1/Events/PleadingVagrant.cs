@@ -19,7 +19,7 @@
             }
             Console.WriteLine($"{StartOfEncounter}\n{Options[0]}\n{Options[1]}\n{Options[2]}");
             string playerChoice = "";
-            while (choices.Any(x => x == playerChoice))
+            while (!choices.Any(x => x == playerChoice))
             {
                 playerChoice = Console.ReadLine().ToUpper();
             }
@@ -27,11 +27,11 @@
             {
                 hero.Gold -= 85;
                 Console.WriteLine(Result(0));
-                hero.AddToRelics(Relic.RandomRelic(hero.Name));
+                hero.AddToRelics(Relic.RandomRelic(hero));
             }
             else if (playerChoice == "R")
             {
-                hero.AddToRelics(Relic.RandomRelic(hero.Name));
+                hero.AddToRelics(Relic.RandomRelic(hero));
                 Console.WriteLine(Result(1));
                 hero.AddToDeck(new Shame());
             }

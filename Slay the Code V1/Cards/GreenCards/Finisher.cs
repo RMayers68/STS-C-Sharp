@@ -24,7 +24,7 @@ namespace STV
             foreach (string s in hero.FindTurnActions(turnNumber,"Attack"))
                 if (s.Contains("Attack"))
                     finisher++;
-            int target = hero.DetermineTarget(encounter);
+            int target = DetermineTarget(encounter);
             for (int i = 0; i < finisher; i++)
                 hero.Attack(encounter[target], AttackDamage + extraDamage);
         }

@@ -46,7 +46,7 @@
             }
             Console.WriteLine($"{StartOfEncounter}\n{Options[0]}\n{Options[1]}\n{Options[2]}\n{Options[3]}");
             string playerChoice = "";
-            while (choices.Any(x => x == playerChoice))
+            while (!choices.Any(x => x == playerChoice))
             {
                 playerChoice = Console.ReadLine().ToUpper();
             }
@@ -69,7 +69,7 @@
             if (playerChoice == "P" || playerChoice == "G" || playerChoice == "C")
             {
                 Console.WriteLine(Result(3));
-                hero.AddToRelics(Relic.RandomRelic(hero.Name));
+                hero.AddToRelics(Relic.RandomRelic(hero));
             }
         }
 

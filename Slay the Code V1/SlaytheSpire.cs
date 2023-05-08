@@ -1,4 +1,4 @@
-﻿// Richard Mayers, May 4th, 2023
+﻿// Richard Mayers, May 8th, 2023
 using static Global.Functions;
 using ConsoleTableExt;
 using STV;
@@ -12,8 +12,17 @@ namespace STV
         public static void Main()
         {
             Console.Title = "Slay The Spire";
+            Console.ForegroundColor = ConsoleColor.White;
             // Menu init
             int menuChoice = 1;
+            Console.WriteLine("Hello to my text recreation of Slay The Spire!\nIf this is Donald or Freddy, yo! If not, who am I kidding it's not anyone else." +
+                "\nAnyway right now this is in the earliest stage of \"everything is coded in\" \nwhich means there will be bugs and cards/events/relics/etc that don't" +
+                " behave properly.\n\nHere are the following things NOT coded into the game at all purposefully:");
+            List<string> notCoded = new() { "Act 4 or their key fragments needed to access it.", "Card Rarity mechanics for Card Rewards.", "Ascension Levels.", "Several Events.", "The functions of cards: \"Nightmare\" and \"The Bomb\".", "The functions of relics: \"Wing Boots\" and \"N'loth's Gift\"." };
+            foreach(string s in notCoded)
+                Console.WriteLine(" - " + s);
+            Console.WriteLine("\nDon't expect a masterpiece, this is mostly a big, long ass training exercise.\nIf you have any comments or constructive criticism, feel free to let me know.");
+            Pause();
             List<string> mainMenu = new() { "1: Enter The Spire", "2: Card Library", "3: Exit" };
 
             //MAIN MENU
@@ -48,23 +57,21 @@ namespace STV
             ConsoleTableExt.ConsoleTableBuilder.From(characters).ExportAndWriteLine(TableAligntment.Center);
             while (!Int32.TryParse(Console.ReadLine(), out heroChoice) || heroChoice < 1 || heroChoice > 4)
                 Console.WriteLine("Invalid input, enter again:");
-            Hero hero = new(Dict.heroL[heroChoice]);
-            hero.AddToRelics(Dict.relicL[heroChoice - 1]);
-            hero.StartingDeck();
+            Hero hero = new(heroChoice);
+            hero.AddToRelics(Dict.relicL[heroChoice - 1]);           
             if (hero.Name == "Ironclad")
                 Console.BackgroundColor = ConsoleColor.DarkRed;
             else if (hero.Name == "Silent")
                 Console.BackgroundColor = ConsoleColor.DarkGreen;
             else if (hero.Name == "Defect")
-            {
                 Console.BackgroundColor = ConsoleColor.DarkCyan;
-                hero.OrbSlots = 3;
-            }
-            else
-            {
-                Console.BackgroundColor = ConsoleColor.DarkBlue;
-                hero.Stance = "None";
-            }
+            else Console.BackgroundColor = ConsoleColor.DarkBlue;
+            ScreenWipe();
+            hero.StartingDeck();
+            Event neow = new Neow();
+            Pause();
+            ScreenWipe();
+            neow.EventAction(hero);
             for (int act = 1; act <= 3; act++)
             {
                 //Initial RNG chances
@@ -72,6 +79,13 @@ namespace STV
                 Console.WriteLine($"You have entered Act {act}!");
                 Pause();
                 List<Room> map = Room.MapGeneration();
+                Room bossRoom = new(3, 16, "Boss");
+                List<Enemy> bossEncounter = Enemy.CreateEncounter(4 + (act * 5 - 5));
+                foreach (Room r in map.Where(x => x.Floor == 15))
+                {
+                    r.ChangeName("Rest Site");
+                    r.Connections.Add(bossRoom);
+                }
                 List<Room> choices = new();
                 Room activeRoom = null;
                 for (int floor = 1; floor <= 16; floor++)
@@ -79,7 +93,7 @@ namespace STV
                     if (hero.FindRelic("Maw") is Relic mawBank && mawBank.IsActive)
                         hero.GoldChange(12);
                     int roomNumber = 0;
-                    Room.DrawMap(map);
+                    Room.DrawMap(map, bossEncounter[0].Name, activeRoom);
                     if (floor == 1) // Choosing starting room
                     {
                         choices = map.FindAll(x => x.Floor == 1);
@@ -96,7 +110,7 @@ namespace STV
                     {
                         Console.WriteLine("I hope you're ready to face the boss...");
                         Pause();
-                        activeRoom = FindRoom(floor, 3, activeRoom.Connections);
+                        activeRoom = bossRoom;
                     }
                     else
                     {
@@ -130,7 +144,23 @@ namespace STV
                         }
                         activeRoom = new Room(FindRoom(floor, directions[directionChoice], map));
                     }
-                    RoomDecider(hero, activeRoom, act * 5 - 5,eventChances);
+                    if (activeRoom.Location != "Boss")
+                    {
+                        RoomDecider(hero, activeRoom, act * 5 - 5, eventChances, bossEncounter);
+                    }
+                    else
+                    {
+                        if (hero.HasRelic("Pantograph"))
+                            hero.CombatHeal(25);
+                        if (hero.HasRelic("Slaver's"))
+                        {
+                            hero.MaxEnergy++;
+                            Battle.Combat(hero, hero.Encounter);
+                            hero.MaxEnergy--;
+                        }
+                        else Battle.Combat(hero, hero.Encounter);
+                        hero.CombatRewards(activeRoom.Location);
+                    }
                     if (hero.Hp <= 0)
                         break;
                 }
@@ -149,7 +179,7 @@ namespace STV
         }
 
         // Method to determine next event based on room
-        public static void RoomDecider(Hero hero,Room activeRoom,int actModifier, List<double> eventChances)
+        public static void RoomDecider(Hero hero,Room activeRoom,int actModifier, List<double> eventChances, List<Enemy> boss)
         { 
             switch (activeRoom.Location)
             {
@@ -208,65 +238,7 @@ namespace STV
                     eventChances[2] -= 0.1;
                     break;
                 case "Rest Site":
-                    if (hero.HasRelic("Eternal"))
-                        hero.HealHP(3 * (hero.Deck.Count / 5));
-                    int restChoice = -1;
-                    while (restChoice != 0)
-                    {
-                        ScreenWipe();
-                        Console.WriteLine($"Hello {hero.Name}! You have arrived at a campfire. What would you like to do? Enter your option.\n");
-                        Console.WriteLine("0: Leave (I would really only do this if I couldn't do anything else.");
-                        Console.WriteLine("1: Rest (Unless you have too much coffee)\n");
-                        Console.WriteLine("2: Upgrade (Unless you found a sweet hammer)\n");
-                        Console.WriteLine("3: Lift (Only if you found some dumbells to train with)\n");
-                        Console.WriteLine("4: Toke (Only if you found some good shiiiiit on the way up)\n");
-                        Console.WriteLine("5: Dig (Only if you have something to dig with. Obviously.)\n");
-                        while (!Int32.TryParse(Console.ReadLine(), out restChoice) || restChoice < 0 || restChoice > 5)
-                            Console.WriteLine("Invalid input, enter again:");
-                        switch (restChoice)
-                        {
-                            default:
-                                Console.WriteLine("Okay, you're really just leaving? See ya bud.");
-                                break;
-                            case 1: // Rest
-                                int regalPillow = 0;
-                                if (hero.HasRelic("Regal"))
-                                    regalPillow = 15;
-                                if (hero.HasRelic("Coffee Dripper"))
-                                    Console.WriteLine("You can't heal due to Coffee Dripper's effect.");
-                                else
-                                {
-                                    hero.HealHP(Convert.ToInt32(hero.MaxHP * 0.3) + regalPillow);
-                                    if (hero.HasRelic("Dream"))
-                                        hero.AddToDeck(Card.PickCard(Card.RandomCards(hero.Name, 3), "add to your Deck"));
-                                }
-                                break;
-                            case 2: // Upgrade
-                                if (hero.HasRelic("Fusion"))
-                                    Console.WriteLine("You can't upgrade a card due to Fusion Hammer's effect.");
-                                if (hero.Deck.FindAll(x => x.Type != "Curse").Any(x => !x.Upgraded))
-                                    Card.PickCard(hero.Deck.FindAll(x => !x.Upgraded), "upgrade").UpgradeCard();
-                                break;
-                            case 3: // Lift
-                                if (hero.FindRelic("Girya") is Relic girya && girya != null)
-                                {
-                                    girya.EffectAmount++;
-                                    girya.PersistentCounter--;
-                                }
-                                break;
-                            case 4: // Toke
-                                if (hero.HasRelic("Peace"))
-                                    hero.RemoveFromDeck(Card.PickCard(hero.Deck, "remove"));
-                                break;
-                            case 5: //Dig
-                                hero.AddToRelics(Relic.RandomRelic(hero.Name));
-                                break;
-                        }
-                        restChoice = 0;
-                        Pause();
-                    }
-                    if (hero.HasRelic("Ancient"))
-                        hero.GainTurnEnergy(2);
+                    RestSite.Rest(hero);
                     break;
                 case "Merchant":
                     Shop.VisitShop(hero);
@@ -292,19 +264,6 @@ namespace STV
                     else Battle.Combat(hero, hero.Encounter);
                     hero.CombatRewards(activeRoom.Location);
                     break;
-                case "Boss":
-                    hero.Encounter = Enemy.CreateEncounter(4 + actModifier);
-                    if (hero.HasRelic("Pantograph"))
-                        hero.CombatHeal(25);
-                    if (hero.HasRelic("Slaver's"))
-                    {
-                        hero.MaxEnergy++;
-                        Battle.Combat(hero, hero.Encounter);
-                        hero.MaxEnergy--;
-                    }
-                    else Battle.Combat(hero, hero.Encounter);
-                    hero.CombatRewards(activeRoom.Location);
-                    break;
             }
         }
 
@@ -317,11 +276,11 @@ namespace STV
             }
             else
             {
-                hero.AddToRelics(Relic.RandomRelic(hero.Name));
+                hero.AddToRelics(Relic.RandomRelic(hero));
                 if (hero.FindRelic("Matryoshka") is Relic matroy && matroy.EffectAmount != 0)
                 {
                     matroy.EffectAmount--;
-                    hero.AddToRelics(Relic.RandomRelic(hero.Name));
+                    hero.AddToRelics(Relic.RandomRelic(hero));
                 }
                 if (RNG.Next(2) == 0)
                 {

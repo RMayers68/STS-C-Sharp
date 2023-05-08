@@ -188,11 +188,9 @@ namespace STV
                 }
                 else if (i == 15)
                 {
-                    Room bossRoom = new(3, 16, "Boss");
                     foreach (Room r in distinct.Where(x => x.Floor == i))
                     {
                         r.ChangeName("Rest Site");
-                        r.Connections.Add(bossRoom);
                     }
                     continue;
                 }
@@ -246,11 +244,11 @@ namespace STV
             return distinct;
         }
 
-        public static void DrawMap(List<Room> map)
+        public static void DrawMap(List<Room> map, string bossEncounter, Room activeRoom)
         {
             ScreenWipe();
             // Drawing the Map   
-            Console.WriteLine("\tBoss\t\n");
+            Console.WriteLine($"\t{bossEncounter}\t\n");
             for (int floor = 15; floor >= 1; floor--)
             {
                 // Rules for drawing lines with rooms
@@ -258,7 +256,18 @@ namespace STV
                 {
                     if (FindRoom(floor, roomNumber, map) == null)
                         Console.Write("    ");
-                    else Console.Write(FindRoom(floor, roomNumber, map).ShortHand + "   ");
+                    else
+                    {
+                        if (activeRoom != null && FindRoom(floor, roomNumber, map) is Room drawRoom && drawRoom.Floor == activeRoom.Floor && drawRoom.RoomNumber == activeRoom.RoomNumber)
+                        {
+                            if (Console.BackgroundColor == ConsoleColor.DarkRed)
+                                Console.ForegroundColor = ConsoleColor.DarkBlue;
+                            else Console.ForegroundColor = ConsoleColor.Red;
+                            Console.Write(drawRoom.ShortHand + "   ");
+                            Console.ForegroundColor = ConsoleColor.White;
+                        }                         
+                        else Console.Write(FindRoom(floor, roomNumber, map).ShortHand + "   ");
+                    }
                 }
                 Console.WriteLine();
                 // Rules for drawing paths inbetween Rooms

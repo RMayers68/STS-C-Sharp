@@ -26,7 +26,7 @@ namespace STV
                 if (hero.Hand[i].Type == "Skill")
                     flechettes++;
             }
-            int target = hero.DetermineTarget(encounter);
+            int target = DetermineTarget(encounter);
             for (int i = 0; i < flechettes; i++)
                 hero.Attack(encounter[target], AttackDamage + extraDamage);
         }

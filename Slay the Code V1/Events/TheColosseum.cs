@@ -14,7 +14,7 @@
             List<string> choices = new() {"F"};
             Console.WriteLine($"{StartOfEncounter}\n{Options[0]}");
             string playerChoice = "";
-            while (choices.Any(x => x == playerChoice))
+            while (!choices.Any(x => x == playerChoice))
             {
                 playerChoice = Console.ReadLine().ToUpper();
             }
@@ -28,7 +28,7 @@
                 playerChoice = "";
                 Console.WriteLine(Result(0));
                 Console.WriteLine($"{StartOfEncounter}\n{Options[0]}\n{Options[1]}");
-                while (choices.Any(x => x == playerChoice))
+                while (!choices.Any(x => x == playerChoice))
                 {
                     playerChoice = Console.ReadLine().ToUpper();
                 }
@@ -54,8 +54,8 @@
                     {
                         hero.GoldChange(100);
                         hero.AddToDeck(Card.ChooseCard(3, "add", hero.Name));
-                        for (int i = 0; i < 2; i++)
-                            hero.AddToRelics(Relic.RandomRelic(hero.Name));
+                        hero.AddToRelics(Relic.RandomRelic(hero,"Rare"));
+                        hero.AddToRelics(Relic.RandomRelic(hero, "Uncommon"));
                     }
                 }
                 else Console.WriteLine(Result(1));

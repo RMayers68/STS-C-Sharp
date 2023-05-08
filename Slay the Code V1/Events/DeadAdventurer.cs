@@ -16,14 +16,14 @@ namespace STV
         public override void EventAction(Hero hero)
         {
             List<string> choices = new() { "S", "E" };            
-            Relic relic = new(Relic.RandomRelic(hero.Name));
+            Relic relic = new(Relic.RandomRelic(hero));
             int gold = 30, heroGoldBefore = hero.Gold;
             bool nothing = true;
             for (int i = 0; i < 3; i++)
             {
                 Console.WriteLine($"{StartOfEncounter}\n{Options[0]}\n{Options[1]}");
                 string playerChoice = "";
-                while (choices.Any(x => x == playerChoice))
+                while (!choices.Any(x => x == playerChoice))
                 {
                     playerChoice = Console.ReadLine().ToUpper();
                 }
