@@ -1,7 +1,8 @@
-﻿// Richard Mayers, May 8th, 2023
+﻿// Richard Mayers, May 10th, 2023
 using static Global.Functions;
 using ConsoleTableExt;
 using STV;
+
 
 namespace STV
 {
@@ -44,6 +45,11 @@ namespace STV
                         ConsoleTableBuilder.From(CardLibrary.ViewLibrary()).ExportAndWriteLine();
                         Pause();
                         break;
+                    /*case 4:                                                       // Programming Test Case Area
+                        for (int i = 0; i < 10; i++)
+                            Console.WriteLine($"{(i-7) % 7}");
+                        Pause();
+                        break;*/
                 }
             }
         }

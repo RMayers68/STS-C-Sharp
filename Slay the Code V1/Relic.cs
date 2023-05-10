@@ -25,7 +25,6 @@
             this.PersistentCounter = persistentCounter;
             this.IsActive = false;
         }
-        //Cloning from dictionary constructor
         public Relic(Relic relic)
         {
             this.Name = relic.Name;

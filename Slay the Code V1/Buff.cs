@@ -1,4 +1,4 @@
-﻿namespace STV
+namespace STV
 {
     public class Buff
     {
@@ -25,7 +25,7 @@
             this.BuffDebuff = buff.BuffDebuff;
             this.Type = buff.Type;
         }
-
+      
         public bool DurationEnded()
         {
             Duration--;

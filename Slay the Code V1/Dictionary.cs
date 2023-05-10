@@ -1,4 +1,4 @@
-﻿namespace STV
+namespace STV
 {
     public class Dict
     {
@@ -499,7 +499,6 @@
              * 1: Duration effect
              * 2: Constant Intensity effect
              * 3: Counter
-             * Why is there no 2? Because nothing's perfect baby!
             */          
         };
         public static Dictionary<int, Buff> buffL = buffs;

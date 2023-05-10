@@ -8,17 +8,16 @@ namespace STV
 		public int MaxHP { get; set; }
 		public int Hp { get; set; }
 		public int Block { get; set; }
-        public int Gold { get; set; }
-        public string? Stance { get; set; }
-        public List<Buff> Buffs { get; set; }
-        public List<Relic> Relics { get; set; }
-        public List<string> Actions { get; set; }
+    public int Gold { get; set; }
+    public string? Stance { get; set; }
+    public List<Buff> Buffs { get; set; }
+    public List<Relic> Relics { get; set; }
+    public List<string> Actions { get; set; }
 
-        private static readonly Random ActorRNG = new();
+    private static readonly Random ActorRNG = new();
 
-        //constructor
-        public Actor() { }
-
+    //constructor
+    public Actor() { }
 
 		// Inclusive methods
 		public void GainBlock(int block, List<Enemy> encounter = null)

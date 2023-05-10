@@ -1,4 +1,6 @@
-﻿namespace STV
+using System.Text.RegularExpressions;
+
+namespace STV
 {
     public abstract class Card : IEquatable<Card>, IComparable<Card>
     {
