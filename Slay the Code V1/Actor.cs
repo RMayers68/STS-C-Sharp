@@ -1,4 +1,5 @@
-﻿namespace STV
+﻿using static Global.Functions;
+namespace STV
 {
 	public abstract class Actor // base class
 	{
@@ -196,7 +197,7 @@
 			{
                 Console.WriteLine($"{Name} suffered from their poison.");
                 HPLoss(poison.Intensity);
-                Console.Write("!\n");
+				Pause();
                 poison.Intensity--;
             }
 		}

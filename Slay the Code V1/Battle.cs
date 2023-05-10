@@ -662,14 +662,14 @@ namespace STV
                     hero.AddToDrawPile(new Insight(), true);
             if (hero.FindBuff("Constricted") is Buff constrict && constrict != null)
                 encounter[0].NonAttackDamage(hero, constrict.Intensity, "Constrict");
-            foreach (Enemy e in encounter)
+            for(int i = encounter.Count-1; i >= 0 ;i--)
             {
-                e.PoisonDamage();
-                if (e.Hp <= 0 && e.FindBuff("Corpse Explosion") is Buff corpse && corpse != null)
+                encounter[i].PoisonDamage();
+                if (encounter[i].Hp <= 0 && encounter[i].FindBuff("Corpse Explosion") is Buff corpse && corpse != null)
                 {
-                    for (int i = 0; i < corpse.Intensity; i++)
+                    for (int j = 0; j < corpse.Intensity; j++)
                         foreach (Enemy e2 in encounter)
-                            e.NonAttackDamage(e2, corpse.Intensity, "Corpse Explosion");
+                            encounter[i].NonAttackDamage(e2, corpse.Intensity, "Corpse Explosion");
                 }                   
                 HealthChecks(hero, encounter, turnNumber);
             }
