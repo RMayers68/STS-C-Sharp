@@ -44,56 +44,9 @@ namespace STV
                 EffectAmount *= 2;
             switch (Name)
             {                                
-                case "Ambrosia":
-                    hero.SwitchStance("Divinity",discardPile,hand);
-                    break;
-                case "Ancient Potion":
-                    hero.AddBuff(8, 1);
-                    break;
-                case "Block Potion":
-                    hero.GainBlock(12);
-                    break;
-                case "Blood Potion":
-                    hero.HealHP(Convert.ToInt32(hero.MaxHP * 0.2));
-                    break;
-                case "Bottled Miracle":
-                    for (int i = 0; i < 2; i++ )
-                    {
-                        if (hand.Count < 10)
-                            hand.Add(new Card(Dict.cardL[336]));
-                        else discardPile.Add(new Card(Dict.cardL[336]));
-                    }
-                    Console.WriteLine(" You have gained 2 Miracles!");
-                    break;
-                case "Cultist Potion":
-                    hero.AddBuff(3, 1);
-                    break;
-                case "Cunning Potion":
-                    for (int i = 0; i < 3; i++)
-                    {
-                        if (hand.Count < 10)
-                            hand.Add(new Card(Dict.cardL[317]));
-                        else discardPile.Add(new Card(Dict.cardL[317]));
-                    }
-                    Console.WriteLine(" You have gained 3 Shivs!");
-                    break;
-                case "Dexterity Potion":
-                    hero.AddBuff(9, 2);
-                    break;
-                case "Distilled Chaos":
-                    for (int i = 0; i < 3; i++)
-                        drawPile[drawPile.Count - 1].CardAction(hero, encounter, drawPile, discardPile, hand, exhaustPile, rng);
-                    break;
-                case "Fear Potion":
-                    target = hero.DetermineTarget(encounter);
-                    encounter[target].AddBuff(1, 3);
-                    break;
                 case "Fire Potion":
                     target = Card.DetermineTarget(encounter);
                     hero.NonAttackDamage(encounter[target], EffectAmount,Name);
-                    break;
-                case "Focus Potion":
-                    hero.AddBuff(7, 2);
                     break;
                 case "Energy Potion":
                     hero.GainTurnEnergy(EffectAmount);

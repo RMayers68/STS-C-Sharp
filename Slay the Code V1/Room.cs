@@ -260,9 +260,7 @@ namespace STV
                     {
                         if (activeRoom != null && FindRoom(floor, roomNumber, map) is Room drawRoom && drawRoom.Floor == activeRoom.Floor && drawRoom.RoomNumber == activeRoom.RoomNumber)
                         {
-                            if (Console.BackgroundColor == ConsoleColor.DarkRed)
-                                Console.ForegroundColor = ConsoleColor.DarkBlue;
-                            else Console.ForegroundColor = ConsoleColor.Red;
+                            Console.ForegroundColor = ConsoleColor.Red;
                             Console.Write(drawRoom.ShortHand + "   ");
                             Console.ForegroundColor = ConsoleColor.White;
                         }                         

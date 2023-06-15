@@ -29,9 +29,7 @@ namespace STV
             //MAIN MENU
             while (menuChoice != 3)                                                     
             {
-                Console.BackgroundColor = ConsoleColor.Black;
                 ScreenWipe();
-                Console.BackgroundColor = ConsoleColor.Black;
                 ConsoleTableExt.ConsoleTableBuilder.From(mainMenu).ExportAndWriteLine(TableAligntment.Center);
                 while (!Int32.TryParse(Console.ReadLine(), out menuChoice) || menuChoice < 1 || menuChoice > 4)
                     Console.WriteLine("Invalid input, enter again:");
@@ -65,13 +63,6 @@ namespace STV
                 Console.WriteLine("Invalid input, enter again:");
             Hero hero = new(heroChoice);
             hero.AddToRelics(Dict.relicL[heroChoice - 1]);           
-            if (hero.Name == "Ironclad")
-                Console.BackgroundColor = ConsoleColor.DarkRed;
-            else if (hero.Name == "Silent")
-                Console.BackgroundColor = ConsoleColor.DarkGreen;
-            else if (hero.Name == "Defect")
-                Console.BackgroundColor = ConsoleColor.DarkCyan;
-            else Console.BackgroundColor = ConsoleColor.DarkBlue;
             ScreenWipe();
             hero.StartingDeck();
             Event neow = new Neow();
