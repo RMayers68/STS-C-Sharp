@@ -309,13 +309,19 @@
                     sundial.PersistentCounter = sundial.EffectAmount;
                 }
             }
-            int i = DrawPile.Count;
-            while (i > 1)
+            Shuffle();
+        }
+
+        public void Shuffle()
+        {
+            List<Card> newDrawPile = new();
+            for(int i = DrawPile.Count-1; i >= 0; i--)
             {
-                i--;
                 int j = HeroRNG.Next(i + 1);
-                (DrawPile[i], DrawPile[j]) = (DrawPile[j], DrawPile[i]);
+                newDrawPile.Add(DrawPile[j]);
+                DrawPile.RemoveAt(j);
             }
+            DrawPile = new(newDrawPile);
         }
 
         // Methods to add to Hero lists

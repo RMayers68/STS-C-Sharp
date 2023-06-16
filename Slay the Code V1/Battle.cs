@@ -521,13 +521,13 @@ namespace STV
                             break;
                         case "DISCARD":
                             List<CardLibrary> discardList = new List<CardLibrary>();
-                            foreach (Card c in hero.DrawPile)
+                            foreach (Card c in hero.DiscardPile)
                                 discardList.Add(new(c));
                             ConsoleTableExt.ConsoleTableBuilder.From(discardList).ExportAndWriteLine(TableAligntment.Center);
                             break;
                         case "EXHAUST":
                             List<CardLibrary> exhaustList = new List<CardLibrary>();
-                            foreach (Card c in hero.DrawPile)
+                            foreach (Card c in hero.ExhaustPile)
                                 exhaustList.Add(new(c));
                             ConsoleTableExt.ConsoleTableBuilder.From(exhaustList).ExportAndWriteLine(TableAligntment.Center);
                             break;
